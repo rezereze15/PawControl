@@ -1,0 +1,11 @@
+.customers-page {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  margin: 0;
+  background: #f5f5f7;
+  color: #160e3f;
+  font-family: sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 800;
+}

@@ -1,0 +1,37 @@
+@import './login.css';
+
+.register-main {
+  padding-top: 36px;
+  padding-bottom: 36px;
+}
+
+.register-card-outer {
+  width: 720px;
+  padding-bottom: 28px;
+}
+
+.register-name-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.register-name-fields .login-field {
+  min-width: 0;
+}
+
+.register-name-fields input {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .register-name-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .register-card-outer {
+    max-width: 720px;
+  }
+}

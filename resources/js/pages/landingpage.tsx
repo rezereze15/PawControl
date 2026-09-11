@@ -1,4 +1,5 @@
-import petImage from '../imports/image.png';
+import petImage from '../imports/landingpagepet.png';
+import logoName from '../imports/Bigpaw_logoname-removebg-preview.png';
 
 export default function App() {
   return (
@@ -6,18 +7,8 @@ export default function App() {
       {/* NAV */}
       <nav className="paw-nav">
         <div className="paw-nav-inner">
-          <a href="#" className="paw-logo">
-            <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="10" cy="10" rx="4.5" ry="5.5" fill="#F59E0B" />
-              <ellipse cx="28" cy="10" rx="4.5" ry="5.5" fill="#F59E0B" />
-              <ellipse cx="5" cy="20" rx="3.5" ry="4.5" fill="#F59E0B" />
-              <ellipse cx="33" cy="20" rx="3.5" ry="4.5" fill="#F59E0B" />
-              <path d="M19 13c-7 0-11 5-9 11 1.5 4.5 5 7 9 7s7.5-2.5 9-7c2-6-2-11-9-11z" fill="#F59E0B" />
-              <line x1="15" y1="4" x2="15" y2="9" stroke="#1a0a5e" strokeWidth="1.5" strokeLinecap="round" />
-              <line x1="19" y1="4" x2="19" y2="9" stroke="#1a0a5e" strokeWidth="1.5" strokeLinecap="round" />
-              <line x1="23" y1="4" x2="23" y2="9" stroke="#1a0a5e" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            <span>Paw<strong>Control</strong></span>
+          <a href="/" className="paw-logo">
+            <img src={logoName} alt="PawControl" className="paw-logo-img" />
           </a>
           <ul className="paw-nav-links">
             <li><a href="#">Home</a></li>
@@ -25,7 +16,7 @@ export default function App() {
             <li><a href="#">Services</a></li>
             <li><a href="#">How it works</a></li>
           </ul>
-          <button className="paw-login-btn">Login</button>
+          <a href="/login" className="paw-login-btn">Login</a>
         </div>
         <div className="paw-nav-border" />
       </nav>
@@ -48,7 +39,6 @@ export default function App() {
           </div>
         </div>
         <div className="paw-hero-img-wrap">
-          <div className="paw-blob" />
           <img src={petImage} alt="A cat and dog sitting together" className="paw-pet-img" />
         </div>
       </section>
@@ -104,15 +94,8 @@ export default function App() {
       <footer className="paw-footer">
         <div className="paw-footer-inner">
           <div className="paw-footer-brand">
-            <a href="#" className="paw-logo paw-logo-white">
-              <svg width="32" height="32" viewBox="0 0 38 38" fill="none">
-                <ellipse cx="10" cy="10" rx="4.5" ry="5.5" fill="#F59E0B" />
-                <ellipse cx="28" cy="10" rx="4.5" ry="5.5" fill="#F59E0B" />
-                <ellipse cx="5" cy="20" rx="3.5" ry="4.5" fill="#F59E0B" />
-                <ellipse cx="33" cy="20" rx="3.5" ry="4.5" fill="#F59E0B" />
-                <path d="M19 13c-7 0-11 5-9 11 1.5 4.5 5 7 9 7s7.5-2.5 9-7c2-6-2-11-9-11z" fill="#F59E0B" />
-              </svg>
-              <span>Paw<strong>Control</strong></span>
+            <a href="/" className="paw-logo paw-logo-white">
+              <img src={logoName} alt="PawControl" className="paw-footer-logo-img" />
             </a>
             <p>Better care, Happier pets</p>
             <p>©2026 PawControl All rights reserved.</p>
