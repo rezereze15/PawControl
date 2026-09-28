@@ -9,6 +9,10 @@ import johnPhoto from '../imports/John_A..png';
 import moyPhoto from '../imports/moy.png';
 import giyoPhoto from '../imports/giyo.png';
 import haerinPhoto from '../imports/3232.png';
+import karinaPhoto from '../imports/karina.png';
+import maloiPhoto from '../imports/maloi.png';
+import chaewonPhoto from '../imports/chaewon.png';
+import asaPhoto from '../imports/asa.png';
 import '../../css/Dashboard.css';
 
 function CalendarIcon({
@@ -1136,7 +1140,7 @@ function CustomerDashboard({
             <span>3</span>
           </div>
           <div className="paw-customer-avatar" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4-1.3 4-4s-1.3-4-4-4-4 1.3-4 4 1.3 4 4 4zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z" /></svg>
+            <img src={karinaPhoto} alt="" />
           </div>
           <span>{username}</span>
         </div>
@@ -1566,13 +1570,7 @@ function AdminDashboard({
           </div>
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full bg-rose-400 flex items-center justify-center overflow-hidden border-2 border-orange-400">
-              <svg
-                className="w-6 h-6 text-white"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 12c2.7 0 4-1.3 4-4s-1.3-4-4-4-4 1.3-4 4 1.3 4 4 4zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z" />
-              </svg>
+              <img src={chaewonPhoto} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-white font-bold text-sm">{username}</span>
@@ -1801,7 +1799,7 @@ const MOCK_USERS = [
     status: "Active",
     lastLogin: "April 25, 2026",
     lastLoginTime: "12:20 AM",
-    photo: leanPhoto,
+    photo: chaewonPhoto,
   },
   {
     id: "UID-0002",
@@ -1811,7 +1809,7 @@ const MOCK_USERS = [
     status: "Active",
     lastLogin: "April 25, 2026",
     lastLoginTime: "11:02 AM",
-    photo: null,
+    photo: maloiPhoto,
   },
   {
     id: "UID-0003",
@@ -1831,7 +1829,7 @@ const MOCK_USERS = [
     status: "Inactive",
     lastLogin: "April 25, 2025",
     lastLoginTime: "11:00 AM",
-    photo: null,
+    photo: asaPhoto,
   },
 ]
 
@@ -2667,13 +2665,7 @@ function ClerkDashboard({
           </div>
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full bg-teal-500 flex items-center justify-center overflow-hidden border-2 border-orange-400">
-              <svg
-                className="w-6 h-6 text-white"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 12c2.7 0 4-1.3 4-4s-1.3-4-4-4-4 1.3-4 4 1.3 4 4 4zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z" />
-              </svg>
+              <img src={maloiPhoto} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-white font-bold text-sm">{username}</span>
@@ -3764,7 +3756,7 @@ function OwnerDashboard({
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full bg-amber-300 flex items-center justify-center overflow-hidden border-2 border-orange-400">
               <img
-                src={leanPhoto}
+                src={asaPhoto}
                 alt="Owner"
                 className="w-full h-full object-cover"
               />
