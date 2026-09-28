@@ -35,3 +35,29 @@
     max-width: 720px;
   }
 }
+
+/* Keep the full registration form readable within the reference card */
+.register-main { align-items: center; padding-top: 42px; padding-bottom: 42px; }
+.register-card-outer {
+  flex: 1 1 47%;
+  width: auto;
+  max-width: 760px;
+  padding: 24px 28px 30px;
+}
+.register-card-outer .login-badge-img { width: 96px; height: 96px; }
+.register-card-outer .login-card-inner { padding: 18px 24px 20px; }
+.register-card-outer .login-title { font-size: clamp(30px, 2.7vw, 44px); margin-bottom: 0; }
+.register-card-outer .login-form { gap: 8px; }
+.register-name-fields { grid-template-columns: 1fr; gap: 8px; }
+.register-card-outer .login-field { gap: 3px; }
+.register-card-outer .login-field label { font-size: 17px; }
+.register-card-outer .login-field input { min-height: 39px; font-size: 16px; }
+.register-card-outer .login-btn { margin-top: 5px; }
+
+@media (max-width: 900px) {
+  .register-card-outer { width: min(100%, 650px); max-width: none; }
+}
+@media (max-width: 640px) {
+  .register-card-outer { padding: 14px 18px 24px; }
+  .register-card-outer .login-card-inner { padding: 18px 16px; }
+}

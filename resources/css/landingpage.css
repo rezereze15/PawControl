@@ -405,3 +405,148 @@ body {
   .paw-dash { transform: rotate(90deg); padding: 0; }
   .paw-footer-inner { grid-template-columns: 1fr; }
 }
+
+/* Figma landing page proportions and palette */
+:root {
+  --navy: #19043f;
+  --navy-dark: #19043f;
+  --orange: #f28b37;
+  --purple: #45199a;
+  --purple-light: #5b33b4;
+  --bg: #fff;
+  --muted: #171717;
+}
+
+.paw-nav { background: var(--navy); }
+.paw-nav-inner { height: 84px; padding: 0 34px 0 20px; }
+.paw-logo-img { height: 48px; }
+.paw-nav-links { gap: 34px; }
+.paw-nav-links a { font-size: 25px; }
+.paw-login-btn {
+  min-width: 115px;
+  padding: 9px 24px;
+  background: #fff;
+  border: 0;
+  border-radius: 13px;
+  color: #5724c0;
+  font-size: 20px;
+}
+.paw-login-btn:hover { background: #f3ecff; color: var(--navy); }
+.paw-login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 76px;
+  height: 36px;
+  padding: 0 18px;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: none;
+  transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.paw-login-btn:hover {
+  background: #f3ecff;
+  color: var(--navy);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 22%);
+  transform: translateY(-2px);
+}
+.paw-login-btn:active { transform: translateY(0); box-shadow: 0 2px 5px rgb(0 0 0 / 16%); }
+.paw-login-btn:focus-visible { outline: 3px solid #ffbb50; outline-offset: 3px; }
+.paw-nav-border { height: 6px; background: #ffbb50; }
+
+.paw-hero {
+  max-width: 1590px;
+  min-height: 815px;
+  padding: 66px 82px 58px;
+  gap: 70px;
+}
+.paw-hero-text { flex: 0 1 48%; }
+.paw-hero-text h1 {
+  font-size: clamp(3.3rem, 4.1vw, 4.5rem);
+  line-height: 1.3;
+  margin-bottom: 22px;
+  letter-spacing: -1.8px;
+}
+.paw-purple { color: var(--navy); }
+.paw-orange { color: var(--orange); }
+.paw-hero-text p {
+  max-width: 600px;
+  margin-bottom: 28px;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  line-height: 1.65;
+  text-align: justify;
+  color: #090909;
+}
+.paw-hero-btns { gap: 16px; }
+.paw-btn-primary, .paw-btn-outline {
+  min-height: 56px;
+  padding: 12px 28px;
+  font-size: 18px;
+  font-weight: 500;
+}
+.paw-btn-primary { background: var(--purple); }
+.paw-btn-primary:hover { background: #351078; }
+.paw-btn-outline { border-color: var(--navy); color: var(--navy); }
+.paw-hero-img-wrap { flex: 1 1 52%; min-height: 600px; }
+.paw-pet-img { max-height: 610px; filter: none; }
+
+.paw-features { padding: 0 4.4% 24px; }
+.paw-features-card {
+  max-width: 1700px;
+  min-height: 320px;
+  padding: 52px 48px;
+  border-radius: 32px;
+  box-shadow: 0 16px 55px rgba(0,0,0,.14);
+}
+.paw-feature-item { gap: 10px; padding: 10px 42px; border: 0; }
+.paw-feature-icon { width: 98px; height: 98px; border-radius: 22px; }
+.paw-feature-icon svg { width: 62px; height: 62px; }
+.paw-feature-item strong { font-size: 25px; }
+.paw-feature-item p { max-width: 260px; font-size: 17px; color: #333; }
+
+.paw-how { max-width: 1600px; padding: 40px 38px 80px; }
+.paw-section-label { font-size: 26px; margin-bottom: 14px; }
+.paw-how h2 { font-size: 38px; margin-bottom: 46px; }
+.paw-steps { justify-content: space-between; gap: 0; }
+.paw-step { width: 190px; gap: 10px; }
+.paw-step-icon { width: 112px; height: 112px; }
+.paw-step-icon svg { width: 62px; height: 62px; }
+.paw-step-num { width: 38px; height: 38px; font-size: 20px; }
+.paw-step strong { font-size: 22px; }
+.paw-step p { font-size: 16px; color: #222; }
+.paw-dash { padding-top: 47px; color: #111; font-size: 21px; }
+.paw-footer { border-top: 12px solid #ffbb50; background: var(--navy); }
+
+@media (max-width: 900px) {
+  .paw-nav-inner { height: 70px; padding: 0 20px; }
+  .paw-logo-img { height: 42px; }
+  .paw-nav-links a { font-size: 17px; }
+  .paw-hero { min-height: unset; padding: 54px 30px 42px; gap: 25px; }
+  .paw-hero-text h1 { font-size: clamp(2.7rem, 7vw, 3.7rem); }
+  .paw-hero-img-wrap { min-height: 350px; }
+  .paw-pet-img { max-height: 400px; }
+  .paw-feature-item { padding: 20px; }
+  .paw-step { width: 150px; }
+  .paw-dash { font-size: 13px; }
+}
+@media (max-width: 640px) {
+  .paw-nav-inner { height: 70px; }
+  .paw-nav-links { display: none; }
+  .paw-login-btn { min-width: unset; padding: 8px 18px; font-size: 16px; }
+  .paw-hero { padding: 42px 22px 28px; }
+  .paw-hero-text h1 { font-size: clamp(2.45rem, 11vw, 3.2rem); letter-spacing: -1px; }
+  .paw-hero-text p { font-size: 1.12rem; text-align: left; }
+  .paw-hero-img-wrap { min-height: 250px; }
+  .paw-pet-img { max-height: 300px; }
+  .paw-features { padding: 0 18px 20px; }
+  .paw-features-card { padding: 22px 16px; border-radius: 22px; }
+  .paw-feature-item { align-items: center; text-align: center; }
+  .paw-how { padding: 36px 20px 54px; }
+  .paw-how h2 { font-size: 29px; margin-bottom: 30px; }
+  .paw-steps { gap: 12px; }
+  .paw-dash { transform: rotate(90deg); padding: 0; }
+}

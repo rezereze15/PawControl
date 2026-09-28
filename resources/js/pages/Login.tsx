@@ -4,10 +4,13 @@ import logoName from "../imports/Bigpaw_logoname-removebg-preview.png";
 import logoBadge from "../imports/BIGPAW_LOGO-removebg-preview.png";
 import "../../css/login.css";
 
-const demoCustomer = {
-  username: 'customer',
-  password: 'customer123',
-};
+const USERS = [
+  { username: 'customer', password: 'customer123', name: 'Karina', role: 'customer' },
+  { username: 'clerk', password: 'clerk123', name: 'Maloi', role: 'clerk' },
+  { username: 'admin', password: 'admin123', name: 'Chaewon', role: 'admin' },
+  { username: 'veterinarian', password: 'veterinarian123', name: 'Haerin', role: 'veterinarian' },
+  { username: 'owner', password: 'owner123', name: 'Asa', role: 'owner' },
+] as const;
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -17,8 +20,12 @@ export default function Login() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (username === demoCustomer.username && password === demoCustomer.password) {
-      window.location.assign('/customers');
+    const user = USERS.find(
+      (candidate) => candidate.username === username && candidate.password === password,
+    );
+
+    if (user) {
+      window.location.assign(user.role === 'customer' ? '/customers' : `/dashboard/${user.role}`);
       return;
     }
 
@@ -26,7 +33,7 @@ export default function Login() {
   }
 
   return (
-    <div className="login-page">
+    <div className="login-page login-screen">
       <header className="login-header">
         <a href="/" className="login-logo">
           <img src={logoName} alt="PawControl" className="login-logo-img" />

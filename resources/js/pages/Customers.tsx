@@ -1,5 +1,5 @@
-import '../../css/Customers.css';
+import Dashboard from './Dashboard';
 
 export default function Customers() {
-  return <main className="customers-page">Customer Example Dashboard</main>;
+  return <Dashboard role="customer" />;
 }

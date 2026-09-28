@@ -1,0 +1,430 @@
+.paw-dashboard-shell {
+  --paw-ink: #17043d;
+  --paw-violet: #4918a0;
+  --paw-orange: #ffb950;
+  min-height: 100vh;
+  background: #f7f8fa;
+  font-family: 'Instrument Sans', 'Segoe UI', sans-serif;
+}
+
+.paw-dashboard-sidebar {
+  width: clamp(260px, 17.8vw, 336px);
+  background: var(--paw-ink);
+}
+
+.paw-dashboard-sidebar > div:first-child {
+  height: 114px;
+  padding: 0 20px;
+  background: #526bff;
+}
+
+.paw-dashboard-sidebar > div:first-child button svg {
+  width: 42px;
+  height: 42px;
+}
+
+.paw-dashboard-sidebar > div:first-child img {
+  height: 54px;
+  max-width: 190px;
+}
+
+.paw-dashboard-sidebar > div:nth-child(2),
+.paw-dashboard-header + div {
+  height: 8px;
+  background: var(--paw-orange);
+}
+
+.paw-dashboard-sidebar nav { margin-top: 52px; gap: 4px; }
+.paw-dashboard-sidebar nav button {
+  min-height: 54px;
+  padding: 10px 20px;
+  gap: 16px;
+  border-radius: 0 10px 10px 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+.paw-dashboard-sidebar nav button svg { width: 34px; height: 34px; flex: none; }
+.paw-dashboard-sidebar nav button[class*="bg-orange-400"] { background: var(--paw-orange); }
+.paw-dashboard-sidebar > button:last-child {
+  min-height: 88px;
+  padding: 18px 20px;
+  border-top: 0;
+  font-size: 21px;
+}
+.paw-dashboard-sidebar > button:last-child svg { width: 38px; height: 38px; }
+
+.paw-dashboard-header {
+  height: 106px;
+  padding: 0 38px;
+  background: var(--paw-ink);
+}
+.paw-dashboard-header > div:last-child span:first-child { font-size: 25px; }
+.paw-dashboard-header > div:last-child span:last-child { color: #fff; }
+.paw-dashboard-header > div:last-child > div:first-child {
+  width: 78px;
+  height: 78px;
+}
+.paw-dashboard-main { padding: 54px 58px; background: #f7f8fa; }
+.paw-dashboard-main h1 { margin-bottom: 10px; color: #080808; font-size: 46px; line-height: 1.15; }
+.paw-dashboard-main > div { gap: 28px; }
+
+/* Customer home dashboard layout */
+.paw-customer-dashboard {
+  --paw-ink: #1b0a3b;
+  --paw-orange: #ff8700;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 560px;
+  background: #f3f4f6;
+  overflow: hidden;
+}
+.paw-customer-topbar {
+  height: 60px;
+  flex: 0 0 60px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 17px;
+  color: #fff;
+  background: var(--paw-ink);
+  border-bottom: 4px solid #ff9a00;
+  z-index: 2;
+}
+.paw-customer-menu-button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 36px;
+  padding: 0;
+  color: #fff;
+}
+.paw-customer-menu-button svg { width: 19px; height: 19px; }
+.paw-customer-brand { width: 111px; height: 38px; object-fit: contain; object-position: left center; }
+.paw-customer-userbar { margin-left: auto; display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 700; }
+.paw-customer-bell { width: 23px; height: 25px; margin-right: 7px; }
+.paw-customer-bell svg { width: 100%; height: 100%; }
+.paw-customer-bell span { position: absolute; top: -3px; right: -5px; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; background: #ff8700; font-size: 9px; }
+.paw-customer-avatar { width: 35px; height: 35px; display: grid; place-items: center; border: 2px solid #ff8700; border-radius: 50%; color: white; background: #9ca3af; }
+.paw-customer-avatar svg { width: 20px; height: 20px; }
+.paw-customer-workspace { display: flex; flex: 1; min-height: 0; }
+.paw-customer-sidebar { width: 238px; flex: 0 0 238px; background: var(--paw-ink); transition: width .2s ease, flex-basis .2s ease; }
+.paw-customer-sidebar nav { margin: 15px 0 0; gap: 3px; }
+.paw-customer-sidebar nav button { min-height: 42px; padding: 8px 18px; gap: 12px; border-radius: 0; font-size: 13px; font-weight: 600; }
+.paw-customer-sidebar nav button svg { width: 17px; height: 17px; }
+.paw-customer-sidebar nav button[class*="bg-orange-400"] { background: var(--paw-orange); }
+.paw-customer-sidebar > button:last-child { min-height: 42px; padding: 9px 18px; border-top: 1px solid rgb(255 255 255 / 12%); font-size: 12px; }
+.paw-customer-sidebar > button:last-child svg { width: 18px; height: 18px; }
+.paw-customer-content { min-width: 0; background: #f3f4f6; }
+.paw-customer-main { padding: 30px 28px; background: #f3f4f6; }
+.paw-customer-main > div { gap: 20px; }
+.paw-customer-main h1 { margin: 0 0 0; color: var(--paw-ink); font-size: 29px; line-height: 1.25; }
+.paw-customer-main .grid { gap: 18px; }
+.paw-customer-main .bg-white { border-radius: 15px; box-shadow: 0 1px 2px rgb(0 0 0 / 12%); }
+.paw-customer-main .grid.md\:grid-cols-3 > .bg-white { min-height: 124px; padding: 23px 25px; gap: 18px; }
+.paw-customer-main .grid.md\:grid-cols-3 > .bg-white > svg,
+.paw-customer-main .grid.md\:grid-cols-3 > .bg-white > img { width: 38px; height: 38px; flex: 0 0 38px; }
+.paw-customer-main .grid.md\:grid-cols-3 > .bg-white p:first-child { font-size: 13px; }
+.paw-customer-main .grid.md\:grid-cols-3 > .bg-white p.text-4xl { font-size: 31px; line-height: 1; }
+.paw-customer-main .grid.lg\:grid-cols-3 > .bg-white { min-height: 291px; padding: 22px; }
+.paw-customer-main .grid.lg\:grid-cols-3 h2 { margin-bottom: 16px; font-size: 16px; }
+.paw-customer-main .grid.lg\:grid-cols-3 .border { border-color: #e5e7eb; }
+.paw-customer-main .grid.lg\:grid-cols-3 .w-56 { width: 210px; padding: 14px; }
+.paw-customer-main .grid.lg\:grid-cols-3 .w-40 { width: 150px; }
+.paw-customer-main .grid.lg\:grid-cols-3 .w-14 { width: 52px; height: 52px; }
+.paw-customer-main .grid.lg\:grid-cols-3 .gap-4 { gap: 15px; }
+.paw-appointment-flow { width: 100%; gap: 24px; }
+.paw-appointment-card { width: 100%; padding: 32px; border-color: #e9d5ff; border-radius: 16px; box-shadow: 0 1px 2px rgb(23 4 61 / 8%); }
+.paw-appointment-card > h1 { margin: 0 0 2px; font-size: 24px; line-height: 1.25; }
+.paw-appointment-card > p { margin-bottom: 24px; }
+.paw-appointment-card > .border-t { padding-top: 24px; }
+.paw-appointment-card .border-t .border-t { padding-top: 24px; }
+.paw-step-connector { margin-top: 19px; }
+.paw-add-pet-overlay { padding: 16px; background: rgb(0 0 0 / 40%); }
+.paw-add-pet-card { width: min(672px, 100%); max-width: 672px; margin: 0; padding: 32px; border-radius: 16px; }
+.paw-add-pet-card h2 { margin-bottom: 0; font-size: 24px; line-height: 1.25; }
+.paw-add-pet-card > p { margin-bottom: 24px; }
+.paw-add-pet-fields { gap: 20px; }
+.paw-add-pet-card input { height: 46px; padding-top: 10px; padding-bottom: 10px; border-radius: 12px; }
+.paw-add-pet-card label { margin-bottom: 8px; }
+.paw-add-pet-card .mt-8 { margin-top: 32px; }
+.paw-appointment-card .flex.justify-between.pt-2 > button,
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button { min-height: 44px; padding: 9px 28px; font-size: 14px; letter-spacing: .01em; box-shadow: 0 2px 4px rgb(23 4 61 / 8%); transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.paw-appointment-card .flex.justify-between.pt-2 > button:first-child,
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:first-child { border-color: #aab3c2; color: #334155; }
+.paw-appointment-card .flex.justify-between.pt-2 > button:first-child:hover,
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:first-child:hover { border-color: #4918a0; color: #4918a0; background: #f7f2ff; }
+.paw-appointment-card .flex.justify-between.pt-2 > button:last-child,
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:last-child { border-color: #4918a0; color: #fff; background: #4918a0; box-shadow: 0 3px 8px rgb(73 24 160 / 22%); }
+.paw-appointment-card .flex.justify-between.pt-2 > button:last-child:hover,
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:last-child:hover { border-color: #351076; background: #351076; box-shadow: 0 5px 12px rgb(73 24 160 / 28%); transform: translateY(-1px); }
+.paw-appointment-card .flex.justify-between.pt-2 > button:focus-visible,
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:focus-visible { outline: 3px solid rgb(255 135 0 / 45%); outline-offset: 2px; }
+.paw-appointment-card button.w-40 { min-height: 112px; border-radius: 14px; box-shadow: 0 2px 6px rgb(23 4 61 / 6%); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.paw-appointment-card button.w-40:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgb(23 4 61 / 12%); }
+.paw-customer-dashboard.sidebar-collapsed .paw-customer-sidebar { width: 62px; flex-basis: 62px; }
+.paw-customer-dashboard.sidebar-collapsed .paw-customer-sidebar nav button { justify-content: center; padding-inline: 8px; font-size: 0; }
+.paw-customer-dashboard.sidebar-collapsed .paw-customer-sidebar nav button svg { width: 20px; height: 20px; }
+.paw-customer-dashboard.sidebar-collapsed .paw-customer-sidebar > button:last-child { justify-content: center; padding-inline: 8px; font-size: 0; }
+
+/* Keep staff dashboards on the same compact frame while preserving their role content. */
+.paw-staff-dashboard { position: relative; }
+.paw-staff-dashboard > .paw-dashboard-sidebar { width: 238px; flex: 0 0 238px; padding-top: 60px; background: var(--paw-ink); transition: width .2s ease, flex-basis .2s ease; }
+.paw-staff-dashboard > .paw-dashboard-sidebar > div:first-child,
+.paw-staff-dashboard > .paw-dashboard-sidebar > div:nth-child(2) { display: none; }
+.paw-staff-dashboard > .paw-dashboard-sidebar nav { margin: 15px 0 0; gap: 3px; }
+.paw-staff-dashboard > .paw-dashboard-sidebar nav button { min-height: 42px; padding: 8px 18px; gap: 12px; border-radius: 0; font-size: 13px; font-weight: 600; }
+.paw-staff-dashboard > .paw-dashboard-sidebar nav button svg { width: 17px; height: 17px; }
+.paw-staff-dashboard > .paw-dashboard-sidebar nav button[class*="bg-orange-400"] { background: var(--paw-orange); }
+.paw-staff-dashboard > .paw-dashboard-sidebar > button:last-child { min-height: 42px; padding: 9px 18px; border-top: 1px solid rgb(255 255 255 / 12%); font-size: 12px; }
+.paw-staff-dashboard > .paw-dashboard-sidebar > button:last-child svg { width: 18px; height: 18px; }
+.paw-staff-topbar { position: absolute; inset: 0 0 auto 0; z-index: 5; width: 100%; height: 60px; flex: none; justify-content: flex-start; gap: 14px; padding: 0 17px; border-bottom: 4px solid #ff9a00; background: var(--paw-ink); }
+.paw-staff-topbar .paw-customer-menu-button { flex: 0 0 20px; }
+.paw-staff-topbar .paw-customer-brand { flex: 0 0 111px; }
+.paw-staff-topbar > .relative { margin-left: auto; width: 23px; height: 25px; }
+.paw-staff-topbar > .relative svg { width: 100%; height: 100%; }
+.paw-staff-topbar > .relative span { top: -3px; right: -5px; width: 14px; height: 14px; border-radius: 50%; background: #ff8700; font-size: 9px; }
+.paw-staff-topbar > div:last-child { gap: 9px; }
+.paw-staff-topbar > div:last-child > div:first-child { width: 35px; height: 35px; }
+.paw-staff-topbar > div:last-child span:first-child { color: #fff; font-size: 13px; }
+.paw-staff-topbar > div:last-child > div:last-child span:last-child { display: none; }
+.paw-staff-dashboard .paw-dashboard-header + div { display: none; }
+.paw-staff-dashboard .paw-dashboard-main { padding: 90px 28px 30px; background: #f3f4f6; }
+.paw-staff-dashboard .paw-dashboard-main > div { gap: 20px; }
+.paw-staff-dashboard .paw-dashboard-main h1 { margin: 0; color: var(--paw-ink); font-size: 29px; line-height: 1.25; }
+.paw-staff-dashboard .paw-dashboard-main .bg-white { border-radius: 15px; box-shadow: 0 1px 2px rgb(0 0 0 / 12%); }
+.paw-staff-dashboard.sidebar-collapsed > .paw-dashboard-sidebar { width: 62px; flex-basis: 62px; }
+.paw-staff-dashboard.sidebar-collapsed > .paw-dashboard-sidebar nav button { justify-content: center; padding-inline: 8px; font-size: 0; }
+.paw-staff-dashboard.sidebar-collapsed > .paw-dashboard-sidebar nav button svg { width: 20px; height: 20px; }
+.paw-staff-dashboard.sidebar-collapsed > .paw-dashboard-sidebar > button:last-child { justify-content: center; padding-inline: 8px; font-size: 0; }
+
+/* Staff home cards share the proportions in the role dashboard references. */
+.paw-clerk-dashboard .paw-dashboard-main .grid,
+.paw-vet-dashboard .paw-dashboard-main .grid,
+.paw-admin-dashboard .paw-dashboard-main .grid { gap: 18px; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white,
+.paw-vet-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white,
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white { min-height: 140px; padding: 23px 24px; gap: 16px; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > svg,
+.paw-clerk-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > img,
+.paw-vet-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > svg,
+.paw-vet-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > img,
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > svg,
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > img { width: 42px; height: 42px; flex: 0 0 42px; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p:first-child,
+.paw-vet-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p:first-child,
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p:first-child { font-size: 13px; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p.text-4xl,
+.paw-vet-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p.text-4xl,
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p.text-4xl { font-size: 32px; line-height: 1.05; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 > .bg-white,
+.paw-vet-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 > .bg-white,
+.paw-admin-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 > .bg-white { min-height: 372px; padding: 22px; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 h2,
+.paw-vet-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 h2,
+.paw-admin-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 h2 { margin-bottom: 16px; font-size: 17px; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .grid.grid-cols-2 > div,
+.paw-vet-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .grid.grid-cols-2 > div,
+.paw-admin-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .grid.grid-cols-2 > div { min-height: 118px; padding: 14px; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .w-16,
+.paw-vet-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .w-16,
+.paw-admin-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .w-16 { width: 52px; height: 52px; flex: 0 0 52px; }
+.paw-clerk-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .bg-white > .flex.flex-col.gap-4,
+.paw-vet-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .bg-white > .flex.flex-col.gap-4,
+.paw-admin-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .bg-white > .flex.flex-col.gap-4 { gap: 14px; }
+.paw-clerk-dashboard .paw-staff-topbar > div:last-child > div:last-child span:last-child { display: block; color: #c9c2d7; font-size: 11px; }
+.paw-vet-dashboard .paw-staff-topbar > div:last-child > div:last-child span:last-child { display: block; color: #c9c2d7; font-size: 11px; }
+.paw-admin-dashboard .paw-staff-topbar > div:last-child > div:last-child span:last-child { display: block; color: #c9c2d7; font-size: 11px; }
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > div:first-child { width: 60px; height: 60px; flex: 0 0 60px; display: grid; place-items: center; padding: 8px; }
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > div:first-child img,
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > div:first-child svg { width: 42px; height: 42px; }
+.paw-admin-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p.text-3xl { font-size: 32px; line-height: 1.05; white-space: nowrap; }
+
+/* Owner home follows the compact overview layout shown in the dashboard reference. */
+.paw-owner-dashboard .paw-dashboard-main > div { gap: 20px; }
+.paw-owner-dashboard .paw-dashboard-main .grid { gap: 18px; }
+.paw-owner-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white { min-height: 140px; padding: 23px 24px; gap: 16px; }
+.paw-owner-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > div:first-child { width: 60px; height: 60px; flex: 0 0 60px; display: grid; place-items: center; padding: 8px; }
+.paw-owner-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > div:first-child img,
+.paw-owner-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white > div:first-child svg { width: 42px; height: 42px; }
+.paw-owner-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p:first-child { font-size: 13px; }
+.paw-owner-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p.text-4xl,
+.paw-owner-dashboard .paw-dashboard-main .grid.md\:grid-cols-3 > .bg-white p.text-3xl { font-size: 32px; line-height: 1.05; white-space: nowrap; }
+.paw-owner-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 > .bg-white { min-height: 356px; padding: 22px; }
+.paw-owner-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 h2 { margin-bottom: 16px; font-size: 17px; }
+.paw-owner-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .grid.grid-cols-2 > div { min-height: 118px; padding: 14px; }
+.paw-owner-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 .w-14 { width: 52px; height: 52px; flex: 0 0 52px; }
+.paw-owner-dashboard .paw-staff-topbar > div:last-child > div:last-child span:last-child { display: block; color: #c9c2d7; font-size: 11px; }
+
+/* Clerk appointments: compact search, status filters, and readable table rows. */
+.paw-appointments-view:not(.vet-view) { gap: 20px; }
+.paw-appointments-view:not(.vet-view) .paw-appointments-heading { align-items: center; gap: 20px; }
+.paw-appointments-view:not(.vet-view) .paw-appointments-heading h1 { font-size: 30px; line-height: 1.15; }
+.paw-appointments-view:not(.vet-view) .paw-appointments-heading p { margin-top: 5px; font-size: 13px; }
+.paw-appointments-view:not(.vet-view) .paw-appointments-heading input { width: 288px; height: 38px; border-radius: 8px; }
+.paw-appointments-view:not(.vet-view) .paw-appointments-heading input:focus { box-shadow: 0 0 0 3px rgb(73 24 160 / 10%); }
+.paw-appointments-view:not(.vet-view) .paw-appointments-heading > div:last-child > button { min-height: 38px; padding: 8px 18px; border-radius: 9px; box-shadow: 0 2px 6px rgb(23 4 61 / 12%); transition: transform .16s ease, box-shadow .16s ease; }
+.paw-appointments-view:not(.vet-view) .paw-appointments-heading > div:last-child > button:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgb(23 4 61 / 18%); }
+.paw-appointment-filterbar { min-height: 54px; padding: 12px 22px; gap: 24px; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 2px rgb(23 4 61 / 7%); }
+.paw-appointment-filterbar button { min-height: 26px; font-size: 13px; }
+.paw-appointment-filterbar button span { width: 12px; height: 12px; }
+.paw-appointments-table-card { border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 2px 5px rgb(23 4 61 / 7%); }
+.paw-appointments-table-card table { border-collapse: separate; border-spacing: 0; }
+.paw-appointments-table-card th { height: 52px; padding: 14px 18px; font-size: 12px; white-space: nowrap; }
+.paw-appointments-table-card td { height: 72px; padding: 12px 18px; font-size: 13px; }
+.paw-appointments-table-card tbody tr { transition: background-color .16s ease; }
+.paw-appointments-table-card td p:first-child { font-size: 13px; }
+.paw-appointments-table-card td p + p { margin-top: 2px; }
+.paw-appointments-table-card td span[class*="border-yellow-400"] { border-color: #fbbf24; background: #fff; color: #c27800; }
+.paw-appointments-table-card td span[class*="border-blue-400"] { border-color: #60a5fa; background: #fff; color: #2563eb; }
+.paw-appointments-table-card td span[class*="bg-red-400"] { background: #ff6269; }
+.paw-appointments-table-card td span[class*="rounded-full"] { padding: 5px 12px; font-size: 11px; }
+.paw-appointments-table-card td .w-10.h-10 { width: 40px; height: 40px; }
+.paw-appointments-table-card td button.flex.flex-col { padding: 8px; }
+.paw-appointments-table-card .paw-appointments-pagination { min-height: 64px; padding: 12px 18px; }
+.paw-appointments-pagination p { font-size: 12px; }
+.paw-appointments-pagination button { min-height: 32px; padding: 6px 11px; border-radius: 8px; transition: background-color .16s ease, border-color .16s ease; }
+
+@media (max-width: 760px) {
+  .paw-appointments-view:not(.vet-view) .paw-appointments-heading { align-items: stretch; flex-direction: column; }
+  .paw-appointments-view:not(.vet-view) .paw-appointments-heading > div:last-child { width: 100%; }
+  .paw-appointments-view:not(.vet-view) .paw-appointments-heading input { width: min(100%, 340px); }
+  .paw-appointments-view:not(.vet-view) .paw-appointment-filterbar { gap: 16px; padding-inline: 14px; overflow-x: auto; }
+  .paw-appointments-view:not(.vet-view) .paw-appointments-table-card { overflow-x: auto; }
+  .paw-appointments-view:not(.vet-view) .paw-appointments-table-card table { min-width: 760px; }
+  .paw-appointments-view:not(.vet-view) .paw-appointments-pagination { min-width: 760px; }
+}
+
+/* Admin user management reference layout. */
+.paw-admin-users { gap: 20px; }
+.paw-admin-users .paw-admin-users-heading { align-items: center; gap: 16px; }
+.paw-admin-users .paw-admin-users-heading h1 { font-size: 30px; line-height: 1.15; }
+.paw-admin-users .paw-admin-users-heading p { margin-top: 5px; font-size: 13px; }
+.paw-admin-users .paw-admin-users-heading > button { min-height: 40px; padding: 9px 18px; border-radius: 9px; box-shadow: 0 2px 6px rgb(23 4 61 / 12%); transition: transform .16s ease, box-shadow .16s ease; }
+.paw-admin-users .paw-admin-users-heading > button:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgb(23 4 61 / 18%); }
+.paw-admin-users-stats { gap: 14px; }
+.paw-admin-user-stat { min-height: 96px; padding: 16px 18px; gap: 14px; border: 1px solid #e5e7eb; border-radius: 13px; box-shadow: 0 2px 4px rgb(23 4 61 / 7%); }
+.paw-admin-user-stat > div:first-child { display: grid; place-items: center; }
+.paw-admin-user-stat svg { width: 30px; height: 30px; }
+.paw-admin-user-stat p.text-xs { font-size: 11px; }
+.paw-admin-user-stat p.text-2xl { font-size: 24px; line-height: 1.1; }
+.paw-admin-users-filters { padding: 15px 20px; border: 1px solid #e5e7eb; border-radius: 13px; box-shadow: 0 2px 4px rgb(23 4 61 / 6%); }
+.paw-admin-users-filter-controls { display: grid; grid-template-columns: minmax(220px, 1fr) 120px 105px auto; align-items: end; gap: 16px; }
+.paw-admin-users-filter-controls label { margin-bottom: 5px; font-size: 11px; }
+.paw-admin-users-filter-controls input,
+.paw-admin-users-filter-controls select,
+.paw-admin-users-filter-controls > div:last-child > button { height: 39px; border-radius: 8px; }
+.paw-admin-users-filter-controls select { width: 100%; padding-inline: 12px; }
+.paw-admin-users-filter-controls > div:last-child { gap: 8px; }
+.paw-admin-users-filter-controls > div:last-child > button { padding-inline: 13px; white-space: nowrap; }
+.paw-admin-users-table { border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 2px 5px rgb(23 4 61 / 7%); }
+.paw-admin-users-table th { height: 52px; padding: 14px 20px; font-size: 12px; white-space: nowrap; }
+.paw-admin-users-table td { height: 69px; padding: 11px 20px; font-size: 13px; }
+.paw-admin-users-table tbody tr { transition: background-color .16s ease; }
+.paw-admin-users-table td p:first-child { font-size: 13px; }
+.paw-admin-users-table td p + p { margin-top: 2px; }
+.paw-admin-users-table td span.rounded-full { padding: 4px 11px; font-size: 11px; white-space: nowrap; }
+.paw-admin-users-table td .w-9.h-9 { width: 36px; height: 36px; }
+.paw-admin-user-actions { min-width: 32px; min-height: 34px; }
+.paw-admin-user-actions:focus-visible { outline: 3px solid rgb(255 135 0 / 45%); outline-offset: 2px; }
+.paw-admin-users-pagination { min-height: 64px; padding: 12px 20px; }
+.paw-admin-users-pagination p { font-size: 12px; }
+.paw-admin-users-pagination button { min-height: 32px; padding: 6px 11px; border-radius: 8px; transition: background-color .16s ease, border-color .16s ease; }
+
+/* Owner sales report recent transactions table. */
+.paw-owner-dashboard .owner-transactions { border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 2px 4px rgb(23 4 61 / 8%); }
+.paw-owner-dashboard .owner-transactions > div:first-child { min-height: 56px; padding: 16px 24px; }
+.paw-owner-dashboard .owner-transactions > div:first-child p { font-size: 14px; }
+.paw-owner-dashboard .owner-transactions table { border-collapse: collapse; }
+.paw-owner-dashboard .owner-transactions thead { background: #f9fafb; }
+.paw-owner-dashboard .owner-transactions th { height: 40px; padding: 10px 24px; font-size: 11px; letter-spacing: .01em; }
+.paw-owner-dashboard .owner-transactions td { height: 53px; padding: 12px 24px; font-size: 12px; }
+.paw-owner-dashboard .owner-transactions td:nth-child(2) { color: var(--paw-ink); font-weight: 600; }
+.paw-owner-dashboard .owner-transactions td:nth-child(4) { color: var(--paw-ink); font-weight: 700; white-space: nowrap; }
+.paw-owner-dashboard .owner-transactions td span { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; }
+
+@media (max-width: 640px) {
+  .paw-owner-dashboard .owner-transactions { overflow-x: auto; }
+  .paw-owner-dashboard .owner-transactions table { min-width: 640px; }
+}
+
+@media (max-width: 900px) {
+  .paw-admin-users-filter-controls { grid-template-columns: minmax(0, 1fr) 130px 115px; }
+  .paw-admin-users-filter-controls > div:last-child { grid-column: 1 / -1; justify-content: flex-end; }
+}
+@media (max-width: 640px) {
+  .paw-admin-users .paw-admin-users-heading { align-items: stretch; flex-direction: column; }
+  .paw-admin-users .paw-admin-users-heading > button { align-self: flex-start; }
+  .paw-admin-users-stats { grid-template-columns: 1fr 1fr; }
+  .paw-admin-users-filter-controls { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .paw-admin-users-filter-controls > div:first-child { grid-column: 1 / -1; }
+  .paw-admin-users-filter-controls > div:last-child { grid-column: 1 / -1; justify-content: flex-start; }
+  .paw-admin-users-table { overflow-x: auto; }
+  .paw-admin-users-table table { min-width: 760px; }
+  .paw-admin-users-pagination { min-width: 760px; }
+}
+
+@media (max-width: 900px) {
+  .paw-customer-sidebar { width: 62px; flex-basis: 62px; }
+  .paw-customer-sidebar nav button { justify-content: center; padding-inline: 8px; font-size: 0; }
+  .paw-customer-sidebar nav button svg { width: 20px; height: 20px; }
+  .paw-customer-sidebar > button:last-child { justify-content: center; padding-inline: 8px; font-size: 0; }
+  .paw-customer-main { padding: 24px 20px; }
+  .paw-staff-dashboard > .paw-dashboard-sidebar { width: 62px; flex-basis: 62px; }
+  .paw-staff-dashboard > .paw-dashboard-sidebar nav button { justify-content: center; padding-inline: 8px; font-size: 0; }
+  .paw-staff-dashboard > .paw-dashboard-sidebar nav button svg { width: 20px; height: 20px; }
+  .paw-staff-dashboard > .paw-dashboard-sidebar > button:last-child { justify-content: center; padding-inline: 8px; font-size: 0; }
+  .paw-staff-dashboard .paw-dashboard-main { padding: 84px 20px 24px; }
+}
+@media (max-width: 640px) {
+  .paw-customer-dashboard { min-height: 100vh; height: auto; overflow: visible; }
+  .paw-customer-workspace { min-height: calc(100vh - 60px); }
+  .paw-customer-sidebar { width: 54px; flex-basis: 54px; }
+  .paw-customer-sidebar nav button { min-height: 46px; }
+  .paw-customer-main { padding: 22px 14px; }
+  .paw-customer-main h1 { font-size: 23px; }
+  .paw-appointment-card { padding: 20px 16px; }
+  .paw-appointment-card > h1 { font-size: 22px; }
+  .paw-add-pet-card { padding: 24px 20px; }
+  .paw-add-pet-fields { gap: 14px; }
+  .paw-add-pet-card .mt-8 { margin-top: 24px; }
+  .paw-customer-main .grid.lg\:grid-cols-3 > .bg-white { grid-column: span 1; }
+  .paw-customer-main .grid.md\:grid-cols-3 > .bg-white { min-height: 100px; padding: 16px; }
+  .paw-customer-main .grid.lg\:grid-cols-3 .w-56 { width: 100%; max-width: 210px; }
+  .paw-customer-main .grid.lg\:grid-cols-3 .w-40 { width: 130px; }
+  .paw-staff-dashboard .paw-dashboard-main { padding: 82px 14px 22px; }
+  .paw-staff-dashboard .paw-dashboard-main h1 { font-size: 23px; }
+  .paw-clerk-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 > .bg-white,
+  .paw-vet-dashboard .paw-dashboard-main .grid.lg\:grid-cols-3 > .bg-white { min-height: unset; }
+}
+
+@media (max-width: 1100px) {
+  .paw-dashboard-sidebar { width: 230px; }
+  .paw-dashboard-sidebar nav button { font-size: 15px; padding-inline: 14px; }
+  .paw-dashboard-main { padding: 32px 28px; }
+  .paw-dashboard-main h1 { font-size: 36px; }
+}
+
+@media (max-width: 760px) {
+  .paw-dashboard-shell { min-height: 100vh; height: auto; overflow: visible; }
+  .paw-dashboard-sidebar { width: 68px; }
+  .paw-dashboard-sidebar > div:first-child { height: 76px; padding: 0 12px; }
+  .paw-dashboard-sidebar > div:first-child img { display: none; }
+  .paw-dashboard-sidebar > div:first-child button svg { width: 38px; height: 38px; }
+  .paw-dashboard-sidebar nav { margin-top: 22px; }
+  .paw-dashboard-sidebar nav button {
+    justify-content: center;
+    gap: 0;
+    padding: 12px 6px;
+    font-size: 0;
+  }
+  .paw-dashboard-sidebar nav button svg { width: 30px; height: 30px; }
+  .paw-dashboard-sidebar > button:last-child { justify-content: center; padding: 12px 6px; font-size: 0; }
+  .paw-dashboard-sidebar > button:last-child svg { width: 32px; height: 32px; }
+  .paw-dashboard-header { height: 76px; padding: 0 14px; gap: 12px; }
+  .paw-dashboard-header > div:last-child span:first-child { font-size: 16px; }
+  .paw-dashboard-header > div:last-child span:last-child { font-size: 11px; }
+  .paw-dashboard-header > div:last-child > div:first-child { width: 42px; height: 42px; }
+  .paw-dashboard-main { padding: 24px 16px; }
+  .paw-dashboard-main h1 { font-size: 30px; }
+}
