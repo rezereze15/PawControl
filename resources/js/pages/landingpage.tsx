@@ -1,5 +1,6 @@
 import petImage from '../imports/landingpagepet.png';
 import logoName from '../imports/Bigpaw_logoname-removebg-preview.png';
+import pawLogo from '../imports/pawlogo.png';
 
 export default function App() {
   return (
@@ -53,7 +54,7 @@ export default function App() {
             desc="Book appointment in just a few clicks"
           />
           <FeatureItem
-            icon={<PawIcon color="#F59E0B" />}
+            icon={<img src={pawLogo} alt="" />}
             bg="#FEF3C7"
             title="Pet Management"
             desc="Keep all your pet's information organized"
@@ -80,7 +81,7 @@ export default function App() {
         <div className="paw-steps">
           <Step n={1} icon={<PersonIcon />} bg="#EDE9F8" label="Owner Details" desc="Enter the owner details" />
           <Dash />
-          <Step n={2} icon={<PawIcon color="#F59E0B" size={36} />} bg="#FEF3C7" label="Pet Information" desc="Enter pet information such as species, breed, etc." />
+          <Step n={2} icon={<img src={pawLogo} alt="" />} bg="#FEF3C7" label="Pet Information" desc="Enter pet information such as species, breed, etc." />
           <Dash />
           <Step n={3} icon={<CalendarIcon color="#4C2F97" size={36} />} bg="#EDE9F8" label="Select The Date & Service" desc="Select the time & date and the service for your appointment" />
           <Dash />

@@ -8,7 +8,7 @@ import bincentPhoto from '../imports/bincent.png';
 import johnPhoto from '../imports/John_A..png';
 import moyPhoto from '../imports/moy.png';
 import giyoPhoto from '../imports/giyo.png';
-import haerinPhoto from '../imports/3232.png';
+import haerinPhoto from '../imports/haerin.png';
 import karinaPhoto from '../imports/karina.png';
 import maloiPhoto from '../imports/maloi.png';
 import chaewonPhoto from '../imports/chaewon.png';
@@ -602,7 +602,6 @@ function Step2({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
 function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const [selectedDate, setSelectedDate] = useState<number | null>(15)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
-  const [serviceOpen, setServiceOpen] = useState(false)
   const [service, setService] = useState("")
 
   const blanks = MAY_2026.startDay
@@ -627,45 +626,18 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
         {/* Service */}
         <div className="flex flex-col gap-3">
           <p className="text-sm text-gray-600 leading-relaxed">
-            Please choose the service you'd like for your pet â€” vaccination to
+            Please input your pet's concern and the vaccination you'd like to schedule to
             help protect them from common diseases, or a checkup to monitor
             their overall health and well-being.
           </p>
-          <div className="relative">
-            <button
-              onClick={() => setServiceOpen((o) => !o)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-left flex justify-between items-center hover:border-[#3b0f8c] transition-colors"
-            >
-              <span className={service ? "text-[#1a0a3c]" : "text-gray-400"}>
-                {service || "Choose the service"}
-              </span>
-              <svg
-                className="w-4 h-4 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </button>
-            {serviceOpen && (
-              <div className="absolute top-full left-0 right-0 border border-gray-200 bg-white rounded-lg shadow-lg z-10 overflow-hidden">
-                {["Vaccination", "Checkups"].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => {
-                      setService(s)
-                      setServiceOpen(false)
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm font-bold text-[#1a0a3c] hover:bg-purple-50 border-b border-gray-100 last:border-0"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <input
+            type="text"
+            value={service}
+            onChange={(event) => setService(event.target.value)}
+            placeholder="Enter the service"
+            aria-label="Service"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]"
+          />
         </div>
 
         {/* Calendar */}
@@ -754,7 +726,7 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
         <div className="flex flex-col gap-4">
           <p className="text-sm text-[#1a0a3c]">
             By booking an appointment, you agree to pay a{" "}
-            <strong>â‚±200 non-refundable down payment</strong> to secure your
+            <strong>₱200 non-refundable down payment</strong> to secure your
             slot.
           </p>
           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 pl-1">
@@ -886,7 +858,7 @@ function Step5({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
           <div className="grid grid-cols-3 gap-2">
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Date of Birth</p>
-              <p className="text-xs text-gray-400">â€”â€”â€”â€”</p>
+              <p className="text-xs text-gray-400">--/--/----</p>
             </div>
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Age</p>
@@ -904,7 +876,7 @@ function Step5({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
             </div>
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Temperature</p>
-              <p className="text-xs text-gray-400">â€”â€”â€”â€”</p>
+              <p className="text-xs text-gray-400">--/--/----</p>
             </div>
           </div>
         </div>
@@ -1055,7 +1027,7 @@ function AppointmentWizard({ onBack }: { onBack: () => void }) {
 
 // â”€â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type DashSection = "home" | "records" | "appointments" | "settings"
-type AdminSection = "home" | "records" | "users" | "settings"
+type AdminSection = "home" | "services" | "supplies" | "users" | "settings"
 
 function CustomerDashboard({
   username,
@@ -1235,7 +1207,7 @@ function HomeSection({
     <div className="flex flex-col gap-6">
       {showAddPet && <AddPetModal onClose={() => setShowAddPet(false)} />}
       <h1 className="text-3xl font-extrabold text-[#1a0a3c]">
-        Hi, {username}! (Customer)
+        Hi, {username}!
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm">
@@ -1444,8 +1416,8 @@ function AdminDashboard({
       ),
     },
     {
-      id: "records",
-      label: "Pet Medical Records",
+      id: "services",
+      label: "Manage Services",
       icon: (
         <svg
           className="w-5 h-5"
@@ -1456,6 +1428,16 @@ function AdminDashboard({
         >
           <rect x="4" y="2" width="16" height="20" rx="2" />
           <path d="M8 6h8M8 10h8M8 14h5" strokeLinecap="round" />
+        </svg>
+      ),
+    },
+    {
+      id: "supplies",
+      label: "Manage Medical Supplies",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 3h6v4l3 3v10H6V10l3-3V3Z" strokeLinejoin="round" />
+          <path d="M9 7h6M12 11v6M9 14h6" strokeLinecap="round" />
         </svg>
       ),
     },
@@ -1581,10 +1563,9 @@ function AdminDashboard({
         <div className="h-1 bg-orange-400 flex-shrink-0" />
 
         <main className="paw-dashboard-main flex-1 overflow-y-auto p-8">
-          {section === "home" && <AdminHomeSection />}
-          {section === "records" && (
-            <AdminPlaceholder title="Pet Medical Records" />
-          )}
+          {section === "home" && <AdminHomeSection username={username} />}
+          {section === "services" && <AdminPlaceholder title="Manage Services" />}
+          {section === "supplies" && <AdminPlaceholder title="Manage Medical Supplies" />}
           {section === "users" && <AdminManageUsers />}
           {section === "settings" && <AdminPlaceholder title="User Settings" />}
         </main>
@@ -1593,11 +1574,11 @@ function AdminDashboard({
   )
 }
 
-function AdminHomeSection() {
+function AdminHomeSection({ username }: { username: string }) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-extrabold text-[#1a0a3c]">
-        Hi, Admin! (Admin)
+        Hi, {username}!
       </h1>
 
       {/* Stat cards */}
@@ -2703,7 +2684,7 @@ function StaffHomeSection({
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-extrabold text-[#1a0a3c]">
-        Hi, {isVeterinarian ? `Doc ${username}` : username}! ({role})
+        Hi, {isVeterinarian ? `Doc ${username}` : username}!
       </h1>
 
       {/* Stat cards */}
@@ -3386,7 +3367,7 @@ function OwnerHomeSection({ username }: { username: string }) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-extrabold text-[#1a0a3c]">
-        Hi, {username} (Owner)
+        Hi, {username}!
       </h1>
 
       {/* Stat cards */}
