@@ -99,6 +99,7 @@ export default function Login() {
 
               {error && <p className="login-error" role="alert">{error}</p>}
 
+              <p className="login-forgot-password">Forgot password?</p>
               <button type="submit" className="login-btn">Login</button>
 
               <p className="login-signup-text">

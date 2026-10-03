@@ -364,7 +364,7 @@ const APPT_STEPS = [
   "Animal Signalment",
   "Select the Date & Service",
   "Payment",
-  "Finish",
+  "Summary",
 ]
 const UNAVAILABLE_TIMES = ["1 PM", "2 PM", "3 PM", "4 PM", "7 PM", "8 PM"]
 const ALL_TIMES = [
@@ -390,13 +390,19 @@ const MAY_2026 = { year: 2026, month: "May", startDay: 5, days: 31 }
 
 function StepIndicator({ current }: { current: number }) {
   return (
-    <div className="flex items-start justify-between mb-8 px-4">
+    <div className="mb-8 flex w-full items-start">
       {APPT_STEPS.map((label, i) => {
         const done = i < current
         const active = i === current
         return (
-          <div key={i} className="flex items-start flex-1">
-            <div className="flex flex-col items-center">
+          <div key={i} className="relative flex flex-1 flex-col items-center">
+            {i < APPT_STEPS.length - 1 && (
+              <div
+                className={`paw-step-connector absolute top-5 z-0 h-0.5 ${done ? 'bg-[#3b0f8c]' : 'bg-gray-300'}`}
+                style={{ left: "calc(50% + 24px)", width: "calc(100% - 48px)" }}
+              />
+            )}
+            <div className="relative z-10 flex flex-col items-center">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm flex-shrink-0
                 ${
@@ -433,9 +439,6 @@ function StepIndicator({ current }: { current: number }) {
                 {label}
               </span>
             </div>
-            {i < APPT_STEPS.length - 1 && (
-              <div className="paw-step-connector flex-1 h-0.5 mt-5 mx-2 bg-[#3b0f8c]" />
-            )}
           </div>
         )
       })}
@@ -684,16 +687,26 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
                   onClick={() => !taken && setSelectedTime(t)}
                   className={`text-xs px-2 py-1.5 rounded-full border-2 font-semibold transition-colors ${
                     taken
-                      ? "border-orange-400 text-orange-500 cursor-not-allowed"
+                      ? "border-orange-400 bg-orange-50 text-orange-600 cursor-not-allowed"
                       : active
-                        ? "border-[#3b0f8c] bg-[#3b0f8c] text-white"
-                        : "border-gray-800 text-[#1a0a3c] hover:border-[#3b0f8c] hover:text-[#3b0f8c]"
+                        ? "border-orange-500 bg-orange-400 text-white"
+                        : "border-[#3b0f8c] text-[#3b0f8c] hover:bg-purple-50"
                   }`}
                 >
                   {t}
                 </button>
               )
             })}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-gray-100 pt-3 text-xs text-gray-600">
+            <span className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-orange-400" aria-hidden="true" />
+              Already selected
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-[#3b0f8c]" aria-hidden="true" />
+              Available
+            </span>
           </div>
         </div>
       </div>
@@ -724,11 +737,17 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
       <div className="grid grid-cols-2 gap-8 items-start">
         {/* Left â€” terms + form */}
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-[#1a0a3c]">
-            By booking an appointment, you agree to pay a{" "}
-            <strong>₱200 non-refundable down payment</strong> to secure your
-            slot.
-          </p>
+          <label className="flex items-start gap-3 text-sm text-[#1a0a3c]">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4 flex-shrink-0 accent-[#3b0f8c]"
+            />
+            <span>
+              By checking and booking an appointment, you agree to pay a{" "}
+              <strong>₱200 non-refundable down payment</strong> to secure your
+              slot.
+            </span>
+          </label>
           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 pl-1">
             <li>
               The down payment will be deducted from the total service fee.
@@ -773,11 +792,12 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
           <p className="font-extrabold text-[#1a0a3c] text-lg underline">
             PAY HERE
           </p>
-          <div className="border-4 border-[#1a0a3c] rounded-lg p-3 bg-white">
+          <div className="flex flex-col items-center px-3 pt-3 pb-2">
+            <p className="mb-2 text-center text-sm font-extrabold text-black">Big Paw's Clinic</p>
             <img
               src={qrCode}
               alt="Payment QR code"
-              className="w-48 h-48 object-contain"
+              className="h-48 w-48 object-contain"
             />
           </div>
         </div>
@@ -883,7 +903,7 @@ function Step5({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
 
         {/* Confirm Date */}
         <div className="border border-gray-200 rounded-xl p-5 flex flex-col gap-3">
-          <p className="font-bold text-[#1a0a3c] text-sm mb-1">Confirm Date</p>
+          <p className="font-bold text-[#1a0a3c] text-sm mb-1">Selected Date</p>
           <div className="flex justify-center">
             <svg className="w-16 h-16" viewBox="0 0 64 64" fill="none">
               <rect
@@ -2244,7 +2264,17 @@ function AdminSalesReports({ ownerView = false }: { ownerView?: boolean }) {
   const max = Math.max(...MOCK_SALES.map((s) => s.amount))
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Sales Reports</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Sales Reports</h1>
+        {ownerView && (
+          <button
+            type="button"
+            className="min-h-10 whitespace-nowrap rounded-xl bg-[#19043f] px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_4px_10px_rgba(25,4,63,0.2)] transition-colors hover:bg-[#2d0a6e]"
+          >
+            Generate Sales Report
+          </button>
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {[
           {
@@ -2266,18 +2296,35 @@ function AdminSalesReports({ ownerView = false }: { ownerView?: boolean }) {
             color: "text-gray-400",
           },
         ].map((c) => (
-          <div key={c.label} className="bg-white rounded-2xl p-6 shadow-sm">
-            <p className="text-sm text-gray-500 font-medium mb-1">{c.label}</p>
-            <p className="text-3xl font-extrabold text-[#1a0a3c]">{c.value}</p>
-            <p className={`text-xs font-semibold mt-1 ${c.color}`}>{c.sub}</p>
+          <div key={c.label} className={`relative overflow-hidden bg-white rounded-2xl p-6 ${ownerView ? 'border border-violet-100 shadow-[0_8px_24px_rgba(26,10,60,0.06)]' : 'shadow-sm'}`}>
+            {ownerView && <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#3b0f8c] to-[#ffbb50]" />}
+            <p className="text-sm text-gray-500 font-medium mb-2">{c.label}</p>
+            <p className="text-3xl font-extrabold tracking-tight text-[#1a0a3c]">{c.value}</p>
+            <p className={`text-xs font-semibold mt-2 ${c.color}`}>{c.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Bar chart */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <p className="font-bold text-[#1a0a3c] mb-6">Monthly Revenue (2026)</p>
-        <div className="flex items-end gap-4 h-48">
+      <div className={`bg-white rounded-2xl p-6 ${ownerView ? 'border border-violet-100 shadow-[0_8px_24px_rgba(26,10,60,0.06)]' : 'shadow-sm'}`}>
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div>
+            <p className="font-bold text-lg text-[#1a0a3c]">Monthly Revenue</p>
+            <p className="mt-1 text-xs text-gray-500">Revenue collected across the year</p>
+          </div>
+          {ownerView && (
+            <select
+              aria-label="Revenue date range"
+              defaultValue="This year"
+              className="rounded-xl border border-violet-100 bg-violet-50/60 px-3 py-2.5 text-sm font-semibold text-[#3b0f8c] focus:outline-none focus:ring-2 focus:ring-violet-200"
+            >
+              <option>This week</option>
+              <option>This month</option>
+              <option>This year</option>
+            </select>
+          )}
+        </div>
+        <div className={`flex items-end gap-4 h-64 rounded-xl px-4 pt-4 ${ownerView ? 'bg-slate-50/80' : ''}`}>
           {MOCK_SALES.map((s) => (
             <div
               key={s.month}
@@ -2287,7 +2334,7 @@ function AdminSalesReports({ ownerView = false }: { ownerView?: boolean }) {
                 ₱{(s.amount / 1000).toFixed(0)}K
               </span>
               <div
-                className="w-full bg-[#3b0f8c] rounded-t-lg hover:bg-orange-400 transition-colors cursor-pointer"
+                className={`w-full rounded-t-lg transition-colors ${ownerView ? 'bg-gradient-to-t from-[#3b0f8c] to-[#7044bd] hover:from-orange-400 hover:to-amber-300' : 'bg-[#3b0f8c] hover:bg-orange-400'} cursor-pointer`}
                 style={{ height: `${(s.amount / max) * 160}px` }}
               />
               <span className="text-xs text-gray-500">{s.month}</span>
@@ -2930,7 +2977,6 @@ function ClerkAppointments({
   const [filter, setFilter] =
     useState<"All" | "Pending" | "Confirmed" | "Cancelled">("All")
   const [search, setSearch] = useState("")
-  const [openMenu, setOpenMenu] = useState<string | null>(null)
 
   const filtered = MOCK_APPOINTMENTS.filter((a) => {
     const matchFilter = filter === "All" || a.status === filter
@@ -2947,7 +2993,7 @@ function ClerkAppointments({
   }
 
   return (
-    <div className={`paw-appointments-view flex flex-col gap-6 ${veterinarianView ? 'vet-view' : ''}`} onClick={() => setOpenMenu(null)}>
+    <div className={`paw-appointments-view flex flex-col gap-6 ${veterinarianView ? 'vet-view' : ''}`}>
       {/* Title row */}
       <div className="paw-appointments-heading flex items-start justify-between gap-4">
         <div>
@@ -3079,61 +3125,16 @@ function ClerkAppointments({
                     </span>
                   </td>
                 )}
-                <td className="px-5 py-4 relative">
-                  <button
-                    type="button"
-                    aria-label={`Actions for ${a.pet}'s appointment`}
-                    aria-expanded={openMenu === a.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setOpenMenu(openMenu === a.id ? null : a.id)
-                    }}
-                    className="flex items-center justify-center p-2 rounded text-gray-500 hover:bg-gray-100 transition-colors"
+                <td className="px-5 py-4">
+                  <span
+                    aria-label={`View ${a.pet}'s appointment`}
+                    className="flex w-fit items-center justify-center p-2 text-gray-500"
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <circle cx="12" cy="5" r="1.75" />
-                      <circle cx="12" cy="12" r="1.75" />
-                      <circle cx="12" cy="19" r="1.75" />
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
                     </svg>
-                  </button>
-                  {openMenu === a.id && (
-                    <div
-                      className="absolute right-8 top-2 z-20 bg-white rounded-xl shadow-xl border border-gray-100 py-2 w-40"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {!veterinarianView && (
-                        <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-[#3b0f8c] font-semibold hover:bg-gray-50 transition-colors">
-                          <svg
-                            className="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <rect x="3" y="4" width="18" height="18" rx="2" />
-                            <path
-                              d="M16 2v4M8 2v4M3 10h18"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                          Reschedule
-                        </button>
-                      )}
-                      <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-[#1a0a3c] font-semibold hover:bg-gray-50 transition-colors">
-                        <svg
-                          className="w-4 h-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </svg>
-                        View Details
-                      </button>
-                    </div>
-                  )}
+                  </span>
                 </td>
               </tr>
             ))}
@@ -3487,41 +3488,47 @@ function OwnerHomeSection({ username }: { username: string }) {
         </div>
 
         {/* Sales Report preview â€” line chart */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[#3b0f8c] font-bold text-sm">
-              Sales Report
-            </span>
-            <button className="text-[#3b0f8c] text-xs font-medium hover:underline">
-              See more &gt;
+        <div className="relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-violet-100 bg-white p-6 shadow-[0_10px_30px_rgba(26,10,60,0.08)]">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-[0.12em] text-violet-500">Performance</span>
+              <h2 className="mt-1 text-lg font-extrabold text-[#1a0a3c]">Sales Report</h2>
+            </div>
+            <button className="rounded-lg px-2 py-1 text-xs font-bold text-[#3b0f8c] transition-colors hover:bg-violet-50">
+              See more <span aria-hidden="true">→</span>
             </button>
           </div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[#3b0f8c] font-semibold">
-              Revenue Trend
-            </span>
-            <span className="border border-gray-300 rounded px-2 py-0.5 text-xs text-gray-500">
-              Daily
-            </span>
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium text-gray-500">Revenue trend</p>
+              <p className="mt-1 text-2xl font-extrabold tracking-tight text-[#1a0a3c]">₱61,400</p>
+            </div>
+            <span className="mb-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">↗ 8.64%</span>
+          </div>
+          <div className="flex items-center justify-between rounded-lg bg-violet-50/70 px-3 py-2">
+            <span className="text-xs font-semibold text-[#3b0f8c]">Daily revenue</span>
+            <span className="rounded-md border border-violet-100 bg-white px-2 py-1 text-[11px] font-semibold text-gray-600">May 14–19</span>
           </div>
           {/* Simple SVG line chart */}
-          <div className="flex-1">
+          <div className="h-40 rounded-xl bg-gradient-to-b from-violet-50/70 to-white p-2">
             <svg
               viewBox="0 0 280 130"
               className="w-full h-full"
               preserveAspectRatio="none"
             >
+              <defs>
+                <linearGradient id="ownerRevenueFill" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#7044bd" stopOpacity="0.22" />
+                  <stop offset="100%" stopColor="#7044bd" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {[28, 55, 82, 109].map((y) => <line key={y} x1="48" y1={y} x2="272" y2={y} stroke="#e9e3f5" strokeDasharray="3 4" />)}
               {/* Y axis labels */}
               {[
-                ["₱10M", 120],
-                ["₱5M", 100],
-                ["₱1M", 80],
-                ["₱500K", 60],
-                ["₱250K", 45],
-                ["₱100K", 30],
-                ["₱50K", 18],
-                ["₱1K", 8],
-                ["₱0", 2],
+                ["₱60K", 30],
+                ["₱40K", 58],
+                ["₱20K", 85],
+                ["₱0", 112],
               ].map(([label, y]) => (
                 <text
                   key={label as string}
@@ -3533,6 +3540,7 @@ function OwnerHomeSection({ username }: { username: string }) {
                   {label as string}
                 </text>
               ))}
+              <polygon points="55,82 90,80 120,76 150,74 180,72 210,68 240,60 270,50 270,112 55,112" fill="url(#ownerRevenueFill)" />
               {/* Line */}
               <polyline
                 points="55,82 90,80 120,76 150,74 180,72 210,68 240,60 270,50"
@@ -3787,6 +3795,3 @@ export default function Dashboard({ role = 'customer' }: { role?: DashboardRole 
 function DashboardHome({ username, onLogout }: { username: string; onLogout: () => void }) {
   return <CustomerDashboard username={username} onLogout={onLogout} />;
 }
-
-
-

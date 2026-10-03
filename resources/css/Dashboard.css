@@ -140,7 +140,6 @@
 .paw-appointment-card > p { margin-bottom: 24px; }
 .paw-appointment-card > .border-t { padding-top: 24px; }
 .paw-appointment-card .border-t .border-t { padding-top: 24px; }
-.paw-step-connector { margin-top: 19px; }
 .paw-add-pet-overlay { padding: 16px; background: rgb(0 0 0 / 40%); }
 .paw-add-pet-card { width: min(672px, 100%); max-width: 672px; margin: 0; padding: 32px; border-radius: 16px; }
 .paw-add-pet-card h2 { margin-bottom: 0; font-size: 24px; line-height: 1.25; }
@@ -191,6 +190,7 @@
 .paw-staff-topbar > div:last-child > div:last-child span:last-child { display: none; }
 .paw-staff-dashboard .paw-dashboard-header + div { display: none; }
 .paw-staff-dashboard .paw-dashboard-main { padding: 90px 28px 30px; background: #f3f4f6; }
+.paw-owner-dashboard .paw-dashboard-main { padding-inline: 36px; }
 .paw-staff-dashboard .paw-dashboard-main > div { gap: 20px; }
 .paw-staff-dashboard .paw-dashboard-main h1 { margin: 0; color: var(--paw-ink); font-size: 29px; line-height: 1.25; }
 .paw-staff-dashboard .paw-dashboard-main .bg-white { border-radius: 15px; box-shadow: 0 1px 2px rgb(0 0 0 / 12%); }
@@ -350,10 +350,12 @@
 }
 
 @media (max-width: 900px) {
+  .paw-owner-dashboard .paw-dashboard-main { padding-inline: 24px; }
   .paw-admin-users-filter-controls { grid-template-columns: minmax(0, 1fr) 130px 115px; }
   .paw-admin-users-filter-controls > div:last-child { grid-column: 1 / -1; justify-content: flex-end; }
 }
 @media (max-width: 640px) {
+  .paw-owner-dashboard .paw-dashboard-main { padding-inline: 18px; }
   .paw-admin-users .paw-admin-users-heading { align-items: stretch; flex-direction: column; }
   .paw-admin-users .paw-admin-users-heading > button { align-self: flex-start; }
   .paw-admin-users-stats { grid-template-columns: 1fr 1fr; }

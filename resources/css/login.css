@@ -391,6 +391,13 @@ body,
 }
 .login-screen .login-signup-text { margin-top: 4px; font-size: 16px; line-height: 1.5; }
 .login-screen .login-signup-link { text-underline-offset: 3px; }
+.login-screen .login-forgot-password {
+  align-self: flex-end;
+  margin: -4px 0 -8px;
+  color: #526eff;
+  font-size: 15px;
+  line-height: 1.2;
+}
 
 @media (max-width: 900px) {
   .login-screen .login-main { gap: 30px; padding: 34px 24px; }
@@ -404,4 +411,5 @@ body,
   .login-screen .login-card-inner { padding: 20px 18px 22px; box-shadow: 0 0 0 9px #f4f4f4; }
   .login-screen .login-form { gap: 14px; }
   .login-screen .login-signup-text { font-size: 14px; }
+  .login-screen .login-forgot-password { font-size: 14px; }
 }
