@@ -35,7 +35,7 @@ export default function Register() {
             <h1 className="login-title">Create Account</h1>
             <div className="login-divider" />
 
-            <RegisterForm onSubmit={(event) => event.preventDefault()} />
+            <RegisterForm />
           </div>
         </div>
       </main>

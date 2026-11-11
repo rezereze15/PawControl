@@ -1,5 +1,6 @@
 ﻿import { useState, type ReactNode } from 'react';
 import { CalendarIcon, PersonIcon } from './shared/dashboard/Icons';
+import { router } from '@inertiajs/react';
 import { AppointmentWizard } from './Customer/modules/MakeAppointment';
 import LegacyManageUsers from './Admin/components/LegacyManageUsers';
 import LegacySalesReports from './Admin/components/LegacySalesReports';
@@ -363,7 +364,7 @@ function OwnerDashboard({
 // â”€â”€â”€ App â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type DashboardRole = 'customer' | 'clerk' | 'admin' | 'veterinarian' | 'owner';
 
-export default function Dashboard({ role = 'customer' }: { role?: DashboardRole }) {
+export default function Dashboard({ role = 'customer', username: authenticatedUsername }: { role?: DashboardRole; username?: string }) {
   const profiles: Record<DashboardRole, string> = {
     customer: 'Karina',
     clerk: 'Maloi',
@@ -371,8 +372,8 @@ export default function Dashboard({ role = 'customer' }: { role?: DashboardRole 
     veterinarian: 'Haerin',
     owner: 'Asa',
   };
-  const username = profiles[role] ?? profiles.customer;
-  const logout = () => window.location.assign('/');
+  const username = authenticatedUsername || profiles[role] || profiles.customer;
+  const logout = () => router.post('/logout');
 
   if (role === 'admin') return <AdminDashboard username={username} onLogout={logout} />;
   if (role === 'clerk') return <ClerkDashboard username={username} onLogout={logout} />;
