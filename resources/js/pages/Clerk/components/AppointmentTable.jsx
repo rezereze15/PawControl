@@ -39,7 +39,7 @@ export default function AppointmentTable({ appointments, veterinarianView }) {
                         </div>
                         <div>
                           <p className="font-bold text-[#1a0a3c]">{a.pet}</p>
-                          <p className="text-gray-400 text-xs">{a.id}</p>
+                          <p className="text-gray-400 text-xs">Ref. {a.referenceNumber}</p>
                         </div>
                       </div>
                     </td>
