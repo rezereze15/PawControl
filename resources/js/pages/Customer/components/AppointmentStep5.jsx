@@ -1,4 +1,8 @@
-function AppointmentStep5({ onBack, onDone }) {
+function AppointmentStep5({ owner, pets = [], data, processing, onBack, onDone }) {
+    const pet = pets.find((option) => String(option.id) === String(data.pet_id));
+    const appointmentDate = data.selected_date && data.selected_time
+        ? new Date(`${data.selected_date}T${data.selected_time}`).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
+        : "Select a date and time";
     return (<div className="flex flex-col gap-5">
       <div className="grid grid-cols-3 gap-4">
         {/* Owner Details */}
@@ -6,27 +10,27 @@ function AppointmentStep5({ onBack, onDone }) {
           <p className="font-bold text-[#1a0a3c] text-sm mb-1">Owner Details</p>
           <div>
             <p className="text-xs font-bold text-[#1a0a3c]">Full Name</p>
-            <p className="text-xs text-gray-600">Karina Cruz Ganda</p>
+            <p className="text-xs text-gray-600">{owner?.name || "—"}</p>
           </div>
           <div>
             <p className="text-xs font-bold text-[#1a0a3c]">
               Authorized Representative
             </p>
-            <p className="text-xs text-gray-600">Jane Doe</p>
+            <p className="text-xs text-gray-600">{[data.ar_first_name, data.ar_last_name].filter(Boolean).join(" ") || "—"}</p>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Contact Number</p>
-              <p className="text-xs text-gray-600">09299667721</p>
+              <p className="text-xs text-gray-600">{owner?.phone || "—"}</p>
             </div>
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Email Address</p>
-              <p className="text-xs text-gray-600">Kawina@gmail.com</p>
+              <p className="text-xs text-gray-600">{owner?.email || "—"}</p>
             </div>
           </div>
           <div>
             <p className="text-xs font-bold text-[#1a0a3c]">Address</p>
-            <p className="text-xs text-gray-600">Blk 28 Lot 3 South Korea</p>
+            <p className="text-xs text-gray-600">{owner?.address || "—"}</p>
           </div>
         </div>
 
@@ -40,16 +44,16 @@ function AppointmentStep5({ onBack, onDone }) {
               <p className="text-xs font-bold text-[#1a0a3c]">
                 Patient/Pet Name
               </p>
-              <p className="text-xs text-gray-600">Lean Angelus</p>
+              <p className="text-xs text-gray-600">{pet?.name || "—"}</p>
             </div>
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Species</p>
-              <p className="text-xs text-gray-600">Dog</p>
+              <p className="text-xs text-gray-600">{pet?.species || "—"}</p>
             </div>
           </div>
           <div>
             <p className="text-xs font-bold text-[#1a0a3c]">Breed</p>
-            <p className="text-xs text-gray-600">Aspin</p>
+            <p className="text-xs text-gray-600">{pet?.breed || "—"}</p>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div>
@@ -58,7 +62,7 @@ function AppointmentStep5({ onBack, onDone }) {
             </div>
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Age</p>
-              <p className="text-xs text-gray-600">3</p>
+              <p className="text-xs text-gray-600">{pet?.age ?? "—"}</p>
             </div>
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Color/Markings</p>
@@ -95,7 +99,7 @@ function AppointmentStep5({ onBack, onDone }) {
             <span>
               Your selected date for appointment:{" "}
               <span className="text-[#3b0f8c] font-medium">
-                May 15, 2026 at 4:00AM
+                {appointmentDate}
               </span>
             </span>
           </div>
@@ -113,9 +117,7 @@ function AppointmentStep5({ onBack, onDone }) {
             </svg>
             <span>
               We'll contact you in your email:{" "}
-              <span className="text-[#3b0f8c] font-medium">
-                Kawina@gmail.com
-              </span>
+              <span className="text-[#3b0f8c] font-medium">{owner?.email || "—"}</span>
             </span>
           </div>
         </div>
@@ -125,8 +127,8 @@ function AppointmentStep5({ onBack, onDone }) {
         <button onClick={onBack} className="border-2 border-gray-400 text-gray-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-gray-50 transition-colors">
           Back
         </button>
-        <button onClick={onDone} className="bg-[#3b0f8c] text-white px-8 py-2 rounded-full text-sm font-bold hover:bg-[#2d0a6e] transition-colors">
-          Done
+        <button onClick={onDone} disabled={processing} className="bg-[#3b0f8c] text-white px-8 py-2 rounded-full text-sm font-bold hover:bg-[#2d0a6e] transition-colors disabled:opacity-50">
+          {processing ? "Submitting..." : "Done"}
         </button>
       </div>
     </div>);

@@ -19,10 +19,13 @@ import karinaPhoto from '../imports/karina.png';
 import chaewonPhoto from '../imports/chaewon.png';
 import asaPhoto from '../imports/asa.png';
 import '../../css/Dashboard.css';
-function CustomerDashboard({ username, onLogout, }) {
+function CustomerDashboard({ username, onLogout, owner, pets, flash }) {
     const [section, setSection] = useState("home");
     const [booking, setBooking] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const success = flash?.success
+        ? `${flash.success}${flash.referenceNumber ? ` Reference number: ${flash.referenceNumber}.` : ''}`
+        : '';
     const navItems = [
         {
             id: "home",
@@ -54,7 +57,8 @@ function CustomerDashboard({ username, onLogout, }) {
         },
     ];
     return (<CustomerDashboardLayout username={username} onLogout={onLogout} logoSrc={bigpawLogo} avatarSrc={karinaPhoto} navItems={navItems} section={section} booking={booking} sidebarOpen={sidebarOpen} onNavigate={(nextSection) => { setSection(nextSection); setBooking(false); }} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
-        {booking ? (<AppointmentWizard onBack={() => setBooking(false)}/>) : (<>
+        {booking ? (<AppointmentWizard owner={owner} pets={pets} onBack={() => setBooking(false)} onSuccess={() => setBooking(false)}/>) : (<>
+              {success && <p className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800" role="status">{success}</p>}
               {section === "home" && (<CustomerHomeSection username={username} onBookAppointment={() => setBooking(true)} onViewRecords={() => setSection("records")} onViewAppointments={() => setSection("appointments")}/>)}
               {section === "records" && (<DashboardPlaceholder title="Pet Medical Records"/>)}
               {section === "appointments" && (<DashboardPlaceholder title="Appointments"/>)}
@@ -194,7 +198,7 @@ function OwnerDashboard({ username, onLogout, }) {
           {section === "settings" && <DashboardPlaceholder title="User Settings"/>}
     </StaffDashboardLayout>);
 }
-export default function Dashboard({ role = 'customer', username: authenticatedUsername }) {
+export default function Dashboard({ role = 'customer', username: authenticatedUsername, owner, pets = [], upcomingAppointments = [], flash }) {
     const profiles = {
         customer: 'Karina',
         clerk: 'Maloi',
@@ -207,13 +211,13 @@ export default function Dashboard({ role = 'customer', username: authenticatedUs
     if (role === 'admin')
         return <AdminDashboard username={username} onLogout={logout}/>;
     if (role === 'clerk')
-        return <ClerkDashboard username={username} onLogout={logout}/>;
+        return <ClerkDashboard username={username} onLogout={logout} upcomingAppointments={upcomingAppointments}/>;
     if (role === 'veterinarian')
         return <VeterinarianDashboard username={username} onLogout={logout}/>;
     if (role === 'owner')
         return <OwnerDashboard username={username} onLogout={logout}/>;
-    return <DashboardHome username={username} onLogout={logout}/>;
+    return <DashboardHome username={username} onLogout={logout} owner={owner} pets={pets} flash={flash}/>;
 }
-function DashboardHome({ username, onLogout }) {
-    return <CustomerDashboard username={username} onLogout={onLogout}/>;
+function DashboardHome({ username, onLogout, owner, pets, flash }) {
+    return <CustomerDashboard username={username} onLogout={onLogout} owner={owner} pets={pets} flash={flash}/>;
 }

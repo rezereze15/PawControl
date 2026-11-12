@@ -1,12 +1,35 @@
-import { useState } from "react";
-import { MAY_2026 } from "../components/appointmentConstants";
+import { useMemo, useState } from "react";
+
 export function useAppointmentSchedule() {
-    const [selectedDate, setSelectedDate] = useState(15);
-    const [selectedTime, setSelectedTime] = useState(null);
-    const [service, setService] = useState("");
-    const cells = [...Array(MAY_2026.startDay).fill(null), ...Array(MAY_2026.days).fill(0).map((_, index) => index + 1)];
-    const weeks = [];
-    for (let index = 0; index < cells.length; index += 7)
-        weeks.push(cells.slice(index, index + 7).concat(Array(7).fill(null)).slice(0, 7));
-    return { selectedDate, setSelectedDate, selectedTime, setSelectedTime, service, setService, weeks };
+    const [calendarMonth, setCalendarMonth] = useState(() => {
+        const today = new Date();
+        return new Date(today.getFullYear(), today.getMonth(), 1);
+    });
+
+    const calendar = useMemo(() => {
+        const year = calendarMonth.getFullYear();
+        const monthIndex = calendarMonth.getMonth();
+        const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+        const cells = [
+            ...Array(new Date(year, monthIndex, 1).getDay()).fill(null),
+            ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+        ];
+        const weeks = [];
+
+        for (let index = 0; index < cells.length; index += 7) {
+            weeks.push(cells.slice(index, index + 7).concat(Array(7).fill(null)).slice(0, 7));
+        }
+
+        return {
+            year,
+            monthIndex,
+            monthLabel: calendarMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" }),
+            weeks,
+        };
+    }, [calendarMonth]);
+
+    const previousMonth = () => setCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() - 1, 1));
+    const nextMonth = () => setCalendarMonth((month) => new Date(month.getFullYear(), month.getMonth() + 1, 1));
+
+    return { ...calendar, previousMonth, nextMonth };
 }

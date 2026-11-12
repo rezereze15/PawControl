@@ -1,7 +1,23 @@
+import { useState } from "react";
 import { useAppointmentSchedule } from "../hooks/useAppointmentSchedule";
-import { ALL_TIMES, UNAVAILABLE_TIMES } from "./appointmentConstants";
-function AppointmentStep3({ onNext, onBack }) {
-    const { selectedDate, setSelectedDate, selectedTime, setSelectedTime, service, setService, weeks } = useAppointmentSchedule();
+import { ALL_TIMES } from "./appointmentConstants";
+function toTimeValue(label) {
+    const [time, meridiem] = label.split(" ");
+    let hour = Number(time.split(":")[0]);
+    if (meridiem === "PM" && hour !== 12) hour += 12;
+    if (meridiem === "AM" && hour === 12) hour = 0;
+    return `${String(hour).padStart(2, "0")}:00`;
+}
+
+function toDateValue(year, monthIndex, day) {
+    return `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
+    const { year, monthIndex, monthLabel, weeks, previousMonth, nextMonth } = useAppointmentSchedule();
+    const [today] = useState(() => new Date());
+    const todayValue = toDateValue(today.getFullYear(), today.getMonth(), today.getDate());
+    const fieldError = (errors.app_date_time || errors.notes) && <p className="mt-1 text-sm text-red-600" role="alert">{errors.app_date_time || errors.notes}</p>;
     return (<div className="flex flex-col gap-5">
       <div className="grid grid-cols-3 gap-6 items-start">
         {/* Service */}
@@ -11,23 +27,32 @@ function AppointmentStep3({ onNext, onBack }) {
             help protect them from common diseases, or a checkup to monitor
             their overall health and well-being.
           </p>
-          <input type="text" value={service} onChange={(event) => setService(event.target.value)} placeholder="Enter the service" aria-label="Service" className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]"/>
+          <input type="text" maxLength={50} value={data.notes} onChange={(event) => setData("notes", event.target.value)} placeholder="Enter the service" aria-label="Service" className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]"/>
         </div>
 
         {/* Calendar */}
         <div className="border border-gray-300 rounded-xl p-4">
-          <p className="text-center font-bold text-[#1a0a3c] mb-3">May 2026</p>
+          <div className="flex items-center justify-between mb-3">
+            <button type="button" onClick={previousMonth} aria-label="Previous month" disabled={year === today.getFullYear() && monthIndex <= today.getMonth()} className="px-2 text-[#3b0f8c] disabled:opacity-30">‹</button>
+            <p className="text-center font-bold text-[#1a0a3c]">{monthLabel}</p>
+            <button type="button" onClick={nextMonth} aria-label="Next month" className="px-2 text-[#3b0f8c]">›</button>
+          </div>
           <div className="grid grid-cols-7 gap-1 text-center">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (<div key={d} className="text-xs text-gray-500 font-medium py-1">
                 {d}
               </div>))}
-            {weeks.map((week, wi) => week.map((day, di) => (<button key={`${wi}-${di}`} disabled={!day} onClick={() => day && setSelectedDate(day)} className={`text-xs py-1.5 rounded-full transition-colors ${!day
+            {weeks.map((week, wi) => week.map((day, di) => {
+            const dateValue = day ? toDateValue(year, monthIndex, day) : "";
+            const disabled = !day || dateValue < todayValue;
+            const selected = dateValue === data.selected_date;
+            return (<button key={`${wi}-${di}`} disabled={disabled} onClick={() => day && setData("selected_date", dateValue)} className={`text-xs py-1.5 rounded-full transition-colors ${!day
                 ? ""
-                : day === selectedDate
+                : selected
                     ? "bg-[#3b0f8c] text-white font-bold"
-                    : "hover:bg-purple-100 text-[#1a0a3c]"}`}>
+                    : disabled ? "text-gray-300 cursor-not-allowed" : "hover:bg-purple-100 text-[#1a0a3c]"}`}>
                   {day || ""}
-                </button>)))}
+                </button>);
+            }))}
           </div>
         </div>
 
@@ -36,11 +61,8 @@ function AppointmentStep3({ onNext, onBack }) {
           <p className="font-bold text-[#1a0a3c] mb-3 text-sm">Select Time</p>
           <div className="grid grid-cols-3 gap-2">
             {ALL_TIMES.map((t) => {
-            const taken = UNAVAILABLE_TIMES.includes(t);
-            const active = selectedTime === t;
-            return (<button key={t} disabled={taken} onClick={() => !taken && setSelectedTime(t)} className={`text-xs px-2 py-1.5 rounded-full border-2 font-semibold transition-colors ${taken
-                    ? "border-orange-400 bg-orange-50 text-orange-600 cursor-not-allowed"
-                    : active
+            const active = data.selected_time === toTimeValue(t);
+            return (<button key={t} onClick={() => setData("selected_time", toTimeValue(t))} className={`text-xs px-2 py-1.5 rounded-full border-2 font-semibold transition-colors ${active
                         ? "border-orange-500 bg-orange-400 text-white"
                         : "border-[#3b0f8c] text-[#3b0f8c] hover:bg-purple-50"}`}>
                   {t}
@@ -49,16 +71,14 @@ function AppointmentStep3({ onNext, onBack }) {
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-gray-100 pt-3 text-xs text-gray-600">
             <span className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-orange-400" aria-hidden="true"/>
-              Already selected
-            </span>
-            <span className="flex items-center gap-2">
               <span className="h-3 w-3 rounded-full bg-[#3b0f8c]" aria-hidden="true"/>
               Available
             </span>
           </div>
         </div>
       </div>
+
+      {fieldError}
 
       <div className="flex justify-between pt-2">
         <button onClick={onBack} className="border-2 border-gray-400 text-gray-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-gray-50 transition-colors">

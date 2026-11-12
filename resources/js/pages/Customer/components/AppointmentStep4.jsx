@@ -1,6 +1,7 @@
 import { qrCode } from "../../shared/dashboard/assets";
-function AppointmentStep4({ onNext, onBack }) {
+function AppointmentStep4({ setData, errors, onNext, onBack }) {
     const inp = "border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]";
+    const proofError = errors.proof_of_down_payment && <p className="mt-1 text-sm text-red-600" role="alert">{errors.proof_of_down_payment}</p>;
     return (<div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-8 items-start">
         {/* Left â€” terms + form */}
@@ -38,13 +39,14 @@ function AppointmentStep4({ onNext, onBack }) {
             <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
               Upload Attachment
             </label>
-            <input className={inp} placeholder="Select an Attachment" type="file"/>
+            <input className={inp} placeholder="Select an Attachment" type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={(event) => setData("proof_of_down_payment", event.target.files?.[0] ?? null)}/>
+            {proofError}
           </div>
           <div>
             <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
               Reference Number
             </label>
-            <input className={inp} placeholder="Input the reference number"/>
+            <input className={inp} placeholder="Generated after submission" readOnly/>
           </div>
         </div>
 

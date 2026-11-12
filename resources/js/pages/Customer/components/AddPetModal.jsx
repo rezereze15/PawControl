@@ -1,108 +1,93 @@
-import { useState } from "react";
+import { useForm } from "@inertiajs/react";
+
 function AddPetModal({ onClose }) {
-    const [form, setForm] = useState({
-        name: "",
+    const form = useForm({
+        petName: "",
         species: "",
         breed: "",
-        color: "",
         age: "",
         sex: "",
-        dob: "",
+        dateOfBirth: "",
         weight: "",
-        temp: "",
     });
-    const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-    const inp = "w-full border border-gray-300 rounded-xl px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]";
-    return (<div className="paw-add-pet-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="paw-add-pet-card bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 p-8">
-        <h2 className="text-2xl font-extrabold text-[#1a0a3c] mb-0.5">
-          Add New Pet
-        </h2>
-        <p className="text-sm text-gray-500 mb-6">Create New Pet</p>
+    const set = (field) => (event) => form.setData(field, event.target.value);
+    const inputClass = "w-full border border-gray-300 rounded-xl px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]";
+    const labelClass = "block text-sm font-bold text-[#1a0a3c] mb-2";
+    const error = (field) => form.errors[field] && (
+        <p className="mt-1 text-xs text-red-600">{form.errors[field]}</p>
+    );
 
-        <div className="paw-add-pet-fields flex flex-col gap-5">
-          {/* Row 1 */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Patient/Pet Name
-              </label>
-              <input className={inp} placeholder="Pet Name" value={form.name} onChange={set("name")}/>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Species
-              </label>
-              <input className={inp} placeholder="Dog/Cat" value={form.species} onChange={set("species")}/>
-            </div>
-          </div>
+    function submit(event) {
+        event.preventDefault();
+        form.post("/pets", {
+            preserveScroll: true,
+            onSuccess: onClose,
+        });
+    }
 
-          {/* Row 2 */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Breed
-              </label>
-              <input className={inp} placeholder="Golden Retriever" value={form.breed} onChange={set("breed")}/>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Color/Markings
-              </label>
-              <input className={inp} placeholder="Black & White" value={form.color} onChange={set("color")}/>
-            </div>
-          </div>
+    return (
+        <div className="paw-add-pet-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <form onSubmit={submit} className="paw-add-pet-card bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 p-8">
+                <h2 className="text-2xl font-extrabold text-[#1a0a3c] mb-0.5">Add New Pet</h2>
+                <p className="text-sm text-gray-500 mb-6">Create New Pet</p>
 
-          {/* Row 3 */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Age
-              </label>
-              <input className={inp} placeholder="5" type="number" min="0" value={form.age} onChange={set("age")}/>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Sex
-              </label>
-              <input className={inp} placeholder="Male/Female" value={form.sex} onChange={set("sex")}/>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Date of Birth
-              </label>
-              <input className={inp} placeholder="MM/DD/YYYY" value={form.dob} onChange={set("dob")}/>
-            </div>
-          </div>
+                <div className="paw-add-pet-fields flex flex-col gap-5">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass} htmlFor="petName">Patient/Pet Name</label>
+                            <input id="petName" className={inputClass} placeholder="Pet Name" value={form.data.petName} onChange={set("petName")} maxLength={50} required />
+                            {error("petName")}
+                        </div>
+                        <div>
+                            <label className={labelClass} htmlFor="species">Species</label>
+                            <input id="species" className={inputClass} placeholder="Dog/Cat" value={form.data.species} onChange={set("species")} maxLength={50} required />
+                            {error("species")}
+                        </div>
+                    </div>
 
-          {/* Row 4 */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Weight
-              </label>
-              <input className={inp} placeholder="Kg" value={form.weight} onChange={set("weight")}/>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-                Temperature
-              </label>
-              <input className={inp} placeholder="°C (optional)" value={form.temp} onChange={set("temp")}/>
-            </div>
-          </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass} htmlFor="breed">Breed</label>
+                            <input id="breed" className={inputClass} placeholder="Golden Retriever" value={form.data.breed} onChange={set("breed")} maxLength={50} required />
+                            {error("breed")}
+                        </div>
+                        <div>
+                            <label className={labelClass} htmlFor="age">Age</label>
+                            <input id="age" className={inputClass} placeholder="5" type="number" min="0" step="1" value={form.data.age} onChange={set("age")} />
+                            {error("age")}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                        <div>
+                            <label className={labelClass} htmlFor="sex">Sex</label>
+                            <input id="sex" className={inputClass} placeholder="Male/Female" value={form.data.sex} onChange={set("sex")} maxLength={50} />
+                            {error("sex")}
+                        </div>
+                        <div>
+                            <label className={labelClass} htmlFor="dateOfBirth">Date of Birth</label>
+                            <input id="dateOfBirth" className={inputClass} type="date" value={form.data.dateOfBirth} onChange={set("dateOfBirth")} />
+                            {error("dateOfBirth")}
+                        </div>
+                        <div>
+                            <label className={labelClass} htmlFor="weight">Weight (kg)</label>
+                            <input id="weight" className={inputClass} type="number" min="0" step="0.01" placeholder="Kg" value={form.data.weight} onChange={set("weight")} />
+                            {error("weight")}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-center mt-8">
+                    <button type="button" onClick={onClose} className="border border-[#3b0f8c] text-[#3b0f8c] px-6 py-2 rounded-lg text-sm font-semibold hover:bg-purple-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" disabled={form.processing} className="bg-[#1a0a3c] text-white px-8 py-2 rounded-lg text-sm font-bold hover:bg-[#2d0a6e] transition-colors disabled:opacity-50">
+                        {form.processing ? "Saving..." : "Add"}
+                    </button>
+                </div>
+            </form>
         </div>
-
-        {/* Actions */}
-        <div className="flex justify-between items-center mt-8">
-          <button onClick={onClose} className="border border-[#3b0f8c] text-[#3b0f8c] px-6 py-2 rounded-lg text-sm font-semibold hover:bg-purple-50 transition-colors">
-            Cancel
-          </button>
-          <button onClick={onClose} className="bg-[#1a0a3c] text-white px-8 py-2 rounded-lg text-sm font-bold hover:bg-[#2d0a6e] transition-colors">
-            Add
-          </button>
-        </div>
-      </div>
-    </div>);
+    );
 }
-// â”€â”€â”€ Appointment Wizard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
 export default AddPetModal;
