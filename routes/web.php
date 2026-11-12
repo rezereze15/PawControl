@@ -20,6 +20,8 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/availability', [AppointmentController::class, 'availability'])
+        ->name('appointments.availability');
     Route::post('/pets', [PetController::class, 'store'])->name('pets.store');
     Route::get('/dashboard', function (Request $request) {
         return redirect()->route('dashboard.role', ['role' => $request->user()->role]);
@@ -37,13 +39,16 @@ Route::middleware('auth')->group(function (): void {
         if ($role === 'customer') {
             $props['owner'] = $request->user()->only(['name', 'phone', 'email', 'address']);
             $props['pets'] = $request->user()->pets()
-                ->get(['petID', 'petName', 'species', 'breed', 'age'])
+                ->get(['petID', 'petName', 'species', 'breed', 'age', 'sex', 'dateOfBirth', 'weight'])
                 ->map(fn ($pet) => [
                     'id' => $pet->petID,
                     'name' => $pet->petName,
                     'species' => $pet->species,
                     'breed' => $pet->breed,
                     'age' => $pet->age,
+                    'sex' => $pet->sex,
+                    'dateOfBirth' => $pet->dateOfBirth?->toDateString(),
+                    'weight' => $pet->weight,
                 ]);
         }
 

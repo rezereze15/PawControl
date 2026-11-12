@@ -59,7 +59,7 @@ function CustomerDashboard({ username, onLogout, owner, pets, flash }) {
     return (<CustomerDashboardLayout username={username} onLogout={onLogout} logoSrc={bigpawLogo} avatarSrc={karinaPhoto} navItems={navItems} section={section} booking={booking} sidebarOpen={sidebarOpen} onNavigate={(nextSection) => { setSection(nextSection); setBooking(false); }} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
         {booking ? (<AppointmentWizard owner={owner} pets={pets} onBack={() => setBooking(false)} onSuccess={() => setBooking(false)}/>) : (<>
               {success && <p className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800" role="status">{success}</p>}
-              {section === "home" && (<CustomerHomeSection username={username} onBookAppointment={() => setBooking(true)} onViewRecords={() => setSection("records")} onViewAppointments={() => setSection("appointments")}/>)}
+              {section === "home" && (<CustomerHomeSection username={username} pets={pets} onBookAppointment={() => setBooking(true)} onViewRecords={() => setSection("records")} onViewAppointments={() => setSection("appointments")}/>)}
               {section === "records" && (<DashboardPlaceholder title="Pet Medical Records"/>)}
               {section === "appointments" && (<DashboardPlaceholder title="Appointments"/>)}
               {section === "settings" && (<DashboardPlaceholder title="User Settings"/>)}

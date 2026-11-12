@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppointmentSchedule } from "../hooks/useAppointmentSchedule";
 import { ALL_TIMES } from "./appointmentConstants";
 function toTimeValue(label) {
@@ -16,8 +16,40 @@ function toDateValue(year, monthIndex, day) {
 function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
     const { year, monthIndex, monthLabel, weeks, previousMonth, nextMonth } = useAppointmentSchedule();
     const [today] = useState(() => new Date());
+    const [confirmedSlots, setConfirmedSlots] = useState([]);
+    const [availabilityLoading, setAvailabilityLoading] = useState(true);
+    const [availabilityError, setAvailabilityError] = useState(false);
+    const monthValue = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
     const todayValue = toDateValue(today.getFullYear(), today.getMonth(), today.getDate());
     const fieldError = (errors.app_date_time || errors.notes) && <p className="mt-1 text-sm text-red-600" role="alert">{errors.app_date_time || errors.notes}</p>;
+
+    useEffect(() => {
+        const controller = new AbortController();
+        setAvailabilityLoading(true);
+        setAvailabilityError(false);
+
+        fetch(`/appointments/availability?month=${monthValue}`, {
+            headers: { Accept: "application/json" },
+            signal: controller.signal,
+        })
+            .then((response) => {
+                if (!response.ok) throw new Error("Availability request failed.");
+                return response.json();
+            })
+            .then((result) => setConfirmedSlots(result.confirmedSlots ?? []))
+            .catch((error) => {
+                if (error.name !== "AbortError") setAvailabilityError(true);
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) setAvailabilityLoading(false);
+            });
+
+        return () => controller.abort();
+    }, [monthValue]);
+
+    const isSlotUnavailable = (date, time) =>
+        confirmedSlots.includes(`${date}T${toTimeValue(time)}`);
+
     return (<div className="flex flex-col gap-5">
       <div className="grid grid-cols-3 gap-6 items-start">
         {/* Service */}
@@ -43,9 +75,10 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
               </div>))}
             {weeks.map((week, wi) => week.map((day, di) => {
             const dateValue = day ? toDateValue(year, monthIndex, day) : "";
-            const disabled = !day || dateValue < todayValue;
+            const dateUnavailable = day && ALL_TIMES.every((time) => isSlotUnavailable(dateValue, time));
+            const disabled = !day || dateValue < todayValue || availabilityLoading || availabilityError || dateUnavailable;
             const selected = dateValue === data.selected_date;
-            return (<button key={`${wi}-${di}`} disabled={disabled} onClick={() => day && setData("selected_date", dateValue)} className={`text-xs py-1.5 rounded-full transition-colors ${!day
+            return (<button key={`${wi}-${di}`} disabled={disabled} aria-label={dateUnavailable ? `${dateValue}, unavailable` : dateValue} onClick={() => day && setData("selected_date", dateValue)} className={`text-xs py-1.5 rounded-full transition-colors ${!day
                 ? ""
                 : selected
                     ? "bg-[#3b0f8c] text-white font-bold"
@@ -54,6 +87,8 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
                 </button>);
             }))}
           </div>
+          {availabilityLoading && <p className="mt-2 text-xs text-gray-500">Checking availability…</p>}
+          {availabilityError && <p className="mt-2 text-xs text-red-600" role="alert">Availability could not be loaded. Please try again.</p>}
         </div>
 
         {/* Time slots */}
@@ -62,10 +97,13 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
           <div className="grid grid-cols-3 gap-2">
             {ALL_TIMES.map((t) => {
             const active = data.selected_time === toTimeValue(t);
-            return (<button key={t} onClick={() => setData("selected_time", toTimeValue(t))} className={`text-xs px-2 py-1.5 rounded-full border-2 font-semibold transition-colors ${active
+            const unavailable = data.selected_date && isSlotUnavailable(data.selected_date, t);
+            return (<button key={t} disabled={availabilityLoading || availabilityError || unavailable} aria-label={unavailable ? `${t}, unavailable` : t} onClick={() => setData("selected_time", toTimeValue(t))} className={`text-xs px-2 py-1.5 rounded-full border-2 font-semibold transition-colors ${unavailable
+                        ? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : active
                         ? "border-orange-500 bg-orange-400 text-white"
                         : "border-[#3b0f8c] text-[#3b0f8c] hover:bg-purple-50"}`}>
-                  {t}
+                  {unavailable ? `${t} Unavailable` : t}
                 </button>);
         })}
           </div>
@@ -73,6 +111,10 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
             <span className="flex items-center gap-2">
               <span className="h-3 w-3 rounded-full bg-[#3b0f8c]" aria-hidden="true"/>
               Available
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-gray-300" aria-hidden="true"/>
+              Unavailable
             </span>
           </div>
         </div>
@@ -84,7 +126,7 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
         <button onClick={onBack} className="border-2 border-gray-400 text-gray-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-gray-50 transition-colors">
           Back
         </button>
-        <button onClick={onNext} className="border-2 border-[#1a0a3c] text-[#1a0a3c] px-6 py-2 rounded-full text-sm font-bold hover:bg-[#1a0a3c] hover:text-white transition-colors">
+        <button onClick={onNext} disabled={availabilityLoading || availabilityError} className="border-2 border-[#1a0a3c] text-[#1a0a3c] px-6 py-2 rounded-full text-sm font-bold hover:bg-[#1a0a3c] hover:text-white transition-colors disabled:opacity-50">
           Next
         </button>
       </div>

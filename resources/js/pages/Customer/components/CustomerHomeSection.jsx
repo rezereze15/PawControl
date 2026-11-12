@@ -2,7 +2,7 @@ import { CalendarIcon } from "../../shared/dashboard/Icons";
 import { leanPhoto, pawLogo } from "../../shared/dashboard/assets";
 import AddPetModal from "./AddPetModal";
 import { useAddPetModal } from "../hooks/useAddPetModal";
-function CustomerHomeSection({ username, onBookAppointment, onViewRecords, onViewAppointments }) {
+function CustomerHomeSection({ username, pets = [], onBookAppointment, onViewRecords, onViewAppointments }) {
     const { showAddPet, setShowAddPet } = useAddPetModal();
     return (<div className="flex flex-col gap-6">
       {showAddPet && <AddPetModal onClose={() => setShowAddPet(false)}/>}
@@ -54,19 +54,23 @@ function CustomerHomeSection({ username, onBookAppointment, onViewRecords, onVie
             My Pets Record
           </h2>
           <div className="flex gap-4 flex-wrap">
-            <div className="border border-gray-200 rounded-xl p-4 flex items-center gap-3 w-56">
-              <div className="w-14 h-14 rounded-full overflow-hidden bg-amber-200 flex-shrink-0">
-                <img src={leanPhoto} alt="Lean" className="w-full h-full object-cover"/>
+            {pets.length === 0 ? (
+              <p className="text-sm text-gray-500">No pets added yet.</p>
+            ) : pets.map((pet) => (
+              <div key={pet.id} className="border border-gray-200 rounded-xl p-4 flex items-center gap-3 w-56">
+                <div className="w-14 h-14 rounded-full overflow-hidden bg-amber-200 flex-shrink-0">
+                  <img src={leanPhoto} alt={pet.name} className="w-full h-full object-cover"/>
+                </div>
+                <div>
+                  <p className="font-extrabold text-[#1a0a3c] text-sm">{pet.name}</p>
+                  <p className="text-gray-500 text-xs">{pet.breed}</p>
+                  <p className="text-gray-400 text-xs">{pet.age == null ? "Age unknown" : `${pet.age} ${pet.age === 1 ? "year" : "years"} old`}</p>
+                  <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+                    View Details
+                  </button>
+                </div>
               </div>
-              <div>
-                <p className="font-extrabold text-[#1a0a3c] text-sm">Lean</p>
-                <p className="text-gray-500 text-xs">Aspin</p>
-                <p className="text-gray-400 text-xs">3 years old</p>
-                <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
-                  View Details
-                </button>
-              </div>
-            </div>
+            ))}
             <button onClick={() => setShowAddPet(true)} className="border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-2 w-40 hover:bg-gray-50 transition-colors">
               <div className="w-12 h-12 rounded-full border-2 border-[#3b0f8c] flex items-center justify-center">
                 <svg className="w-6 h-6 text-[#3b0f8c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

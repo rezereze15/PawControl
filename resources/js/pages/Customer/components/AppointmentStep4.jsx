@@ -1,19 +1,22 @@
 import { qrCode } from "../../shared/dashboard/assets";
-function AppointmentStep4({ setData, errors, onNext, onBack }) {
+function AppointmentStep4({ data, setData, errors, onNext, onBack }) {
     const inp = "border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]";
     const proofError = errors.proof_of_down_payment && <p className="mt-1 text-sm text-red-600" role="alert">{errors.proof_of_down_payment}</p>;
+    const termsError = errors.terms_accepted && <p className="mt-1 text-sm text-red-600" role="alert">{errors.terms_accepted}</p>;
+    const referenceError = errors.reference_number && <p className="mt-1 text-sm text-red-600" role="alert">{errors.reference_number}</p>;
     return (<div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-8 items-start">
         {/* Left â€” terms + form */}
         <div className="flex flex-col gap-4">
           <label className="flex items-start gap-3 text-sm text-[#1a0a3c]">
-            <input type="checkbox" className="mt-1 h-4 w-4 flex-shrink-0 accent-[#3b0f8c]"/>
+            <input type="checkbox" checked={data.terms_accepted} onChange={(event) => setData("terms_accepted", event.target.checked)} className="mt-1 h-4 w-4 flex-shrink-0 accent-[#3b0f8c]"/>
             <span>
               By checking and booking an appointment, you agree to pay a{" "}
               <strong>₱200 non-refundable down payment</strong> to secure your
               slot.
             </span>
           </label>
+          {termsError}
           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 pl-1">
             <li>
               The down payment will be deducted from the total service fee.
@@ -44,9 +47,10 @@ function AppointmentStep4({ setData, errors, onNext, onBack }) {
           </div>
           <div>
             <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
-              Reference Number
+              Payment Reference Number <span className="text-red-500">*</span>
             </label>
-            <input className={inp} placeholder="Generated after submission" readOnly/>
+            <input className={inp} type="text" inputMode="numeric" maxLength={255} required value={data.reference_number} onChange={(event) => setData("reference_number", event.target.value)} placeholder="Enter payment reference number"/>
+            {referenceError}
           </div>
         </div>
 

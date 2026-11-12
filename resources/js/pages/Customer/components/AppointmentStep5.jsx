@@ -55,28 +55,22 @@ function AppointmentStep5({ owner, pets = [], data, processing, onBack, onDone }
             <p className="text-xs font-bold text-[#1a0a3c]">Breed</p>
             <p className="text-xs text-gray-600">{pet?.breed || "—"}</p>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Date of Birth</p>
-              <p className="text-xs text-gray-400">--/--/----</p>
+              <p className="text-xs text-gray-600">{pet?.dateOfBirth || "â€”"}</p>
             </div>
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Age</p>
               <p className="text-xs text-gray-600">{pet?.age ?? "—"}</p>
             </div>
             <div>
-              <p className="text-xs font-bold text-[#1a0a3c]">Color/Markings</p>
-              <p className="text-xs text-gray-600">Brown/Polka dots</p>
+              <p className="text-xs font-bold text-[#1a0a3c]">Sex</p>
+              <p className="text-xs text-gray-600">{pet?.sex || "â€”"}</p>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
             <div>
               <p className="text-xs font-bold text-[#1a0a3c]">Weight</p>
-              <p className="text-xs text-gray-600">8kg</p>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-[#1a0a3c]">Temperature</p>
-              <p className="text-xs text-gray-400">--/--/----</p>
+              <p className="text-xs text-gray-600">{pet?.weight == null ? "â€”" : `${pet.weight} kg`}</p>
             </div>
           </div>
         </div>
@@ -84,6 +78,14 @@ function AppointmentStep5({ owner, pets = [], data, processing, onBack, onDone }
         {/* Confirm Date */}
         <div className="border border-gray-200 rounded-xl p-5 flex flex-col gap-3">
           <p className="font-bold text-[#1a0a3c] text-sm mb-1">Selected Date</p>
+          <div>
+            <p className="text-xs font-bold text-[#1a0a3c]">Service</p>
+            <p className="text-xs text-gray-600">{data.notes || "â€”"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-[#1a0a3c]">Payment Reference Number</p>
+            <p className="text-xs text-gray-600">{data.reference_number || "â€”"}</p>
+          </div>
           <div className="flex justify-center">
             <svg className="w-16 h-16" viewBox="0 0 64 64" fill="none">
               <rect x="6" y="14" width="52" height="44" rx="5" stroke="#1a0a3c" strokeWidth="3"/>
@@ -128,7 +130,7 @@ function AppointmentStep5({ owner, pets = [], data, processing, onBack, onDone }
           Back
         </button>
         <button onClick={onDone} disabled={processing} className="bg-[#3b0f8c] text-white px-8 py-2 rounded-full text-sm font-bold hover:bg-[#2d0a6e] transition-colors disabled:opacity-50">
-          {processing ? "Submitting..." : "Done"}
+          {processing ? "Saving..." : "Done"}
         </button>
       </div>
     </div>);
