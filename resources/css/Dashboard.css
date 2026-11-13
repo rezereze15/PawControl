@@ -496,3 +496,4 @@
   .paw-dashboard-main { padding: 24px 16px; }
   .paw-dashboard-main h1 { font-size: 30px; }
 }
+.paw-clerk-review-modal { width: min(100%, 880px); }

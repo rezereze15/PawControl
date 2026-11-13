@@ -28,6 +28,14 @@ class Pet extends Model
         return $this->belongsTo(User::class, 'petOwnerID');
     }
 
+    /** Cache-busted URL of the authorized route that serves this pet's photo. */
+    public function photoUrl(): ?string
+    {
+        return $this->photo_path
+            ? route('pets.photo.show', ['pet' => $this->petID, 'v' => substr(md5($this->photo_path), 0, 8)])
+            : null;
+    }
+
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'pet_id', 'petID');

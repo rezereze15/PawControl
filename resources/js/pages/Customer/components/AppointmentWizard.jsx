@@ -47,7 +47,7 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
         let valid = true;
 
         if (!form.data.service_type.trim()) {
-            form.setError("service_type", "Please enter the service type.");
+            form.setError("service_type", "Please select a service.");
             valid = false;
         } else {
             form.clearErrors("service_type");

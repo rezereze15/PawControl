@@ -22,8 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'username', 'email', 'password', 'phone', 'address', 'role', 'status'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'username', 'email', 'password', 'phone', 'address', 'role', 'status', 'profile_photo_path'])]
+#[Hidden(['password', 'remember_token', 'profile_photo_path'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -50,5 +50,13 @@ class User extends Authenticatable
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'user_id');
+    }
+
+    /** Cache-busted URL of the authorized route that serves this user's profile photo. */
+    public function profilePhotoUrl(): ?string
+    {
+        return $this->profile_photo_path
+            ? route('settings.photo.show', ['v' => substr(md5($this->profile_photo_path), 0, 8)])
+            : null;
     }
 }

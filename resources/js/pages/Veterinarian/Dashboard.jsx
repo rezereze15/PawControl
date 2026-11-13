@@ -4,8 +4,9 @@ import StaffHomeSection from '../Clerk/components/StaffHomeSection';
 import { PersonIcon } from '../shared/dashboard/Icons';
 import { bigpawLogo, haerinPhoto } from '../shared/dashboard/assets';
 import { ClerkPlaceholder } from '../shared/dashboard/Placeholder';
-import { ClerkAppointments } from '../Clerk/modules/Appointments';
-export default function VeterinarianDashboard({ username, onLogout, }) {
+import VetAppointments from './modules/VetAppointments';
+import PatientRecords from './modules/PatientRecords';
+export default function VeterinarianDashboard({ username, onLogout, confirmedAppointments = [], patientRecords = [] }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -40,8 +41,8 @@ export default function VeterinarianDashboard({ username, onLogout, }) {
     ];
     return (<StaffDashboardLayout username={username} roleLabel="Veterinarian" dashboardClassName="paw-vet-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={haerinPhoto} avatarAlt="Haerin" avatarClassName="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center overflow-hidden border-2 border-orange-400" navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
         {section === "home" && (<StaffHomeSection username={username} role="Veterinarian"/>)}
-          {section === "records" && (<ClerkPlaceholder title="Pet Medical Records"/>)}
-          {section === "appointments" && <ClerkAppointments veterinarianView/>}
+          {section === "records" && <PatientRecords patients={patientRecords}/>}
+          {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords}/>}
           {section === "settings" && <ClerkPlaceholder title="User Settings"/>}
     </StaffDashboardLayout>);
 }

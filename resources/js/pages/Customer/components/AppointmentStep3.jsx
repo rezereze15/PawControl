@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppointmentSchedule } from "../hooks/useAppointmentSchedule";
-import { ALL_TIMES } from "./appointmentConstants";
+import { ALL_TIMES, SERVICE_TYPES } from "./appointmentConstants";
 function toTimeValue(label) {
     const [time, meridiem] = label.split(" ");
     let hour = Number(time.split(":")[0]);
@@ -55,7 +55,10 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
         {/* Service */}
         <div className="flex flex-col gap-3">
           <label htmlFor="appointment-service" className="text-sm font-bold text-[#1a0a3c]">Service type <span className="text-red-500">*</span></label>
-          <input id="appointment-service" type="text" maxLength={100} value={data.service_type} onChange={(event) => setData("service_type", event.target.value)} placeholder="e.g. Check-up or vaccination" aria-label="Service type" required className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]"/>
+          <select id="appointment-service" value={data.service_type} onChange={(event) => setData("service_type", event.target.value)} aria-label="Service type" required className="w-full border border-gray-300 rounded-lg bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]">
+            <option value="" disabled>Select a service</option>
+            {SERVICE_TYPES.map((service) => <option key={service} value={service}>{service}</option>)}
+          </select>
           <label htmlFor="appointment-notes" className="text-sm font-bold text-[#1a0a3c]">Pet concern or details <span className="text-gray-400">(optional)</span></label>
           <textarea id="appointment-notes" maxLength={500} value={data.notes} onChange={(event) => setData("notes", event.target.value)} placeholder="Tell us what your pet needs" aria-label="Pet concern or details" rows={3} className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]"/>
         </div>

@@ -5,7 +5,8 @@ import { PersonIcon } from '../shared/dashboard/Icons';
 import { bigpawLogo, maloiPhoto } from '../shared/dashboard/assets';
 import { ClerkPlaceholder } from '../shared/dashboard/Placeholder';
 import { ClerkAppointments } from './modules/Appointments';
-export default function ClerkDashboard({ username, onLogout, upcomingAppointments = [] }) {
+import FlashToast from '@/Components/FlashToast';
+export default function ClerkDashboard({ username, onLogout, upcomingAppointments = [], flash, errors = {} }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -48,6 +49,8 @@ export default function ClerkDashboard({ username, onLogout, upcomingAppointment
         },
     ];
     return (<StaffDashboardLayout username={username} roleLabel="Clerk" dashboardClassName="paw-clerk-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={maloiPhoto} avatarAlt="" avatarClassName="w-9 h-9 rounded-full bg-teal-500 flex items-center justify-center overflow-hidden border-2 border-orange-400" navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+        <FlashToast message={flash?.success}/>
+        <FlashToast message={errors.appointment} tone="error" title="Could not update appointment"/>
         {section === "home" && (<StaffHomeSection username={username} role="Clerk"/>)}
           {section === "records" && (<ClerkPlaceholder title="Pet Medical Records"/>)}
           {section === "appointments" && <ClerkAppointments appointments={upcomingAppointments}/>}

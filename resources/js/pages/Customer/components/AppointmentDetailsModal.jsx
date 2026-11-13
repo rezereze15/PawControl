@@ -69,6 +69,10 @@ function AppointmentDetailsModal({ appointment, onClose }) {
                         </div>
                     </dl>
 
+                    {appointment.proofUrl && <a href={appointment.proofUrl} target="_blank" rel="noopener noreferrer" className="mt-4 flex items-center justify-between rounded-xl border border-violet-100 bg-violet-50 p-4 text-sm font-semibold text-violet-800 transition hover:bg-violet-100">
+                        <span>View uploaded proof of payment{appointment.proofIsPdf ? " (PDF)" : ""}</span>
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M14 3h7v7M10 14 21 3M21 14v7H3V3h7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </a>}
                     {appointment.notes && <div className="mt-4 rounded-xl border border-slate-100 p-4">
                         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Notes for the clinic</h3>
                         <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{appointment.notes}</p>
