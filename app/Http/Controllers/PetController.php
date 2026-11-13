@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePetRequest;
 use App\Http\Requests\UpdatePetPhotoRequest;
 use App\Models\Pet;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -16,6 +17,9 @@ class PetController extends Controller
         $validated = $request->validated();
         $photo = $validated['photo'] ?? null;
         unset($validated['photo']);
+        $validated['age'] = ! empty($validated['dateOfBirth'])
+            ? Carbon::parse($validated['dateOfBirth'])->age
+            : null;
 
         $disk = config('filesystems.default');
         $photoPath = $photo?->store('pet-profiles', $disk);

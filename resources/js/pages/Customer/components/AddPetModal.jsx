@@ -3,11 +3,11 @@ import { useForm } from "@inertiajs/react";
 
 const fields = [
     { name: "petName", label: "Pet name", placeholder: "e.g. Milo", required: true, autoComplete: "off" },
-    { name: "species", label: "Species", placeholder: "Dog, cat, or other", required: true },
+    { name: "species", label: "Species", placeholder: "Select species", options: ["Dog", "Cat"], required: true },
     { name: "breed", label: "Breed", placeholder: "e.g. Aspin", required: true },
-    { name: "age", label: "Age", placeholder: "Years", type: "number", min: "0", step: "1" },
-    { name: "sex", label: "Sex", placeholder: "Male or female" },
     { name: "dateOfBirth", label: "Date of birth", type: "date" },
+    { name: "age", label: "Age", placeholder: "Calculated from date of birth", readOnly: true },
+    { name: "sex", label: "Sex", placeholder: "Select sex", options: ["Male", "Female"] },
     { name: "weight", label: "Weight", placeholder: "kg", type: "number", min: "0", step: "0.01", suffix: "kg" },
 ];
 
@@ -23,6 +23,20 @@ function AddPetModal({ onClose }) {
         photo: null,
     });
     const [photoPreview, setPhotoPreview] = useState(null);
+
+    function calculatedAge(dateOfBirth) {
+        if (!dateOfBirth) return "";
+        const birth = new Date(`${dateOfBirth}T00:00:00`);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
+        return String(age);
+    }
+
+    function todayDate() {
+        const today = new Date();
+        return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    }
 
     useEffect(() => {
         const onKeyDown = (event) => event.key === "Escape" && !form.processing && onClose();
@@ -104,23 +118,38 @@ function AddPetModal({ onClose }) {
                                         {field.label}{field.required && <span className="ml-1 text-red-500">*</span>}
                                     </label>
                                     <div className="relative">
-                                        <input
+                                        {field.options ? <select
+                                            id={`new-pet-${field.name}`}
+                                            className={fieldClass(field.name)}
+                                            value={form.data[field.name]}
+                                            onChange={(event) => { form.setData(field.name, event.target.value); form.clearErrors(field.name); }}
+                                            required={field.required}
+                                            aria-invalid={Boolean(form.errors[field.name])}
+                                            aria-describedby={form.errors[field.name] ? `new-pet-${field.name}-error` : undefined}
+                                        >
+                                            <option value="">{field.placeholder}</option>
+                                            {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
+                                        </select> : <input
                                             id={`new-pet-${field.name}`}
                                             className={`${fieldClass(field.name)} ${field.suffix ? "pr-12" : ""}`}
                                             type={field.type || "text"}
                                             placeholder={field.placeholder}
                                             value={form.data[field.name]}
                                             onChange={(event) => {
-                                                form.setData(field.name, event.target.value);
+                                                const value = event.target.value;
+                                                if (field.name === "dateOfBirth") form.setData((data) => ({ ...data, dateOfBirth: value, age: calculatedAge(value) }));
+                                                else form.setData(field.name, value);
                                                 form.clearErrors(field.name);
                                             }}
                                             maxLength={field.type === "text" || !field.type ? 50 : undefined}
                                             min={field.min}
                                             step={field.step}
+                                            readOnly={field.readOnly}
+                                            max={field.type === "date" ? todayDate() : undefined}
                                             required={field.required}
                                             aria-invalid={Boolean(form.errors[field.name])}
                                             aria-describedby={form.errors[field.name] ? `new-pet-${field.name}-error` : undefined}
-                                        />
+                                        />}
                                         {field.suffix && <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm text-slate-400">{field.suffix}</span>}
                                     </div>
                                     {form.errors[field.name] && <p id={`new-pet-${field.name}-error`} className="mt-1.5 text-xs font-medium text-red-600">{form.errors[field.name]}</p>}
