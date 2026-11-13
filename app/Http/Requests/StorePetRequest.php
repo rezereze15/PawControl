@@ -21,6 +21,7 @@ class StorePetRequest extends FormRequest
             'sex' => ['nullable', 'string', 'max:50'],
             'dateOfBirth' => ['nullable', 'date', 'before_or_equal:today'],
             'weight' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
+            'photo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 }

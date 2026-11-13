@@ -10,7 +10,7 @@ function AppointmentStep2({ pets = [], selectedPetId, onSelectPet, onNext, onBac
             ? "border-[#3b0f8c] bg-purple-50"
             : "border-gray-200 hover:border-[#3b0f8c]"}`}>
           <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center text-[#3b0f8c] font-bold">
-            {pet.name?.[0] ?? "?"}
+            {pet.photoUrl ? <img src={pet.photoUrl} alt={`${pet.name} profile`} className="h-full w-full object-cover"/> : (pet.name?.[0] ?? "?")}
           </div>
           <div className="text-left">
             <p className="font-extrabold text-[#1a0a3c] text-sm">{pet.name}</p>

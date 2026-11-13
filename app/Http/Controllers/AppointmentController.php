@@ -67,6 +67,7 @@ class AppointmentController extends Controller
                 'ar_first_name' => $validated['ar_first_name'],
                 'ar_last_name' => $validated['ar_last_name'],
                 'pet_id' => $validated['pet_id'],
+                'service_type' => $validated['service_type'],
                 'notes' => $validated['notes'] ?? null,
                 'app_date_time' => $validated['app_date_time'],
                 'proof_of_down_payment_path' => $proofPath,

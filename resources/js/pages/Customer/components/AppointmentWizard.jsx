@@ -12,6 +12,7 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
         ar_first_name: "",
         ar_last_name: "",
         pet_id: "",
+        service_type: "",
         notes: "",
         selected_date: "",
         selected_time: "",
@@ -45,11 +46,11 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
     const validateAppointmentDetails = () => {
         let valid = true;
 
-        if (!form.data.notes.trim()) {
-            form.setError("notes", "Please enter the service.");
+        if (!form.data.service_type.trim()) {
+            form.setError("service_type", "Please enter the service type.");
             valid = false;
         } else {
-            form.clearErrors("notes");
+            form.clearErrors("service_type");
         }
 
         if (!form.data.selected_date || !form.data.selected_time) {
@@ -81,6 +82,13 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
             form.clearErrors("reference_number");
         }
 
+        if (!form.data.proof_of_down_payment) {
+            form.setError("proof_of_down_payment", "Please upload proof of payment.");
+            valid = false;
+        } else {
+            form.clearErrors("proof_of_down_payment");
+        }
+
         if (valid) next();
     };
     const submit = () => {
@@ -100,7 +108,7 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
             onError: (errors) => {
                 if (errors.ar_first_name || errors.ar_last_name) goTo(0);
                 else if (errors.pet_id) goTo(1);
-                else if (errors.app_date_time || errors.notes) goTo(2);
+                else if (errors.app_date_time || errors.service_type || errors.notes) goTo(2);
                 else if (errors.terms_accepted || errors.reference_number || errors.proof_of_down_payment) goTo(3);
             },
         });

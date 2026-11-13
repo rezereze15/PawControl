@@ -19,6 +19,7 @@ class Appointment extends Model
         'ar_first_name',
         'ar_last_name',
         'pet_id',
+        'service_type',
         'notes',
         'app_date_time',
         'proof_of_down_payment_path',

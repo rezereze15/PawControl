@@ -21,7 +21,7 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
     const [availabilityError, setAvailabilityError] = useState(false);
     const monthValue = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
     const todayValue = toDateValue(today.getFullYear(), today.getMonth(), today.getDate());
-    const fieldError = (errors.app_date_time || errors.notes) && <p className="mt-1 text-sm text-red-600" role="alert">{errors.app_date_time || errors.notes}</p>;
+    const fieldError = (errors.app_date_time || errors.service_type || errors.notes) && <p className="mt-1 text-sm text-red-600" role="alert">{errors.app_date_time || errors.service_type || errors.notes}</p>;
 
     useEffect(() => {
         const controller = new AbortController();
@@ -54,12 +54,10 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
       <div className="grid grid-cols-3 gap-6 items-start">
         {/* Service */}
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-gray-600 leading-relaxed">
-            Please input your pet's concern and the vaccination you'd like to schedule to
-            help protect them from common diseases, or a checkup to monitor
-            their overall health and well-being.
-          </p>
-          <input type="text" maxLength={50} value={data.notes} onChange={(event) => setData("notes", event.target.value)} placeholder="Enter the service" aria-label="Service" className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]"/>
+          <label htmlFor="appointment-service" className="text-sm font-bold text-[#1a0a3c]">Service type <span className="text-red-500">*</span></label>
+          <input id="appointment-service" type="text" maxLength={100} value={data.service_type} onChange={(event) => setData("service_type", event.target.value)} placeholder="e.g. Check-up or vaccination" aria-label="Service type" required className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]"/>
+          <label htmlFor="appointment-notes" className="text-sm font-bold text-[#1a0a3c]">Pet concern or details <span className="text-gray-400">(optional)</span></label>
+          <textarea id="appointment-notes" maxLength={500} value={data.notes} onChange={(event) => setData("notes", event.target.value)} placeholder="Tell us what your pet needs" aria-label="Pet concern or details" rows={3} className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]"/>
         </div>
 
         {/* Calendar */}

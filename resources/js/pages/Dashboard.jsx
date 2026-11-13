@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PersonIcon } from './shared/dashboard/Icons';
 import { router } from '@inertiajs/react';
 import { AppointmentWizard } from './Customer/modules/MakeAppointment';
@@ -9,6 +9,7 @@ import ClerkDashboard from './Clerk/Dashboard';
 import CustomerDashboardLayout from '../Layouts/CustomerDashboardLayout';
 import StaffDashboardLayout from '../Layouts/StaffDashboardLayout';
 import CustomerHomeSection from './Customer/components/CustomerHomeSection';
+import CustomerAppointments from './Customer/modules/Appointments';
 import LegacyAdminHomeSection from './Admin/components/LegacyAdminHomeSection';
 import StaffHomeSection from './Clerk/components/StaffHomeSection';
 import OwnerHomeSection from './Owner/components/OwnerHomeSection';
@@ -19,13 +20,21 @@ import karinaPhoto from '../imports/karina.png';
 import chaewonPhoto from '../imports/chaewon.png';
 import asaPhoto from '../imports/asa.png';
 import '../../css/Dashboard.css';
-function CustomerDashboard({ username, onLogout, owner, pets, flash }) {
+function CustomerDashboard({ username, onLogout, owner, pets, customerAppointments = [], incomingAppointment, upcomingAppointmentCount, flash }) {
     const [section, setSection] = useState("home");
     const [booking, setBooking] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const success = flash?.success
         ? `${flash.success}${flash.referenceNumber ? ` Reference number: ${flash.referenceNumber}.` : ''}`
         : '';
+    const [dismissedSuccess, setDismissedSuccess] = useState(false);
+    useEffect(() => {
+        setDismissedSuccess(false);
+        if (!success) return undefined;
+
+        const timeout = window.setTimeout(() => setDismissedSuccess(true), 6000);
+        return () => window.clearTimeout(timeout);
+    }, [success]);
     const navItems = [
         {
             id: "home",
@@ -58,10 +67,26 @@ function CustomerDashboard({ username, onLogout, owner, pets, flash }) {
     ];
     return (<CustomerDashboardLayout username={username} onLogout={onLogout} logoSrc={bigpawLogo} avatarSrc={karinaPhoto} navItems={navItems} section={section} booking={booking} sidebarOpen={sidebarOpen} onNavigate={(nextSection) => { setSection(nextSection); setBooking(false); }} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
         {booking ? (<AppointmentWizard owner={owner} pets={pets} onBack={() => setBooking(false)} onSuccess={() => setBooking(false)}/>) : (<>
-              {success && <p className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800" role="status">{success}</p>}
-              {section === "home" && (<CustomerHomeSection username={username} pets={pets} onBookAppointment={() => setBooking(true)} onViewRecords={() => setSection("records")} onViewAppointments={() => setSection("appointments")}/>)}
+              {success && !dismissedSuccess && <div className="paw-success-toast fixed left-4 right-4 top-4 z-[60] flex items-start gap-3 overflow-hidden rounded-2xl border border-emerald-200 bg-white p-4 shadow-xl shadow-emerald-950/10 sm:left-auto sm:right-6 sm:top-6 sm:w-[min(24rem,calc(100vw-3rem))]" role="status" aria-live="polite">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                    <path d="m5 12 4 4L19 6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+                <span className="min-w-0 flex-1 pt-0.5">
+                  <span className="block text-sm font-bold text-slate-900">Success</span>
+                  <span className="mt-0.5 block text-sm leading-5 text-slate-600">{success}</span>
+                </span>
+                <button type="button" onClick={() => setDismissedSuccess(true)} aria-label="Dismiss success message" className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="m6 6 12 12M18 6 6 18" strokeLinecap="round"/>
+                  </svg>
+                </button>
+                <span className="paw-toast-progress absolute inset-x-0 bottom-0 h-1 origin-left bg-emerald-500" aria-hidden="true" />
+              </div>}
+              {section === "home" && (<CustomerHomeSection username={username} pets={pets} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} onBookAppointment={() => setBooking(true)} onViewRecords={() => setSection("records")} onViewAppointments={() => setSection("appointments")}/>)}
               {section === "records" && (<DashboardPlaceholder title="Pet Medical Records"/>)}
-              {section === "appointments" && (<DashboardPlaceholder title="Appointments"/>)}
+              {section === "appointments" && <CustomerAppointments appointments={customerAppointments} onBookAppointment={() => setBooking(true)}/>}
               {section === "settings" && (<DashboardPlaceholder title="User Settings"/>)}
             </>)}
     </CustomerDashboardLayout>);
@@ -198,7 +223,7 @@ function OwnerDashboard({ username, onLogout, }) {
           {section === "settings" && <DashboardPlaceholder title="User Settings"/>}
     </StaffDashboardLayout>);
 }
-export default function Dashboard({ role = 'customer', username: authenticatedUsername, owner, pets = [], upcomingAppointments = [], flash }) {
+export default function Dashboard({ role = 'customer', username: authenticatedUsername, owner, pets = [], upcomingAppointments = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, flash }) {
     const profiles = {
         customer: 'Karina',
         clerk: 'Maloi',
@@ -216,8 +241,8 @@ export default function Dashboard({ role = 'customer', username: authenticatedUs
         return <VeterinarianDashboard username={username} onLogout={logout}/>;
     if (role === 'owner')
         return <OwnerDashboard username={username} onLogout={logout}/>;
-    return <DashboardHome username={username} onLogout={logout} owner={owner} pets={pets} flash={flash}/>;
+    return <DashboardHome username={username} onLogout={logout} owner={owner} pets={pets} customerAppointments={customerAppointments} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
 }
-function DashboardHome({ username, onLogout, owner, pets, flash }) {
-    return <CustomerDashboard username={username} onLogout={onLogout} owner={owner} pets={pets} flash={flash}/>;
+function DashboardHome({ username, onLogout, owner, pets, customerAppointments, incomingAppointment, upcomingAppointmentCount, flash }) {
+    return <CustomerDashboard username={username} onLogout={onLogout} owner={owner} pets={pets} customerAppointments={customerAppointments} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
 }

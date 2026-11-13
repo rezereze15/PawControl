@@ -22,11 +22,12 @@ class StoreAppointmentRequest extends FormRequest
                 'integer',
                 Rule::exists('pets', 'petID')->where('petOwnerID', $this->user()?->getAuthIdentifier()),
             ],
-            'notes' => ['required', 'string', 'max:50'],
+            'service_type' => ['required', 'string', 'max:100'],
+            'notes' => ['nullable', 'string', 'max:500'],
             'app_date_time' => ['required', 'date', 'after:now'],
             'terms_accepted' => ['accepted'],
             'reference_number' => ['required', 'string', 'regex:/\A[0-9]+\z/', 'max:255', 'unique:appointments,reference_number'],
-            'proof_of_down_payment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'proof_of_down_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ];
     }
 }

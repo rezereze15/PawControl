@@ -42,7 +42,8 @@ function AppointmentStep4({ data, setData, errors, onNext, onBack }) {
             <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
               Upload Attachment
             </label>
-            <input className={inp} placeholder="Select an Attachment" type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={(event) => setData("proof_of_down_payment", event.target.files?.[0] ?? null)}/>
+            <input className={inp} placeholder="Select an Attachment" type="file" accept=".jpg,.jpeg,.png,.pdf" required onChange={(event) => setData("proof_of_down_payment", event.target.files?.[0] ?? null)}/>
+            {data.proof_of_down_payment && <p className="mt-1 text-sm text-gray-600">Selected: {data.proof_of_down_payment.name}</p>}
             {proofError}
           </div>
           <div>

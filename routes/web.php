@@ -7,6 +7,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PetController;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 Route::inertia('/', 'landingpage')->name('home');
 
@@ -23,6 +24,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/appointments/availability', [AppointmentController::class, 'availability'])
         ->name('appointments.availability');
     Route::post('/pets', [PetController::class, 'store'])->name('pets.store');
+    Route::post('/pets/{pet}/photo', [PetController::class, 'updatePhoto'])->name('pets.photo.update');
     Route::get('/dashboard', function (Request $request) {
         return redirect()->route('dashboard.role', ['role' => $request->user()->role]);
     })->name('dashboard');
@@ -38,8 +40,42 @@ Route::middleware('auth')->group(function (): void {
 
         if ($role === 'customer') {
             $props['owner'] = $request->user()->only(['name', 'phone', 'email', 'address']);
+            $customerAppointments = Appointment::query()
+                ->with('pet')
+                ->where('user_id', $request->user()->getAuthIdentifier())
+                ->orderBy('app_date_time')
+                ->get();
+            $appointmentToArray = fn (Appointment $appointment) => [
+                'id' => $appointment->id,
+                'referenceNumber' => $appointment->reference_number,
+                'pet' => $appointment->pet?->petName ?? 'Unknown pet',
+                'species' => $appointment->pet?->species,
+                'breed' => $appointment->pet?->breed,
+                'photoUrl' => $appointment->pet?->photo_path
+                    ? Storage::disk(config('filesystems.default'))->temporaryUrl($appointment->pet->photo_path, now()->addMinutes(30))
+                    : null,
+                'serviceType' => $appointment->service_type,
+                'notes' => $appointment->notes,
+                'startsAt' => $appointment->app_date_time->toIso8601String(),
+                'status' => $appointment->status,
+                'rejectionReason' => $appointment->rejection_reason,
+            ];
+            $props['customerAppointments'] = $customerAppointments
+                ->map($appointmentToArray)
+                ->values();
+            $incomingAppointment = $customerAppointments->first(fn (Appointment $appointment) =>
+                $appointment->app_date_time->greaterThanOrEqualTo(now())
+                && ! in_array($appointment->status, ['Rejected', 'Cancelled'], true)
+            );
+            $props['incomingAppointment'] = $incomingAppointment ? $appointmentToArray($incomingAppointment) : null;
+            $props['upcomingAppointmentCount'] = $customerAppointments
+                ->filter(fn (Appointment $appointment) =>
+                    $appointment->app_date_time->greaterThanOrEqualTo(now())
+                    && ! in_array($appointment->status, ['Rejected', 'Cancelled'], true)
+                )
+                ->count();
             $props['pets'] = $request->user()->pets()
-                ->get(['petID', 'petName', 'species', 'breed', 'age', 'sex', 'dateOfBirth', 'weight'])
+                ->get(['petID', 'petName', 'species', 'breed', 'age', 'sex', 'dateOfBirth', 'weight', 'photo_path'])
                 ->map(fn ($pet) => [
                     'id' => $pet->petID,
                     'name' => $pet->petName,
@@ -49,6 +85,9 @@ Route::middleware('auth')->group(function (): void {
                     'sex' => $pet->sex,
                     'dateOfBirth' => $pet->dateOfBirth?->toDateString(),
                     'weight' => $pet->weight,
+                    'photoUrl' => $pet->photo_path
+                        ? Storage::disk(config('filesystems.default'))->temporaryUrl($pet->photo_path, now()->addMinutes(30))
+                        : null,
                 ]);
         }
 

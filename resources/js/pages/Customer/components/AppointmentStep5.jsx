@@ -80,11 +80,19 @@ function AppointmentStep5({ owner, pets = [], data, processing, onBack, onDone }
           <p className="font-bold text-[#1a0a3c] text-sm mb-1">Selected Date</p>
           <div>
             <p className="text-xs font-bold text-[#1a0a3c]">Service</p>
-            <p className="text-xs text-gray-600">{data.notes || "â€”"}</p>
+            <p className="text-xs text-gray-600">{data.service_type || "â€”"}</p>
           </div>
+          {data.notes && <div>
+            <p className="text-xs font-bold text-[#1a0a3c]">Pet concern or details</p>
+            <p className="text-xs text-gray-600">{data.notes}</p>
+          </div>}
           <div>
             <p className="text-xs font-bold text-[#1a0a3c]">Payment Reference Number</p>
             <p className="text-xs text-gray-600">{data.reference_number || "â€”"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-[#1a0a3c]">Proof of payment</p>
+            <p className="text-xs text-gray-600">{data.proof_of_down_payment?.name || "Not selected"}</p>
           </div>
           <div className="flex justify-center">
             <svg className="w-16 h-16" viewBox="0 0 64 64" fill="none">

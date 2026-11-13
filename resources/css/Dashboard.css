@@ -134,20 +134,64 @@
 .paw-customer-main .grid.lg\:grid-cols-3 .w-40 { width: 150px; }
 .paw-customer-main .grid.lg\:grid-cols-3 .w-14 { width: 52px; height: 52px; }
 .paw-customer-main .grid.lg\:grid-cols-3 .gap-4 { gap: 15px; }
+.paw-appointments-table-page { width: 100%; max-width: 1440px; min-width: 0; margin-inline: auto; container-type: inline-size; }
+.paw-customer-main > .paw-appointments-table-page { gap: 22px; }
+.paw-customer-main .paw-appointments-table-page h1 { margin: 0; font-size: 32px; line-height: 1.15; }
+.paw-appointment-filter-grid { align-items: end; }
+.paw-appointment-filter-panel { padding: 22px clamp(22px, 3.2vw, 36px); }
+.paw-appointment-filter-grid { column-gap: 16px; row-gap: 16px; }
+.paw-appointment-filter-grid label > span,
+.paw-appointment-filter-grid label > select { margin-top: 8px; }
+.paw-appointment-filter-grid label { min-width: 0; }
+.paw-appointment-filter-grid input,
+.paw-appointment-filter-grid select { min-width: 0; }
+.paw-appointments-table-page table th { white-space: nowrap; font-size: 13px; }
+.paw-appointments-table-page table tbody td { vertical-align: middle; }
+.paw-appointment-results table tbody tr { height: 82px; }
+.paw-appointment-results footer { min-height: 48px; }
+.paw-appointment-history-heading h2 { margin: 0; font-size: clamp(25px, 2.4vw, 32px); line-height: 1.12; }
+.paw-appointment-results thead { background: #f8f7fb; }
+.paw-appointment-results tbody tr:hover { background: #faf8ff; }
+.paw-appointment-results tbody td { padding-block: 18px; }
+.paw-appointment-results footer { background: transparent; border-radius: 0; }
+@container (min-width: 640px) {
+  .paw-appointment-filter-grid { grid-template-columns: minmax(210px, 1.8fr) repeat(3, minmax(105px, .75fr)) auto auto; gap: 16px; }
+  .paw-appointment-filter-grid > div { width: auto; }
+}
+.paw-appointment-results table th,
+.paw-appointment-results table td { padding-inline: 30px; }
+.paw-appointment-results table th { padding-block: 19px; }
+.paw-appointment-results tbody tr { min-height: 90px; }
+.paw-appointments-page { width: 100%; max-width: 1480px; min-width: 0; margin-inline: auto; }
+.paw-customer-main > .paw-appointments-page { gap: 30px; }
+.paw-customer-main .paw-appointments-page h1 { margin: 0; font-size: clamp(32px, 3vw, 40px); line-height: 1.08; }
+.paw-appointments-header { min-height: 88px; align-items: center; }
+.paw-book-appointment-button { min-height: 48px; white-space: nowrap; }
+.paw-appointment-stat { min-height: 100px; padding: 20px 22px; }
+.paw-next-appointment { min-height: 164px; }
+.paw-appointment-history { min-width: 0; }
+.paw-appointment-history > div:first-child { gap: 18px; }
+.paw-appointment-history [role="group"] { align-items: center; }
+.paw-appointment-history li { min-width: 0; }
 .paw-appointment-flow { width: 100%; gap: 24px; }
 .paw-appointment-card { width: 100%; padding: 32px; border-color: #e9d5ff; border-radius: 16px; box-shadow: 0 1px 2px rgb(23 4 61 / 8%); }
 .paw-appointment-card > h1 { margin: 0 0 2px; font-size: 24px; line-height: 1.25; }
 .paw-appointment-card > p { margin-bottom: 24px; }
 .paw-appointment-card > .border-t { padding-top: 24px; }
 .paw-appointment-card .border-t .border-t { padding-top: 24px; }
-.paw-add-pet-overlay { padding: 16px; background: rgb(0 0 0 / 40%); }
-.paw-add-pet-card { width: min(672px, 100%); max-width: 672px; margin: 0; padding: 32px; border-radius: 16px; }
-.paw-add-pet-card h2 { margin-bottom: 0; font-size: 24px; line-height: 1.25; }
-.paw-add-pet-card > p { margin-bottom: 24px; }
-.paw-add-pet-fields { gap: 20px; }
-.paw-add-pet-card input { height: 46px; padding-top: 10px; padding-bottom: 10px; border-radius: 12px; }
-.paw-add-pet-card label { margin-bottom: 8px; }
-.paw-add-pet-card .mt-8 { margin-top: 32px; }
+.paw-modal-backdrop { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; overflow-y: auto; padding: 16px; background: rgb(15 23 42 / 54%); backdrop-filter: blur(5px); animation: paw-fade-in .18s ease-out both; }
+.paw-pet-modal { display: flex; width: min(100%, 680px); max-height: min(90vh, 850px); flex-direction: column; overflow: hidden; border: 1px solid rgb(255 255 255 / 75%); border-radius: 24px; background: #fff; box-shadow: 0 28px 80px rgb(15 23 42 / 28%); animation: paw-modal-in .22s cubic-bezier(.2,.8,.2,1) both; }
+.paw-pet-details-modal { width: min(100%, 580px); }
+.paw-pet-modal-header { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 24px; border-bottom: 1px solid #f1f3f8; background: linear-gradient(180deg, #fff 0%, #fdfcff 100%); }
+.paw-pet-modal-body { flex: 1 1 auto; overflow-y: auto; padding: 22px 24px; overscroll-behavior: contain; }
+.paw-pet-modal-footer { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #f1f3f8; background: #fff; }
+.paw-add-pet-modal { width: min(100%, 680px); }
+.paw-success-toast { animation: paw-toast-in .28s cubic-bezier(.2,.8,.2,1) both; }
+.paw-toast-progress { animation: paw-toast-progress 6s linear both; }
+@keyframes paw-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes paw-modal-in { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes paw-toast-in { from { opacity: 0; transform: translate3d(16px, -8px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes paw-toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 .paw-appointment-card .flex.justify-between.pt-2 > button,
 .paw-add-pet-card .flex.justify-between.items-center.mt-8 > button { min-height: 44px; padding: 9px 28px; font-size: 14px; letter-spacing: .01em; box-shadow: 0 2px 4px rgb(23 4 61 / 8%); transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease; }
 .paw-appointment-card .flex.justify-between.pt-2 > button:first-child,
@@ -345,6 +389,7 @@
 .paw-owner-dashboard .owner-transactions td span { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; }
 
 @media (max-width: 640px) {
+  .paw-appointment-filter-panel { padding: 18px; }
   .paw-owner-dashboard .owner-transactions { overflow-x: auto; }
   .paw-owner-dashboard .owner-transactions table { min-width: 640px; }
 }
@@ -355,6 +400,26 @@
   .paw-admin-users-filter-controls > div:last-child { grid-column: 1 / -1; justify-content: flex-end; }
 }
 @media (max-width: 640px) {
+  .paw-customer-main > .paw-appointments-table-page { gap: 18px; }
+  .paw-customer-main .paw-appointments-table-page h1 { font-size: 26px; }
+  .paw-appointment-filter-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .paw-appointment-filter-grid label:first-child { grid-column: 1 / -1; }
+  .paw-appointment-filter-grid > div { align-self: end; }
+  .paw-appointment-filter-grid > button:last-child { grid-column: 1 / -1; justify-content: flex-start; }
+  .paw-appointment-results table tbody tr { height: 76px; }
+  .paw-customer-main > .paw-appointments-page { gap: 20px; }
+  .paw-customer-main .paw-appointments-page h1 { font-size: 28px; }
+  .paw-appointments-header { align-items: flex-start; }
+  .paw-book-appointment-button { width: 100%; }
+  .paw-appointment-stat { min-height: 88px; padding: 16px; }
+  .paw-next-appointment { min-height: 0; padding: 20px; }
+  .paw-appointment-history > div:first-child { gap: 14px; }
+  .paw-modal-backdrop { align-items: flex-start; padding: 8px; }
+  .paw-pet-modal { max-height: calc(100vh - 16px); border-radius: 20px; }
+  .paw-pet-modal-header { padding: 16px; }
+  .paw-pet-modal-body { padding: 16px; }
+  .paw-pet-modal-footer { flex-wrap: wrap; padding: 12px 16px; }
+  .paw-pet-modal-footer > button { flex: 1 1 120px; }
   .paw-owner-dashboard .paw-dashboard-main { padding-inline: 18px; }
   .paw-admin-users .paw-admin-users-heading { align-items: stretch; flex-direction: column; }
   .paw-admin-users .paw-admin-users-heading > button { align-self: flex-start; }
