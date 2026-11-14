@@ -32,9 +32,12 @@ class RegistrationVerificationCode extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.registration-code',
-            text: 'mail.registration-code-text',
+            view: 'mail.code',
+            text: 'mail.code-text',
             with: [
+                'heading' => 'Your verification code',
+                'intro' => 'Use the code below to verify your email address and finish creating your account.',
+                'footer' => "If you didn't try to create an account, you can safely ignore this email.",
                 'expiresInMinutes' => PendingRegistration::CODE_TTL_MINUTES,
             ],
         );

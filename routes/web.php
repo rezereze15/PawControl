@@ -4,6 +4,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\ProfileCompletionController;
 use App\Http\Middleware\EnsureProfileIsComplete;
@@ -28,6 +29,23 @@ Route::middleware('guest')->group(function (): void {
         ->name('register.resend');
     Route::post('/register/cancel', [AuthController::class, 'cancel'])->name('register.cancel');
 
+    // Forgot password: email → 6-digit code → new password (state kept in the session).
+    Route::get('/forgot-password', [PasswordResetController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendCode'])
+        ->middleware('throttle:5,1')
+        ->name('password.email');
+    Route::get('/forgot-password/verify', [PasswordResetController::class, 'showCode'])->name('password.code');
+    Route::post('/forgot-password/verify', [PasswordResetController::class, 'verifyCode'])
+        ->middleware('throttle:10,1')
+        ->name('password.code.verify');
+    Route::post('/forgot-password/resend', [PasswordResetController::class, 'resend'])
+        ->middleware('throttle:4,1')
+        ->name('password.code.resend');
+    Route::get('/reset-password', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])
+        ->middleware('throttle:6,1')
+        ->name('password.update');
+
     // Sign in with Google (OAuth 2.0 via Laravel Socialite).
     Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])
         ->middleware('throttle:10,1')
@@ -40,7 +58,8 @@ Route::middleware('guest')->group(function (): void {
 // Everything below needs a logged-in user. EnsureProfileIsComplete also blocks Google
 // sign-ups that haven't filled in the "complete your profile" modal yet; only logout,
 // the dashboard (which shows the modal, without data) and the modal's save endpoint are exempt.
-Route::middleware(['auth', EnsureProfileIsComplete::class])->group(function (): void {
+// auth.session: signs out other sessions once the user's password changes (e.g. after a reset).
+Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->group(function (): void {
     Route::post('/logout', [AuthController::class, 'destroy'])
         ->withoutMiddleware(EnsureProfileIsComplete::class)
         ->name('logout');

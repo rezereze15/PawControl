@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\EmailMask;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
@@ -74,8 +75,6 @@ class PendingRegistration extends Model
     /** j***@gmail.com */
     public function maskedEmail(): string
     {
-        [$local, $domain] = explode('@', $this->email, 2) + [1 => ''];
-
-        return mb_substr($local, 0, 1).'***@'.$domain;
+        return EmailMask::mask($this->email);
     }
 }

@@ -455,3 +455,28 @@
   .register-grid--2,
   .register-grid--3 { grid-template-columns: 1fr; }
 }
+
+/* Success notice (e.g. "Password updated. You can now log in.") */
+.signin-success {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid rgb(31 107 58 / 0.2);
+  border-radius: 12px;
+  background: #effaf3;
+  color: #1f6b3a;
+  font-size: 14px;
+  line-height: 1.45;
+  transition: opacity 200ms var(--ease-out);
+
+  @starting-style { opacity: 0; }
+}
+
+/* "Forgot password?" is a real link now */
+a.signin-forgot {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms ease;
+}
+a.signin-forgot:hover { text-decoration-color: currentColor; }
+a.signin-forgot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }

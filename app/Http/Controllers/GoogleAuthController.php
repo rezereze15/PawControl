@@ -23,8 +23,18 @@ use Throwable;
 class GoogleAuthController extends Controller
 {
     /** Step 1: send the user to Google's sign-in page. */
-    public function redirect(): SymfonyRedirect
+    public function redirect(Request $request): SymfonyRedirect
     {
+        // Google always returns to the redirect URI's host (APP_URL, e.g. localhost:8000).
+        // If the flow starts on another host (e.g. 127.0.0.1:8000) the browser keeps a
+        // separate session there, the saved `state` is missing on return, and Socialite
+        // throws InvalidStateException. Locally, hop to APP_URL first so both ends match.
+        $appUrl = rtrim((string) config('app.url'), '/');
+
+        if (app()->isLocal() && $appUrl !== '' && $request->getSchemeAndHttpHost() !== $appUrl) {
+            return redirect()->away($appUrl.'/auth/google/redirect');
+        }
+
         return Socialite::driver('google')
             ->scopes(['openid', 'profile', 'email'])
             ->with(['prompt' => 'select_account'])
@@ -43,7 +53,13 @@ class GoogleAuthController extends Controller
             // Validates `state` (CSRF), exchanges the code server-side, then fetches the profile.
             $google = Socialite::driver('google')->user();
         } catch (Throwable $exception) {
-            Log::warning('Google sign-in failed.', ['exception' => $exception]);
+            Log::warning('Google sign-in failed.', [
+                'exception' => $exception,
+                // Diagnostics for InvalidStateException (host/session mismatch); no secrets.
+                'host' => $request->getSchemeAndHttpHost(),
+                'app_url' => config('app.url'),
+                'session_has_state' => $request->session()->has('state'),
+            ]);
 
             return $this->failed('We couldn\'t sign you in with Google. Please try again.');
         }

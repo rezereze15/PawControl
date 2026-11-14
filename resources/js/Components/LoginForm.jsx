@@ -1,10 +1,13 @@
+import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import GoogleButton from '@/Components/GoogleButton';
 
-export default function LoginForm({ username, password, error, processing = false, onUsernameChange, onPasswordChange, onClearError, onSubmit }) {
+export default function LoginForm({ username, password, error, success = '', processing = false, onUsernameChange, onPasswordChange, onClearError, onSubmit }) {
     const [showPassword, setShowPassword] = useState(false);
 
     return (<form className="signin-form" onSubmit={onSubmit}>
+      {success && <p className="signin-success" role="status">{success}</p>}
+
       <div className="signin-field">
         <label htmlFor="username" className="signin-label">
           Username or email<span className="signin-required" aria-hidden="true">*</span>
@@ -20,7 +23,7 @@ export default function LoginForm({ username, password, error, processing = fals
           <label htmlFor="password" className="signin-label">
             Password<span className="signin-required" aria-hidden="true">*</span>
           </label>
-          <span className="signin-forgot">Forgot password?</span>
+          <Link href="/forgot-password" className="signin-forgot">Forgot password?</Link>
         </div>
         <div className="signin-password">
           <input id="password" type={showPassword ? 'text' : 'password'} className="signin-input" autoComplete="current-password" value={password} onChange={(event) => {
