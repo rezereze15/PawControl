@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\RegistrationVerificationCode;
 use App\Models\PendingRegistration;
 use App\Models\User;
+use App\Support\RegistrationRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,21 +41,14 @@ class AuthController extends Controller
     public function register(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:100'],
-            'middle_name' => ['nullable', 'string', 'max:100'],
-            'last_name' => ['required', 'string', 'max:100'],
-            'username' => ['required', 'string', 'min:3', 'max:50', 'alpha_dash', 'unique:users,username'],
-            'address' => ['required', 'string', 'max:500'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['required', 'string', 'max:30'],
-            'password' => ['required', 'confirmed', Password::min(8)],
+            ...RegistrationRules::name(),
+            ...RegistrationRules::username(),
+            ...RegistrationRules::contact(),
+            ...RegistrationRules::email(),
+            ...RegistrationRules::password(),
         ]);
 
-        $name = trim(implode(' ', array_filter([
-            $validated['first_name'],
-            $validated['middle_name'] ?? null,
-            $validated['last_name'],
-        ])));
+        $name = RegistrationRules::fullName($validated);
 
         // The real User is created only after the emailed code is verified.
         (new PendingRegistration)->pruneAll();

@@ -22,8 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'username', 'email', 'password', 'phone', 'address', 'role', 'status', 'profile_photo_path'])]
-#[Hidden(['password', 'remember_token', 'profile_photo_path'])]
+#[Fillable(['name', 'username', 'email', 'password', 'phone', 'address', 'role', 'status', 'profile_photo_path', 'google_id', 'avatar', 'needs_profile_completion'])]
+#[Hidden(['password', 'remember_token', 'profile_photo_path', 'google_id'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -39,7 +39,14 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'needs_profile_completion' => 'boolean',
         ];
+    }
+
+    /** Google sign-ups must fill in username / phone / address before using the app. */
+    public function hasCompleteProfile(): bool
+    {
+        return ! $this->needs_profile_completion;
     }
 
     public function pets(): HasMany
@@ -52,11 +59,16 @@ class User extends Authenticatable
         return $this->hasMany(Appointment::class, 'user_id');
     }
 
-    /** Cache-busted URL of the authorized route that serves this user's profile photo. */
+    /**
+     * Cache-busted URL of the authorized route that serves this user's uploaded
+     * profile photo, falling back to their Google picture if they signed in with Google.
+     */
     public function profilePhotoUrl(): ?string
     {
-        return $this->profile_photo_path
-            ? route('settings.photo.show', ['v' => substr(md5($this->profile_photo_path), 0, 8)])
-            : null;
+        if ($this->profile_photo_path) {
+            return route('settings.photo.show', ['v' => substr(md5($this->profile_photo_path), 0, 8)]);
+        }
+
+        return $this->avatar;
     }
 }

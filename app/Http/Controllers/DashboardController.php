@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Pet;
 use App\Models\User;
+use App\Support\RegistrationRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -24,6 +25,24 @@ class DashboardController extends Controller
 
         if ($user->role !== $role) {
             return redirect()->route('dashboard');
+        }
+
+        // Google sign-up that still needs username/phone/address: send only what the
+        // "complete your profile" modal needs. No dashboard data until it's saved.
+        if (! $user->hasCompleteProfile()) {
+            return Inertia::render('Dashboard', [
+                'role' => $role,
+                'username' => $user->name,
+                'profile' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'photoUrl' => $user->profilePhotoUrl(),
+                ],
+                'profileCompletion' => [
+                    'email' => $user->email,
+                    ...RegistrationRules::splitName($user->name),
+                ],
+            ]);
         }
 
         $props = [

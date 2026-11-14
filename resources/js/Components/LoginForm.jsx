@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import GoogleButton from '@/Components/GoogleButton';
 
 export default function LoginForm({ username, password, error, processing = false, onUsernameChange, onPasswordChange, onClearError, onSubmit }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -43,6 +44,8 @@ export default function LoginForm({ username, password, error, processing = fals
         {processing && <span className="signin-spinner" aria-hidden="true"/>}
         <span>{processing ? 'Logging in…' : 'Log in'}</span>
       </button>
+
+      <GoogleButton />
 
       <p className="signin-footnote">
         Don&apos;t have an account yet?{' '}

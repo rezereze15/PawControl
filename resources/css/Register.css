@@ -7,43 +7,12 @@
   width: min(100%, 1180px);
 }
 
-.register-form { gap: 16px; }
-
-.register-grid {
-  display: grid;
-  gap: 14px;
-}
-.register-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.register-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.register-grid .signin-field { min-width: 0; }
-
-.signin-optional {
-  margin-left: 6px;
-  color: #8a8f9c;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.signin-field-error {
-  margin: 0;
-  color: #c53030;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-@media (max-width: 1040px) {
-  .register-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .register-grid--3 > :last-child { grid-column: 1 / -1; }
-}
+/* .register-grid, .signin-optional, .signin-field-error moved to AuthPage.css (shared with the profile modal). */
 
 @media (max-width: 860px) {
   .signin-card--wide { grid-template-columns: 1fr; width: min(100%, 620px); }
 }
 
-@media (max-width: 560px) {
-  .register-grid--2,
-  .register-grid--3 { grid-template-columns: 1fr; }
-}
 
 /* ── Verify code step ── */
 .verify-email { color: #19043f; word-break: break-all; }

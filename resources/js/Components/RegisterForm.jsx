@@ -1,7 +1,8 @@
 import { useForm } from "@inertiajs/react";
 import { useState } from "react";
+import GoogleButton from "@/Components/GoogleButton";
 
-function Field({ id, label, required = false, optional = false, error, className = "", children }) {
+export function Field({ id, label, required = false, optional = false, error, className = "", children }) {
     return (<div className={`signin-field ${className}`}>
       <label htmlFor={id} className="signin-label">
         {label}
@@ -90,6 +91,8 @@ export default function RegisterForm() {
         {form.processing && <span className="signin-spinner" aria-hidden="true"/>}
         <span>{form.processing ? "Sending code…" : "Create account"}</span>
       </button>
+
+      <GoogleButton label="Sign up with Google"/>
 
       <p className="signin-footnote">
         Already have an account? <a href="/login" className="signin-link">Log in</a>

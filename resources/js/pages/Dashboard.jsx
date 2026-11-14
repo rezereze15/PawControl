@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PersonIcon } from './shared/dashboard/Icons';
 import { router, usePage } from '@inertiajs/react';
 import FlashToast from '@/Components/FlashToast';
+import CompleteProfileModal from '@/Components/CompleteProfileModal';
 import UserSettings from './Customer/modules/UserSettings';
 import VeterinarianDashboard from './Veterinarian/Dashboard';
 import { AppointmentWizard } from './Customer/modules/MakeAppointment';
@@ -160,7 +161,18 @@ function OwnerDashboard({ username, onLogout, }) {
           {section === "settings" && <DashboardPlaceholder title="User Settings"/>}
     </StaffDashboardLayout>);
 }
-export default function Dashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, flash }) {
+export default function Dashboard({ profileCompletion = null, ...props }) {
+    const dashboard = <RoleDashboard {...props}/>;
+    if (!profileCompletion)
+        return dashboard;
+    // Google sign-up with missing details: show the dashboard shell (the server sent no
+    // data for it) made inert behind the blocking "complete your profile" modal.
+    return (<>
+      <div inert style={{ display: 'contents' }}>{dashboard}</div>
+      <CompleteProfileModal email={profileCompletion.email} firstName={profileCompletion.first_name} middleName={profileCompletion.middle_name} lastName={profileCompletion.last_name} photoUrl={props.profile?.photoUrl}/>
+    </>);
+}
+function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, flash }) {
     const { errors = {} } = usePage().props;
     const profiles = {
         customer: 'Karina',

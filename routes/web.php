@@ -3,7 +3,10 @@
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\PetController;
+use App\Http\Controllers\ProfileCompletionController;
+use App\Http\Middleware\EnsureProfileIsComplete;
 use App\Http\Controllers\UserSettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,10 +27,29 @@ Route::middleware('guest')->group(function (): void {
         ->middleware('throttle:4,1')
         ->name('register.resend');
     Route::post('/register/cancel', [AuthController::class, 'cancel'])->name('register.cancel');
+
+    // Sign in with Google (OAuth 2.0 via Laravel Socialite).
+    Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])
+        ->middleware('throttle:10,1')
+        ->name('google.redirect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])
+        ->middleware('throttle:10,1')
+        ->name('google.callback');
 });
 
-Route::middleware('auth')->group(function (): void {
-    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+// Everything below needs a logged-in user. EnsureProfileIsComplete also blocks Google
+// sign-ups that haven't filled in the "complete your profile" modal yet; only logout,
+// the dashboard (which shows the modal, without data) and the modal's save endpoint are exempt.
+Route::middleware(['auth', EnsureProfileIsComplete::class])->group(function (): void {
+    Route::post('/logout', [AuthController::class, 'destroy'])
+        ->withoutMiddleware(EnsureProfileIsComplete::class)
+        ->name('logout');
+
+    // Save endpoint for the "complete your profile" modal on the dashboard (no page of its own).
+    Route::post('/profile/complete', [ProfileCompletionController::class, 'store'])
+        ->withoutMiddleware(EnsureProfileIsComplete::class)
+        ->middleware('throttle:10,1')
+        ->name('profile.complete');
 
     // Appointments
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
@@ -53,8 +75,11 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('throttle:6,1')
         ->name('settings.password.update');
 
-    Route::get('/dashboard', [DashboardController::class, 'redirect'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'redirect'])
+        ->withoutMiddleware(EnsureProfileIsComplete::class)
+        ->name('dashboard');
     Route::get('/dashboard/{role}', [DashboardController::class, 'show'])
+        ->withoutMiddleware(EnsureProfileIsComplete::class)
         ->whereIn('role', ['customer', 'clerk', 'admin', 'veterinarian', 'owner'])
         ->name('dashboard.role');
     Route::get('/customers', fn () => redirect()->route('dashboard'))->name('customers');
