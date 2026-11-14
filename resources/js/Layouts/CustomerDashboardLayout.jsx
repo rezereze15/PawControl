@@ -1,3 +1,6 @@
+import UserAvatar from "@/Components/UserAvatar";
+
+/** avatarSrc is the signed-in user's own photo URL (or null). It never depends on the role. */
 export default function CustomerDashboardLayout({ username, onLogout, logoSrc, avatarSrc, navItems, section, booking, sidebarOpen, onNavigate, onToggleSidebar, children }) {
     return (<div className={`paw-dashboard-shell paw-customer-dashboard ${sidebarOpen ? '' : 'sidebar-collapsed'} flex h-screen bg-gray-100 overflow-hidden`}>
       <header className="paw-customer-topbar">
@@ -14,8 +17,8 @@ export default function CustomerDashboardLayout({ username, onLogout, logoSrc, a
             </svg>
             <span>3</span>
           </div>
-          <div className="paw-customer-avatar" aria-hidden="true">
-            <img src={avatarSrc} alt=""/>
+          <div className="paw-customer-avatar overflow-hidden" aria-hidden="true">
+            <UserAvatar photoUrl={avatarSrc} name={username} className="rounded-full"/>
           </div>
           <span>{username}</span>
         </div>

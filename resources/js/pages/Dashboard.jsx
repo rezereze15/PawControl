@@ -18,8 +18,6 @@ import StaffHomeSection from './Clerk/components/StaffHomeSection';
 import OwnerHomeSection from './Owner/components/OwnerHomeSection';
 import DashboardPlaceholder from './shared/dashboard/Placeholder';
 import bigpawLogo from '../imports/Bigpaw_logoname-removebg-preview.png';
-import karinaPhoto from '../imports/karina.png';
-import asaPhoto from '../imports/asa.png';
 import '../../css/Dashboard.css';
 function CustomerDashboard({ username, onLogout, owner, profile, pets, customerAppointments = [], incomingAppointment, upcomingAppointmentCount, flash }) {
     const [section, setSection] = useState("home");
@@ -58,17 +56,17 @@ function CustomerDashboard({ username, onLogout, owner, profile, pets, customerA
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<CustomerDashboardLayout username={username} onLogout={onLogout} logoSrc={bigpawLogo} avatarSrc={profile?.photoUrl || karinaPhoto} navItems={navItems} section={section} booking={booking} sidebarOpen={sidebarOpen} onNavigate={(nextSection) => { setSection(nextSection); setBooking(false); }} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
+    return (<CustomerDashboardLayout username={username} onLogout={onLogout} logoSrc={bigpawLogo} avatarSrc={profile?.photoUrl} navItems={navItems} section={section} booking={booking} sidebarOpen={sidebarOpen} onNavigate={(nextSection) => { setSection(nextSection); setBooking(false); }} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
         {booking ? (<AppointmentWizard owner={owner} pets={pets} onBack={() => setBooking(false)} onSuccess={() => setBooking(false)}/>) : (<>
               <FlashToast message={success}/>
               {section === "home" && (<CustomerHomeSection username={username} pets={pets} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} onBookAppointment={() => setBooking(true)} onViewRecords={() => setSection("records")} onViewAppointments={() => setSection("appointments")}/>)}
               {section === "records" && (<DashboardPlaceholder title="Pet Medical Records"/>)}
               {section === "appointments" && <CustomerAppointments appointments={customerAppointments} onBookAppointment={() => setBooking(true)}/>}
-              {section === "settings" && <UserSettings profile={profile} fallbackAvatar={karinaPhoto}/>}
+              {section === "settings" && <UserSettings profile={profile}/>}
             </>)}
     </CustomerDashboardLayout>);
 }
-function OwnerDashboard({ username, onLogout, petRecords = [] }) {
+function OwnerDashboard({ username, onLogout, profile, petRecords = [], flash }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -102,11 +100,12 @@ function OwnerDashboard({ username, onLogout, petRecords = [] }) {
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<StaffDashboardLayout username={username} onLogout={onLogout} roleLabel="Owner" dashboardClassName="paw-owner-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={asaPhoto} avatarAlt="Owner" avatarClassName="w-9 h-9 rounded-full bg-amber-300 flex items-center justify-center overflow-hidden border-2 border-orange-400" navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
+    return (<StaffDashboardLayout username={username} onLogout={onLogout} roleLabel="Owner" dashboardClassName="paw-owner-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
+          <FlashToast message={flash?.success}/>
     {section === "home" && <OwnerHomeSection username={username}/>}
           {section === "records" && <PetMedicalRecords records={petRecords}/>}
           {section === "sales" && <LegacySalesReports ownerView/>}
-          {section === "settings" && <DashboardPlaceholder title="User Settings"/>}
+          {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }
 export default function Dashboard({ profileCompletion = null, ...props }) {
@@ -120,7 +119,7 @@ export default function Dashboard({ profileCompletion = null, ...props }) {
       <CompleteProfileModal email={profileCompletion.email} firstName={profileCompletion.first_name} middleName={profileCompletion.middle_name} lastName={profileCompletion.last_name} photoUrl={props.profile?.photoUrl}/>
     </>);
 }
-function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], flash }) {
+function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], managedUsers = [], roles = [], flash }) {
     const { errors = {} } = usePage().props;
     const profiles = {
         customer: 'Karina',
@@ -132,13 +131,13 @@ function RoleDashboard({ role = 'customer', username: authenticatedUsername, own
     const username = authenticatedUsername || profiles[role] || profiles.customer;
     const logout = () => router.post('/logout');
     if (role === 'admin')
-        return <AdminDashboard username={username} onLogout={logout} stats={adminStats} usersByRole={usersByRole} recentUsers={recentUsers}/>;
+        return <AdminDashboard username={username} onLogout={logout} profile={profile} stats={adminStats} usersByRole={usersByRole} recentUsers={recentUsers} managedUsers={managedUsers} roles={roles} flash={flash}/>;
     if (role === 'clerk')
-        return <ClerkDashboard username={username} onLogout={logout} upcomingAppointments={upcomingAppointments} flash={flash} errors={errors}/>;
+        return <ClerkDashboard username={username} onLogout={logout} profile={profile} upcomingAppointments={upcomingAppointments} flash={flash} errors={errors}/>;
     if (role === 'veterinarian')
-        return <VeterinarianDashboard username={username} onLogout={logout} confirmedAppointments={confirmedAppointments} patientRecords={patientRecords}/>;
+        return <VeterinarianDashboard username={username} onLogout={logout} profile={profile} confirmedAppointments={confirmedAppointments} patientRecords={patientRecords} flash={flash}/>;
     if (role === 'owner')
-        return <OwnerDashboard username={username} onLogout={logout} petRecords={petRecords}/>;
+        return <OwnerDashboard username={username} onLogout={logout} profile={profile} petRecords={petRecords} flash={flash}/>;
     return <DashboardHome username={username} onLogout={logout} owner={owner} profile={profile} pets={pets} customerAppointments={customerAppointments} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
 }
 function DashboardHome({ username, onLogout, owner, profile, pets, customerAppointments, incomingAppointment, upcomingAppointmentCount, flash }) {

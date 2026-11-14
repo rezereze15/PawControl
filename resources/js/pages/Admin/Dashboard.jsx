@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import StaffDashboardLayout from '@/Layouts/StaffDashboardLayout';
 import { PersonIcon } from '../shared/dashboard/Icons';
-import { bigpawLogo, chaewonPhoto } from '../shared/dashboard/assets';
+import { bigpawLogo } from '../shared/dashboard/assets';
 import AdminHomeSection from './components/AdminHomeSection';
 import AdminManageUsers from './modules/ManageUsers';
 import DashboardPlaceholder from '../shared/dashboard/Placeholder';
+import UserSettings from '../Customer/modules/UserSettings';
+import FlashToast from '@/Components/FlashToast';
 export { DashboardPlaceholder as AdminPlaceholder };
-export default function AdminDashboard({ username, onLogout, stats, usersByRole, recentUsers }) {
+export default function AdminDashboard({ username, onLogout, profile, stats, usersByRole, recentUsers, managedUsers = [], roles = [], flash }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -49,12 +51,13 @@ export default function AdminDashboard({ username, onLogout, stats, usersByRole,
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<StaffDashboardLayout username={username} roleLabel="Admin" dashboardClassName="paw-admin-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={chaewonPhoto} avatarAlt="" avatarClassName="w-9 h-9 rounded-full bg-rose-400 flex items-center justify-center overflow-hidden border-2 border-orange-400" navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+    return (<StaffDashboardLayout username={username} roleLabel="Admin" dashboardClassName="paw-admin-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+          <FlashToast message={flash?.success}/>
     {section === "home" && <AdminHomeSection username={username} stats={stats} usersByRole={usersByRole} recentUsers={recentUsers} onNavigate={setSection}/>}
           {section === "services" && <DashboardPlaceholder title="Manage Services"/>}
           {section === "supplies" && <DashboardPlaceholder title="Manage Medical Supplies"/>}
-          {section === "users" && <AdminManageUsers />}
-          {section === "settings" && <DashboardPlaceholder title="User Settings"/>}
+          {section === "users" && <AdminManageUsers users={managedUsers} roles={roles} currentUserId={profile?.id}/>}
+          {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }
 // â”€â”€â”€ Clerk Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

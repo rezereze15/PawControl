@@ -1,4 +1,7 @@
-export default function StaffDashboardLayout({ username, roleLabel, dashboardClassName, logoSrc, logoAlt, avatarSrc, avatarAlt, avatarClassName, navItems, section, onSectionChange, sidebarOpen, onToggleSidebar, onLogout, children }) {
+import UserAvatar from "@/Components/UserAvatar";
+
+/** avatarSrc is the signed-in user's own photo URL (or null). It never depends on the role. */
+export default function StaffDashboardLayout({ username, roleLabel, dashboardClassName, logoSrc, logoAlt, avatarSrc, navItems, section, onSectionChange, sidebarOpen, onToggleSidebar, onLogout, children }) {
     return (<div className={`paw-dashboard-shell paw-staff-dashboard ${dashboardClassName} ${sidebarOpen ? "" : "sidebar-collapsed"} flex h-screen bg-gray-100 overflow-hidden`}>
       {/* Sidebar */}
       <aside className="paw-dashboard-sidebar w-64 bg-[#1a0a3c] flex flex-col flex-shrink-0">
@@ -45,8 +48,8 @@ export default function StaffDashboardLayout({ username, roleLabel, dashboardCla
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className={avatarClassName}>
-              <img src={avatarSrc} alt={avatarAlt} className="w-full h-full object-cover"/>
+            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border-2 border-orange-400">
+              <UserAvatar photoUrl={avatarSrc} name={username}/>
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-white font-bold text-sm">{username}</span>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Pet;
+use App\Models\Role;
 use App\Models\User;
 use App\Support\RegistrationRules;
 use Illuminate\Http\RedirectResponse;
@@ -11,12 +12,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 
 class DashboardController extends Controller
 {
     public function redirect(Request $request): RedirectResponse
     {
-        return redirect()->route('dashboard.role', ['role' => $request->user()->role]);
+        $user = $request->user();
+
+        if ($user->role === null) {
+            // Roles live in the `roles` table, linked by users.roleID. Without that column
+            // the database is missing the roles migration (2026_11_15_000000).
+            throw new RuntimeException(array_key_exists('roleID', $user->getAttributes())
+                ? "User #{$user->id} has no valid role (roleID {$user->roleID})."
+                : 'This database has not been migrated for roles: the users table has no roleID column. Run `php artisan migrate`, and check DB_CONNECTION in .env points to the database you expect (it is currently ['.config('database.default').']).');
+        }
+
+        return redirect()->route('dashboard.role', ['role' => $user->role]);
     }
 
     public function show(Request $request, string $role): Response|RedirectResponse
@@ -67,6 +79,7 @@ class DashboardController extends Controller
     private function profile(User $user): array
     {
         return [
+            'id' => $user->id,
             'name' => $user->name,
             'username' => $user->username,
             'email' => $user->email,
@@ -224,25 +237,47 @@ class DashboardController extends Controller
     /** @return array<string, mixed> */
     private function adminProps(): array
     {
-        // One query that counts users per role, e.g. ['customer' => 15, 'clerk' => 3, ...]
-        $roleCounts = User::query()
-            ->selectRaw('role, COUNT(*) as total')
-            ->groupBy('role')
-            ->pluck('total', 'role');
+        $roles = Role::query()->withCount('users')->orderBy('roleID')->get();
+        $roleCounts = $roles->mapWithKeys(fn (Role $role) => [$role->roleName => (int) $role->users_count]);
 
         return [
             'adminStats' => [
                 'totalUsers' => (int) $roleCounts->sum(),
-                'activeUsers' => User::query()->where('status', 'Active')->count(),
+                'activeUsers' => User::query()->where('status', User::STATUS_ACTIVE)->count(),
             ],
             'usersByRole' => $roleCounts
-                ->map(fn ($total, $role) => ['role' => $role, 'count' => (int) $total])
+                ->filter()
+                ->map(fn ($total, $role) => ['role' => $role, 'count' => $total])
                 ->values(),
+            'roles' => $roles->map(fn (Role $role) => [
+                'id' => $role->roleID,
+                'name' => $role->roleName,
+                'label' => $role->label(),
+                'permissions' => Role::PERMISSIONS[$role->roleName] ?? [],
+                'userCount' => (int) $role->users_count,
+            ])->values(),
+            'managedUsers' => User::query()
+                ->orderBy('name')
+                ->get()
+                ->map(fn (User $user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    ...RegistrationRules::splitName($user->name),
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'address' => $user->address,
+                    'role' => $user->role,
+                    'status' => $user->status,
+                    'photoUrl' => $user->profilePhotoUrl(),
+                    'lastLoginAt' => $user->last_login_at?->toIso8601String(),
+                    'createdAt' => $user->created_at?->toIso8601String(),
+                ]),
             // Only what the screen shows: no emails, phones, or other personal details.
             'recentUsers' => User::query()
                 ->latest()
                 ->limit(5)
-                ->get(['id', 'name', 'role', 'created_at'])
+                ->get(['id', 'name', 'roleID', 'created_at'])
                 ->map(fn (User $user) => [
                     'id' => $user->id,
                     'name' => $user->name,
