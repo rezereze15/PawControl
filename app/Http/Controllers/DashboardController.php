@@ -55,6 +55,7 @@ class DashboardController extends Controller
             'customer' => $this->customerProps($user),
             'clerk' => $this->clerkProps(),
             'veterinarian' => $this->veterinarianProps(),
+            'owner' => $this->ownerProps(),
             default => [],
         };
 
@@ -200,6 +201,70 @@ class DashboardController extends Controller
                 ])
                 ->values(),
             'patientRecords' => $patients,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function ownerProps(): array
+    {
+        $pets = Pet::query()
+            ->with([
+                'owner:id,name,email,phone',
+                'appointments' => fn ($query) => $query
+                    ->where('status', Appointment::STATUS_CONFIRMED)
+                    ->orderByDesc('app_date_time'),
+            ])
+            ->orderBy('petID')
+            ->get();
+
+        return ['petRecords' => $pets->map(fn (Pet $pet) => $this->petRecord($pet))->values()];
+    }
+
+    /**
+     * Every registered pet, with a status derived from its confirmed appointments:
+     * Ongoing (one today), Upcoming (one in the future), Completed (only past ones),
+     * or No Visits.
+     *
+     * @return array<string, mixed>
+     */
+    private function petRecord(Pet $pet): array
+    {
+        $now = now();
+        $visits = $pet->appointments;
+        $lastVisit = $visits->first(fn (Appointment $appointment) => $appointment->app_date_time->lessThanOrEqualTo($now));
+
+        $status = match (true) {
+            $visits->contains(fn (Appointment $appointment) => $appointment->app_date_time->isToday()) => 'Ongoing',
+            $visits->contains(fn (Appointment $appointment) => $appointment->app_date_time->greaterThan($now)) => 'Upcoming',
+            $visits->isNotEmpty() => 'Completed',
+            default => 'No Visits',
+        };
+
+        return [
+            'id' => $pet->petID,
+            'name' => $pet->petName,
+            'species' => $pet->species,
+            'breed' => $pet->breed,
+            'sex' => $pet->sex,
+            'dateOfBirth' => $pet->dateOfBirth?->toDateString(),
+            'age' => $pet->dateOfBirth ? $pet->dateOfBirth->age : $pet->age,
+            'weight' => $pet->weight,
+            'photo' => $this->petPhotoUrl($pet),
+            'owner' => [
+                'name' => $pet->owner?->name ?? 'Unknown owner',
+                'email' => $pet->owner?->email,
+                'phone' => $pet->owner?->phone,
+            ],
+            'status' => $status,
+            'lastVisitAt' => $lastVisit?->app_date_time->toIso8601String(),
+            'veterinarian' => null, // appointments don't record an assigned vet yet
+            'visits' => $visits->map(fn (Appointment $appointment) => [
+                'id' => $appointment->id,
+                'startsAt' => $appointment->app_date_time->toIso8601String(),
+                'type' => $appointment->service_type ?? 'Appointment',
+                'notes' => $appointment->notes,
+                'status' => $appointment->status,
+            ])->values(),
         ];
     }
 

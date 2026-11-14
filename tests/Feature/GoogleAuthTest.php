@@ -45,6 +45,42 @@ class GoogleAuthTest extends TestCase
             ->assertRedirectContains('https://accounts.google.com/o/oauth2/auth');
     }
 
+    public function test_local_redirect_from_other_host_hops_to_app_url_first(): void
+    {
+        $this->app['env'] = 'local';
+        config(['app.url' => 'http://localhost:8000/']);
+
+        // Started on 127.0.0.1 while Google will return to localhost: hop so the session (and `state`) match.
+        $this->get('http://127.0.0.1:8000/auth/google/redirect')
+            ->assertRedirect('http://localhost:8000/auth/google/redirect');
+    }
+
+    public function test_local_redirect_on_app_url_host_goes_straight_to_google(): void
+    {
+        $this->app['env'] = 'local';
+        config([
+            'app.url' => 'http://localhost:8000',
+            'services.google.client_id' => 'test-client-id',
+            'services.google.client_secret' => 'x',
+        ]);
+
+        $this->get('http://localhost:8000/auth/google/redirect')
+            ->assertRedirectContains('https://accounts.google.com/o/oauth2/auth');
+    }
+
+    public function test_non_local_redirect_never_hops_hosts(): void
+    {
+        $this->app['env'] = 'production';
+        config([
+            'app.url' => 'http://localhost:8000',
+            'services.google.client_id' => 'test-client-id',
+            'services.google.client_secret' => 'x',
+        ]);
+
+        $this->get('http://127.0.0.1:8000/auth/google/redirect')
+            ->assertRedirectContains('https://accounts.google.com/o/oauth2/auth');
+    }
+
     public function test_new_google_user_is_created_and_logged_in(): void
     {
         $this->fakeGoogleUser();

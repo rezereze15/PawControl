@@ -9,6 +9,7 @@ import { AppointmentWizard } from './Customer/modules/MakeAppointment';
 import LegacyManageUsers from './Admin/components/LegacyManageUsers';
 import LegacySalesReports from './Admin/components/LegacySalesReports';
 import ClerkDashboard from './Clerk/Dashboard';
+import PetMedicalRecords from './Owner/modules/PetMedicalRecords';
 import CustomerDashboardLayout from '../Layouts/CustomerDashboardLayout';
 import StaffDashboardLayout from '../Layouts/StaffDashboardLayout';
 import CustomerHomeSection from './Customer/components/CustomerHomeSection';
@@ -120,7 +121,7 @@ function AdminDashboard({ username, onLogout, }) {
           {section === "settings" && <DashboardPlaceholder title="User Settings"/>}
     </StaffDashboardLayout>);
 }
-function OwnerDashboard({ username, onLogout, }) {
+function OwnerDashboard({ username, onLogout, petRecords = [] }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -156,7 +157,7 @@ function OwnerDashboard({ username, onLogout, }) {
     ];
     return (<StaffDashboardLayout username={username} onLogout={onLogout} roleLabel="Owner" dashboardClassName="paw-owner-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={asaPhoto} avatarAlt="Owner" avatarClassName="w-9 h-9 rounded-full bg-amber-300 flex items-center justify-center overflow-hidden border-2 border-orange-400" navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
     {section === "home" && <OwnerHomeSection username={username}/>}
-          {section === "records" && (<DashboardPlaceholder title="Pet Medical Records"/>)}
+          {section === "records" && <PetMedicalRecords records={petRecords}/>}
           {section === "sales" && <LegacySalesReports ownerView/>}
           {section === "settings" && <DashboardPlaceholder title="User Settings"/>}
     </StaffDashboardLayout>);
@@ -172,7 +173,7 @@ export default function Dashboard({ profileCompletion = null, ...props }) {
       <CompleteProfileModal email={profileCompletion.email} firstName={profileCompletion.first_name} middleName={profileCompletion.middle_name} lastName={profileCompletion.last_name} photoUrl={props.profile?.photoUrl}/>
     </>);
 }
-function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, flash }) {
+function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, flash }) {
     const { errors = {} } = usePage().props;
     const profiles = {
         customer: 'Karina',
@@ -190,7 +191,7 @@ function RoleDashboard({ role = 'customer', username: authenticatedUsername, own
     if (role === 'veterinarian')
         return <VeterinarianDashboard username={username} onLogout={logout} confirmedAppointments={confirmedAppointments} patientRecords={patientRecords}/>;
     if (role === 'owner')
-        return <OwnerDashboard username={username} onLogout={logout}/>;
+        return <OwnerDashboard username={username} onLogout={logout} petRecords={petRecords}/>;
     return <DashboardHome username={username} onLogout={logout} owner={owner} profile={profile} pets={pets} customerAppointments={customerAppointments} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
 }
 function DashboardHome({ username, onLogout, owner, profile, pets, customerAppointments, incomingAppointment, upcomingAppointmentCount, flash }) {
