@@ -12,12 +12,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 
 class DashboardController extends Controller
 {
     public function redirect(Request $request): RedirectResponse
     {
-        return redirect()->route('dashboard.role', ['role' => $request->user()->role]);
+        $user = $request->user();
+
+        if ($user->role === null) {
+            // Roles live in the `roles` table, linked by users.roleID. Without that column
+            // the database is missing the roles migration (2026_11_15_000000).
+            throw new RuntimeException(array_key_exists('roleID', $user->getAttributes())
+                ? "User #{$user->id} has no valid role (roleID {$user->roleID})."
+                : 'This database has not been migrated for roles: the users table has no roleID column. Run `php artisan migrate`, and check DB_CONNECTION in .env points to the database you expect (it is currently ['.config('database.default').']).');
+        }
+
+        return redirect()->route('dashboard.role', ['role' => $user->role]);
     }
 
     public function show(Request $request, string $role): Response|RedirectResponse
