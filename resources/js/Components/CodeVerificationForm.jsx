@@ -1,6 +1,8 @@
 import { router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import CodeInput from '@/Components/CodeInput';
+import { ErrorMessage, SubmitButton, SuccessMessage } from '@/Components/AuthUi';
+import { ui } from '@/Components/authStyles';
 
 /**
  * The "enter the 6-digit code" step shared by registration (VerifyCode) and
@@ -53,34 +55,26 @@ export default function CodeVerificationForm({ verifyUrl, resendUrl, resendAvail
 
     const complete = form.data.code.length === codeLength;
 
-    return (<form className="signin-form" onSubmit={submit}>
-      {flash?.success && <p className="verify-success" role="status">{flash.success}</p>}
+    return (<form className={ui.form} onSubmit={submit}>
+      {flash?.success && <SuccessMessage>{flash.success}</SuccessMessage>}
 
-      <div className="signin-field">
-        <span id="code-label" className="signin-label">Verification code</span>
+      <div className={ui.field}>
+        <span id="code-label" className={ui.label}>Verification code</span>
         <CodeInput ref={codeInput} length={codeLength} invalid={Boolean(form.errors.code)} labelledBy="code-label" onChange={handleCodeChange}/>
       </div>
 
-      {form.errors.code && (<p className="signin-error" role="alert">
-          <svg viewBox="0 0 20 20" aria-hidden="true" className="signin-error-icon">
-            <path fill="currentColor" d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm0 4a1 1 0 0 1 1 1v3.5a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1Zm0 8.75a1.1 1.1 0 1 1 0-2.2 1.1 1.1 0 0 1 0 2.2Z"/>
-          </svg>
-          <span>{form.errors.code}</span>
-        </p>)}
+      {form.errors.code && <ErrorMessage>{form.errors.code}</ErrorMessage>}
 
-      <button type="submit" className="signin-submit" disabled={form.processing || !complete} aria-busy={form.processing}>
-        {form.processing && <span className="signin-spinner" aria-hidden="true"/>}
-        <span>{form.processing ? 'Verifying…' : 'Verify'}</span>
-      </button>
+      <SubmitButton processing={form.processing} disabled={!complete} busyLabel="Verifying…">Verify</SubmitButton>
 
-      <div className="verify-resend">
+      <div className={ui.resend}>
         <span>Didn&apos;t get the code?</span>{' '}
-        <button type="button" className="verify-link-btn" onClick={resend} disabled={cooldown > 0 || resending}>
+        <button type="button" className={ui.linkButton} onClick={resend} disabled={cooldown > 0 || resending}>
           {resending ? 'Sending…' : cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
         </button>
-        {resendError && <p className="signin-field-error" role="alert">{resendError}</p>}
+        {resendError && <p className={ui.fieldError} role="alert">{resendError}</p>}
       </div>
 
-      {backLink && <div className="verify-back">{backLink}</div>}
+      {backLink && <div className={ui.center}>{backLink}</div>}
     </form>);
 }

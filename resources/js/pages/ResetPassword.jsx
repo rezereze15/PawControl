@@ -1,7 +1,8 @@
 import { Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import AuthLayout from '@/Components/AuthLayout';
-import { Field } from '@/Components/RegisterForm';
+import { Field, SubmitButton } from '@/Components/AuthUi';
+import { inputClass, ui } from '@/Components/authStyles';
 import dogImage from '../imports/logindog.png';
 
 /** Forgot password step 3: choose a new password (only reachable after a correct code). */
@@ -14,9 +15,9 @@ export default function ResetPassword() {
         form.post('/reset-password', { onError: () => form.reset('password', 'password_confirmation') });
     }
 
-    const bind = (field, id) => ({
+    const bind = (field, id, extraClass = '') => ({
         id,
-        className: 'signin-input',
+        className: inputClass(Boolean(form.errors[field]), extraClass),
         value: form.data[field],
         onChange: (event) => {
             form.setData(field, event.target.value);
@@ -27,11 +28,11 @@ export default function ResetPassword() {
     });
 
     return (<AuthLayout title="Choose a new password" image={dogImage} imageAlt="Puppies at a veterinary clinic" caption="Locked out? We'll get you back in a minute." kicker="Code verified" heading="Choose a new password" subtitle="Use at least 8 characters. You'll be asked to log in again afterwards.">
-      <form className="signin-form" onSubmit={submit}>
+      <form className={ui.form} onSubmit={submit}>
         <Field id="password" label="New password" required error={form.errors.password}>
-          <div className="signin-password">
-            <input type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="At least 8 characters" autoFocus required {...bind('password', 'password')}/>
-            <button type="button" className="signin-toggle" onClick={() => setShowPassword((shown) => !shown)} aria-pressed={showPassword} aria-controls="password password-confirmation">
+          <div className={ui.passwordWrap}>
+            <input type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="At least 8 characters" autoFocus required {...bind('password', 'password', ui.passwordInputPad)}/>
+            <button type="button" className={ui.toggle} onClick={() => setShowPassword((shown) => !shown)} aria-pressed={showPassword} aria-controls="password password-confirmation">
               {showPassword ? 'Hide' : 'Show'}
             </button>
           </div>
@@ -41,13 +42,10 @@ export default function ResetPassword() {
           <input type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Re-enter password" required {...bind('password_confirmation', 'password-confirmation')}/>
         </Field>
 
-        <button type="submit" className="signin-submit" disabled={form.processing} aria-busy={form.processing}>
-          {form.processing && <span className="signin-spinner" aria-hidden="true"/>}
-          <span>{form.processing ? 'Updating…' : 'Update password'}</span>
-        </button>
+        <SubmitButton processing={form.processing} busyLabel="Updating…">Update password</SubmitButton>
 
-        <p className="signin-footnote">
-          <Link href="/login" className="signin-link">Back to login</Link>
+        <p className={ui.footnote}>
+          <Link href="/login" className={ui.link}>Back to login</Link>
         </p>
       </form>
     </AuthLayout>);
