@@ -72,7 +72,7 @@ export default function RegisterForm() {
                     <input id="password-confirmation" type="password" autoComplete="new-password" placeholder="Confirm your password" value={form.data.password_confirmation} onChange={(event) => form.setData("password_confirmation", event.target.value)} required/>
                   </div>
     
-                  <button type="submit" className="login-btn" disabled={form.processing}>{form.processing ? "Creating Account..." : "Create Account"}</button>
+                  <button type="submit" className="login-btn" disabled={form.processing}>{form.processing ? "Sending code..." : "Create Account"}</button>
     
                   <p className="login-signup-text">
                     Already have an account? <a href="/login" className="login-signup-link">Log in</a>

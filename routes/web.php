@@ -13,7 +13,17 @@ Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1');
     Route::get('/register', [AuthController::class, 'showRegistration'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
+
+    // Email verification step (pending registration is identified via the session).
+    Route::get('/register/verify', [AuthController::class, 'showVerification'])->name('register.verify');
+    Route::post('/register/verify', [AuthController::class, 'verify'])
+        ->middleware('throttle:10,1')
+        ->name('register.verify.store');
+    Route::post('/register/resend', [AuthController::class, 'resend'])
+        ->middleware('throttle:4,1')
+        ->name('register.resend');
+    Route::post('/register/cancel', [AuthController::class, 'cancel'])->name('register.cancel');
 });
 
 Route::middleware('auth')->group(function (): void {
