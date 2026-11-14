@@ -1,141 +1,130 @@
+/* Register + VerifyCode extras on top of the shared auth card (AuthPage.css). */
 @import './login.css';
 
-.register-main {
-  padding-top: 36px;
-  padding-bottom: 36px;
+/* ── Register: wider card, multi-column field rows ── */
+.signin-card--wide {
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  width: min(100%, 1180px);
 }
 
-.register-card-outer {
-  width: 720px;
-  padding-bottom: 28px;
-}
+.register-form { gap: 16px; }
 
-.register-name-fields {
+.register-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
+}
+.register-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.register-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.register-grid .signin-field { min-width: 0; }
+
+.signin-optional {
+  margin-left: 6px;
+  color: #8a8f9c;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.register-name-fields .login-field {
-  min-width: 0;
+.signin-field-error {
+  margin: 0;
+  color: #c53030;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
-.register-name-fields input {
-  width: 100%;
+@media (max-width: 1040px) {
+  .register-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .register-grid--3 > :last-child { grid-column: 1 / -1; }
 }
 
-@media (max-width: 640px) {
-  .register-name-fields {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 860px) {
+  .signin-card--wide { grid-template-columns: 1fr; width: min(100%, 620px); }
 }
 
-@media (min-width: 641px) and (max-width: 900px) {
-  .register-card-outer {
-    max-width: 720px;
-  }
+@media (max-width: 560px) {
+  .register-grid--2,
+  .register-grid--3 { grid-template-columns: 1fr; }
 }
 
-/* Keep the full registration form readable within the reference card */
-.register-main { align-items: center; padding-top: 42px; padding-bottom: 42px; }
-.register-card-outer {
-  flex: 1 1 47%;
-  width: auto;
-  max-width: 760px;
-  padding: 24px 28px 30px;
-}
-.register-card-outer .login-badge-img { width: 96px; height: 96px; }
-.register-card-outer .login-card-inner { padding: 18px 24px 20px; }
-.register-card-outer .login-title { font-size: clamp(30px, 2.7vw, 44px); margin-bottom: 0; }
-.register-card-outer .login-form { gap: 8px; }
-.register-name-fields { grid-template-columns: 1fr; gap: 8px; }
-.register-card-outer .login-field { gap: 3px; }
-.register-card-outer .login-field label { font-size: 17px; }
-.register-card-outer .login-field input { min-height: 39px; font-size: 16px; }
-.register-card-outer .login-btn { margin-top: 5px; }
+/* ── Verify code step ── */
+.verify-email { color: #19043f; word-break: break-all; }
 
-@media (max-width: 900px) {
-  .register-card-outer { width: min(100%, 650px); max-width: none; }
-}
-@media (max-width: 640px) {
-  .register-card-outer { padding: 14px 18px 24px; }
-  .register-card-outer .login-card-inner { padding: 18px 16px; }
-}
-
-/* ---- Email verification code step ---- */
-.verify-intro { margin: 0; font-size: 17px; line-height: 1.45; color: #151b2a; }
-.verify-intro strong { word-break: break-all; }
-.verify-center { text-align: center; }
 .verify-success {
   margin: 0;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: #e8f7ee;
-  color: #1f6b3a;
-  font-size: 15px;
-}
-.verify-code-boxes {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px 0 4px;
-}
-.verify-code-box {
-  width: 52px;
-  height: 60px;
-  padding: 0;
-  border: 1.5px solid #222;
+  padding: 12px 14px;
+  border: 1px solid rgb(31 107 58 / 0.2);
   border-radius: 12px;
+  background: #effaf3;
+  color: #1f6b3a;
+  font-size: 14px;
+  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @starting-style { opacity: 0; }
+}
+
+.verify-code-boxes {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 420px;
+}
+
+.verify-code-box {
+  width: 100%;
+  aspect-ratio: 5 / 6;
+  min-height: 52px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1.5px solid #dcd8e8;
+  border-radius: 14px;
   background: #fff;
   color: #19043f;
-  font-size: 28px;
+  font: inherit;
+  font-size: 26px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   text-align: center;
+  caret-color: #45199a;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
-.verify-code-box:focus { border-color: #ffb84e; box-shadow: 0 0 0 3px rgba(255, 184, 78, 0.35); }
-.verify-code-box.has-error { border-color: #c53030; }
-.verify-submit { align-self: center; min-width: 140px; }
-.verify-submit:disabled { opacity: 0.55; cursor: not-allowed; }
-.verify-resend { text-align: center; font-size: 16px; color: #171717; }
+
+.verify-code-box[data-filled='true'] { border-color: #19043f; background: #faf9fd; }
+.verify-code-box:focus { border-color: #45199a; box-shadow: 0 0 0 4px rgb(69 25 154 / 0.12); }
+.verify-code-box[aria-invalid='true'] { border-color: #c53030; }
+
+.signin-submit:disabled:not([aria-busy='true']) {
+  cursor: not-allowed;
+  opacity: 0.45;
+  box-shadow: inset 0 -3px 0 #ffbb50;
+}
+
+.verify-resend {
+  color: #5d6475;
+  font-size: 15px;
+  text-align: center;
+}
+
+.verify-back { text-align: center; }
+
 .verify-link-btn {
   padding: 0;
   border: 0;
   background: none;
   color: #526eff;
   font: inherit;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms ease, color 150ms ease;
 }
-.verify-link-btn:hover:not(:disabled) { text-decoration: underline; }
-.verify-link-btn:disabled { color: #8a8f9c; cursor: not-allowed; }
+.verify-link-btn:hover:not(:disabled) { text-decoration-color: currentColor; }
+.verify-link-btn:focus-visible { outline: 2px solid #ffbb50; outline-offset: 2px; border-radius: 4px; }
+.verify-link-btn:disabled { color: #8a8f9c; cursor: not-allowed; font-variant-numeric: tabular-nums; }
+.verify-link-btn--muted { color: #5d6475; font-size: 15px; font-weight: 500; }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
   .verify-code-boxes { gap: 6px; }
-  .verify-code-box { width: 42px; height: 52px; font-size: 24px; }
+  .verify-code-box { font-size: 22px; border-radius: 12px; }
 }
-
-/* Same button design as the Login page (.login-screen .login-btn in login.css). */
-.register-main .login-btn {
-  min-width: 88px;
-  min-height: 42px;
-  padding: 7px 22px;
-  border: 2px solid #45199a;
-  border-radius: 999px;
-  background: #fff;
-  color: #19043f;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: 0 2px 5px rgb(25 4 63 / 10%);
-  transition: background-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
-}
-.register-main .login-btn:hover:not(:disabled) {
-  background: #45199a;
-  color: #fff;
-  box-shadow: 0 4px 10px rgb(69 25 154 / 24%);
-  transform: translateY(-1px);
-}
-.register-main .login-btn:focus-visible { outline: 3px solid #ffbb50; outline-offset: 3px; }
-.register-main .login-btn:disabled { opacity: 0.55; cursor: not-allowed; }

@@ -1,8 +1,7 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import AuthLayout from '@/Components/AuthLayout';
 import registerCatImage from '../imports/registerCat.png';
-import logoName from '../imports/Bigpaw_logoname-removebg-preview.png';
-import logoBadge from '../imports/BIGPAW_LOGO-removebg-preview.png';
 import '../../css/Register.css';
 
 export default function VerifyCode({ maskedEmail, resendAvailableIn, codeLength = 6 }) {
@@ -112,69 +111,42 @@ export default function VerifyCode({ maskedEmail, resendAvailableIn, codeLength 
 
     const complete = digits.every((digit) => digit !== '');
 
-    return (<div className="login-page">
-      <Head title="Check your email"/>
-      <header className="login-header">
-        <a href="/" className="login-logo">
-          <img src={logoName} alt="PawControl" className="login-logo-img"/>
-        </a>
-        <nav className="login-nav">
-          <a href="/">Home</a>
-          <a href="#">About Us</a>
-          <a href="#">Services</a>
-          <a href="#">How it works</a>
-        </nav>
-      </header>
+    return (<AuthLayout title="Check your email" image={registerCatImage} imageAlt="Cat at a veterinary clinic" caption="One quick step and your account is ready." kicker="Almost there" heading="Check your email" subtitle={<>We sent a 6-digit verification code to <strong className="verify-email">{maskedEmail}</strong>. It expires in 10 minutes.</>}>
+      <form className="signin-form" onSubmit={submit}>
+        {flash?.success && <p className="verify-success" role="status">{flash.success}</p>}
 
-      <div className="login-accent-bar"/>
-
-      <main className="login-main register-main">
-        <div className="login-photo-wrap">
-          <img src={registerCatImage} alt="Cat at a veterinary clinic" className="login-photo"/>
-        </div>
-
-        <div className="login-card-outer register-card-outer">
-          <div className="login-badge">
-            <img src={logoBadge} alt="Big Paws Animal Clinic" className="login-badge-img"/>
-          </div>
-
-          <div className="login-card-inner">
-            <h1 className="login-title">Check your email</h1>
-            <div className="login-divider"/>
-
-            <form className="login-form" onSubmit={submit}>
-              <p className="verify-intro">
-                We sent a verification code to <strong>{maskedEmail}</strong>. Enter it below to finish creating your account.
-              </p>
-
-              {flash?.success && <p className="verify-success" role="status">{flash.success}</p>}
-
-              <div className="verify-code-boxes" role="group" aria-label="Verification code">
-                {digits.map((digit, index) => (<input key={index} ref={(el) => { inputs.current[index] = el; }} className={`verify-code-box${form.errors.code ? ' has-error' : ''}`} type="text" inputMode="numeric" pattern="[0-9]*" autoComplete={index === 0 ? 'one-time-code' : 'off'} autoFocus={index === 0} maxLength={codeLength} aria-label={`Digit ${index + 1}`} value={digit} onChange={(event) => handleChange(index, event)} onKeyDown={(event) => handleKeyDown(index, event)} onPaste={(event) => handlePaste(index, event)} onFocus={(event) => event.target.select()}/>))}
-              </div>
-
-              {form.errors.code && <p className="login-error verify-center" role="alert">{form.errors.code}</p>}
-
-              <button type="submit" className="login-btn verify-submit" disabled={form.processing || !complete}>
-                {form.processing ? 'Verifying...' : 'Verify'}
-              </button>
-
-              <div className="verify-resend">
-                <span>Didn&apos;t get the code?</span>{' '}
-                <button type="button" className="verify-link-btn" onClick={resend} disabled={cooldown > 0 || resending}>
-                  {resending ? 'Sending...' : cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
-                </button>
-                {resendError && <p className="login-error" role="alert">{resendError}</p>}
-              </div>
-
-              <p className="login-signup-text">
-                <Link href="/register/cancel" method="post" as="button" className="verify-link-btn">
-                  ← Back / use a different email
-                </Link>
-              </p>
-            </form>
+        <div className="signin-field">
+          <span id="code-label" className="signin-label">Verification code</span>
+          <div className="verify-code-boxes" role="group" aria-labelledby="code-label">
+            {digits.map((digit, index) => (<input key={index} ref={(el) => { inputs.current[index] = el; }} className="verify-code-box" data-filled={digit !== ''} aria-invalid={Boolean(form.errors.code)} type="text" inputMode="numeric" pattern="[0-9]*" autoComplete={index === 0 ? 'one-time-code' : 'off'} autoFocus={index === 0} maxLength={codeLength} aria-label={`Digit ${index + 1}`} value={digit} onChange={(event) => handleChange(index, event)} onKeyDown={(event) => handleKeyDown(index, event)} onPaste={(event) => handlePaste(index, event)} onFocus={(event) => event.target.select()}/>))}
           </div>
         </div>
-      </main>
-    </div>);
+
+        {form.errors.code && (<p className="signin-error" role="alert">
+            <svg viewBox="0 0 20 20" aria-hidden="true" className="signin-error-icon">
+              <path fill="currentColor" d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm0 4a1 1 0 0 1 1 1v3.5a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1Zm0 8.75a1.1 1.1 0 1 1 0-2.2 1.1 1.1 0 0 1 0 2.2Z"/>
+            </svg>
+            <span>{form.errors.code}</span>
+          </p>)}
+
+        <button type="submit" className="signin-submit" disabled={form.processing || !complete} aria-busy={form.processing}>
+          {form.processing && <span className="signin-spinner" aria-hidden="true"/>}
+          <span>{form.processing ? 'Verifying…' : 'Verify'}</span>
+        </button>
+
+        <div className="verify-resend">
+          <span>Didn&apos;t get the code?</span>{' '}
+          <button type="button" className="verify-link-btn" onClick={resend} disabled={cooldown > 0 || resending}>
+            {resending ? 'Sending…' : cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
+          </button>
+          {resendError && <p className="signin-field-error" role="alert">{resendError}</p>}
+        </div>
+
+        <div className="verify-back">
+          <Link href="/register/cancel" method="post" as="button" className="verify-link-btn verify-link-btn--muted">
+            ← Back / use a different email
+          </Link>
+        </div>
+      </form>
+    </AuthLayout>);
 }
