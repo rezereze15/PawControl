@@ -86,7 +86,7 @@ function AdminHomeSection({ username, stats = {}, roles = [], usersByRole = [], 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         <StatCard icon={usersIcon} label="Total Users" value={display(stats.totalUsers)} note={`${display(stats.activeUsers)} active`} onAction={() => go("users")}/>
-        <StatCard icon={servicesIcon} label="Active Services" value={display(stats.activeServices)} onAction={() => go("services")}/>
+        <StatCard icon={servicesIcon} label="Active Services" value={display(stats.activeServices)} note={`of ${display(stats.totalServices)} total`} onAction={() => go("services")}/>
         <StatCard icon={suppliesIcon} label="Medical Supplies" value={display(stats.totalSupplies)} onAction={() => go("supplies")}/>
         <StatCard icon={lowStockIcon} iconBg="bg-orange-100" label="Low Stock Alerts" value={display(stats.lowStockCount)} actionLabel="View" highlight={hasLowStock} onAction={() => go("supplies")}/>
       </div>

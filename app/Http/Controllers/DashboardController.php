@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Pet;
 use App\Models\Role;
+use App\Models\Service;
 use App\Models\User;
 use App\Support\RegistrationRules;
 use Illuminate\Http\RedirectResponse;
@@ -244,6 +245,8 @@ class DashboardController extends Controller
             'adminStats' => [
                 'totalUsers' => (int) $roleCounts->sum(),
                 'activeUsers' => User::query()->where('status', User::STATUS_ACTIVE)->count(),
+                'activeServices' => Service::query()->where('is_active', true)->count(),
+                'totalServices' => Service::query()->count(),
             ],
             'usersByRole' => $roleCounts
                 ->filter()
