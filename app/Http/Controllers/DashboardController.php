@@ -56,6 +56,7 @@ class DashboardController extends Controller
             'clerk' => $this->clerkProps(),
             'veterinarian' => $this->veterinarianProps(),
             'owner' => $this->ownerProps(),
+            'admin' => $this->adminProps(),
             default => [],
         };
 
@@ -218,6 +219,37 @@ class DashboardController extends Controller
             ->get();
 
         return ['petRecords' => $pets->map(fn (Pet $pet) => $this->petRecord($pet))->values()];
+    }
+
+    /** @return array<string, mixed> */
+    private function adminProps(): array
+    {
+        // One query that counts users per role, e.g. ['customer' => 15, 'clerk' => 3, ...]
+        $roleCounts = User::query()
+            ->selectRaw('role, COUNT(*) as total')
+            ->groupBy('role')
+            ->pluck('total', 'role');
+
+        return [
+            'adminStats' => [
+                'totalUsers' => (int) $roleCounts->sum(),
+                'activeUsers' => User::query()->where('status', 'Active')->count(),
+            ],
+            'usersByRole' => $roleCounts
+                ->map(fn ($total, $role) => ['role' => $role, 'count' => (int) $total])
+                ->values(),
+            // Only what the screen shows: no emails, phones, or other personal details.
+            'recentUsers' => User::query()
+                ->latest()
+                ->limit(5)
+                ->get(['id', 'name', 'role', 'created_at'])
+                ->map(fn (User $user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'role' => $user->role,
+                    'createdAt' => $user->created_at?->toIso8601String(),
+                ]),
+        ];
     }
 
     /**

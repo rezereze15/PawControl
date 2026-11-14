@@ -6,7 +6,7 @@ import AdminHomeSection from './components/AdminHomeSection';
 import AdminManageUsers from './modules/ManageUsers';
 import DashboardPlaceholder from '../shared/dashboard/Placeholder';
 export { DashboardPlaceholder as AdminPlaceholder };
-export default function AdminDashboard({ username, onLogout, }) {
+export default function AdminDashboard({ username, onLogout, stats, usersByRole, recentUsers }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -50,7 +50,7 @@ export default function AdminDashboard({ username, onLogout, }) {
         },
     ];
     return (<StaffDashboardLayout username={username} roleLabel="Admin" dashboardClassName="paw-admin-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={chaewonPhoto} avatarAlt="" avatarClassName="w-9 h-9 rounded-full bg-rose-400 flex items-center justify-center overflow-hidden border-2 border-orange-400" navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
-    {section === "home" && <AdminHomeSection username={username}/>}
+    {section === "home" && <AdminHomeSection username={username} stats={stats} usersByRole={usersByRole} recentUsers={recentUsers} onNavigate={setSection}/>}
           {section === "services" && <DashboardPlaceholder title="Manage Services"/>}
           {section === "supplies" && <DashboardPlaceholder title="Manage Medical Supplies"/>}
           {section === "users" && <AdminManageUsers />}
