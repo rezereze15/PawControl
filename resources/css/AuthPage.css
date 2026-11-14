@@ -12,14 +12,15 @@
   --danger: #c53030;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
-  background:
-    radial-gradient(900px 480px at 100% 0%, rgb(255 187 80 / 0.10), transparent 60%),
-    radial-gradient(800px 520px at 0% 100%, rgb(69 25 154 / 0.08), transparent 60%),
-    #f7f6fb;
+  /* Same wash as the landing hero; glows + paw prints come from <PawBackdrop />. */
+  background: linear-gradient(180deg, #fbfaff 0%, #fdfcff 55%, #fff 100%);
   color: var(--ink);
 }
 
 .signin-main {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,6 +31,8 @@
 
 /* ── Card ── */
 .signin-card {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   width: min(100%, 1060px);

@@ -17,6 +17,10 @@ export default defineConfig({
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
                 }),
+                bunny('Plus Jakarta Sans', {
+                    weights: [500, 600],
+                    fallbacks: ['system-ui', 'sans-serif'],
+                }),
             ],
         }),
         inertia(),

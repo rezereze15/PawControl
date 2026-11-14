@@ -413,3 +413,10 @@ body,
   .login-screen .login-signup-text { font-size: 14px; }
   .login-screen .login-forgot-password { font-size: 14px; }
 }
+
+/* Nav link typeface, matches the landing page. */
+.login-nav a {
+  font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}

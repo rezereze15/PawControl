@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import PawBackdrop from './PawBackdrop';
 import logoName from '../imports/Bigpaw_logoname-removebg-preview.png';
 import logoBadge from '../imports/BIGPAW_LOGO-removebg-preview.png';
 import '../../css/login.css';
@@ -26,6 +27,7 @@ export default function AuthLayout({ title, image, imageAlt, eyebrow = 'Big Paws
       <div className="login-accent-bar"/>
 
       <main className="signin-main">
+        <PawBackdrop />
         <section className={`signin-card${wide ? ' signin-card--wide' : ''}`} aria-labelledby="signin-title">
           <aside className="signin-visual">
             <img src={image} alt={imageAlt} className="signin-visual-img"/>

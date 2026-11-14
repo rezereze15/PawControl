@@ -1,0 +1,77 @@
+/* Decorative glow + dot grid + paw prints. Used by Components/PawBackdrop.jsx
+   (landing hero and auth pages). The parent needs position:relative + overflow:clip. */
+.paw-backdrop {
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Soft colour fields */
+.paw-glow {
+  position: absolute;
+  border-radius: 999px;
+  will-change: transform;
+  animation: paw-drift 22s var(--ease-in-out) infinite alternate;
+}
+.paw-glow--violet {
+  top: -260px;
+  left: -220px;
+  width: 760px;
+  height: 760px;
+  background: radial-gradient(closest-side, rgb(69 25 154 / 0.14), rgb(69 25 154 / 0.05) 55%, transparent);
+}
+.paw-glow--gold {
+  top: 4%;
+  right: -180px;
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(closest-side, rgb(255 187 80 / 0.30), rgb(242 139 55 / 0.10) 50%, transparent);
+  animation-duration: 26s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes paw-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(40px, 28px, 0); }
+}
+
+/* Faint dot grid, faded out towards the edges */
+.paw-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgb(25 4 63 / 0.16) 1.2px, transparent 1.4px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 70% 55% at 30% 30%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 55% at 30% 30%, #000 0%, transparent 75%);
+  opacity: 0.55;
+}
+
+/* Scattered paw prints */
+.paw-print {
+  position: absolute;
+  color: var(--navy);
+  opacity: 0.05;
+}
+.paw-print--1 { top: 9%;  left: 3%;   width: 72px;  rotate: -18deg; }
+.paw-print--2 { top: 46%; left: 41%;  width: 46px;  rotate: 14deg; opacity: 0.04; }
+.paw-print--3 { top: 7%;  left: 47%;  width: 38px;  rotate: 28deg; color: var(--orange); opacity: 0.12; }
+.paw-print--4 { top: 63%; left: 6%;   width: 54px;  rotate: 22deg; color: var(--orange); opacity: 0.1; }
+.paw-print--5 { top: 4%;  right: 4%;  width: 60px;  rotate: -24deg; }
+.paw-print--6 { bottom: 6%; right: 9%; width: 84px; rotate: 12deg; opacity: 0.04; }
+
+@media (max-width: 900px) {
+  .paw-glow--violet { width: 520px; height: 520px; }
+  .paw-glow--gold { width: 600px; height: 600px; right: -240px; top: 30%; }
+  .paw-print--2, .paw-print--3 { display: none; }
+}
+
+@media (max-width: 640px) {
+  .paw-print--1, .paw-print--5, .paw-print--6 { width: 44px; }
+  .paw-dots { mask-image: radial-gradient(ellipse 90% 40% at 50% 20%, #000 0%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse 90% 40% at 50% 20%, #000 0%, transparent 75%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paw-glow { animation: none; }
+}

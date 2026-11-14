@@ -550,3 +550,61 @@ body {
   .paw-steps { gap: 12px; }
   .paw-dash { transform: rotate(90deg); padding: 0; }
 }
+
+/* ── Background surface (hero + features) ─────────── */
+.paw-surface {
+  position: relative;
+  isolation: isolate;
+  overflow: clip; /* clip decorative layers without creating a scroll container */
+  background: linear-gradient(180deg, #fbfaff 0%, #fdfcff 55%, #fff 100%);
+}
+
+.paw-surface > .paw-hero,
+.paw-surface > .paw-features { position: relative; z-index: 1; }
+.paw-features { background: transparent; }
+
+/* Warm spotlight behind the pets so the orange blob sits in light, not on white */
+.paw-hero-img-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 6% 4%;
+  z-index: 0;
+  border-radius: 999px;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.55) 55%, transparent);
+}
+
+/* Features card reads as a raised surface over the backdrop */
+.paw-features-card {
+  border: 1px solid rgb(25 4 63 / 0.06);
+  background: rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 1px 2px rgb(25 4 63 / 0.05), 0 24px 60px -18px rgb(25 4 63 / 0.22);
+}
+
+/* ── How it works band ────────────────────────────── */
+.paw-how-band {
+  position: relative;
+  background:
+    radial-gradient(900px 360px at 50% 0%, rgb(69 25 154 / 0.07), transparent 70%),
+    linear-gradient(180deg, #fff 0%, #f7f5fc 18%, #f7f5fc 100%);
+}
+.paw-how-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgb(25 4 63 / 0.12) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.paw-how-band > .paw-how { position: relative; }
+.paw-step-icon { box-shadow: 0 0 0 6px #fff, 0 10px 24px -10px rgb(25 4 63 / 0.25); }
+
+/* Nav link typeface (loaded via bunny() in vite.config). */
+.paw-nav-links a {
+  font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}

@@ -1,6 +1,7 @@
 import FeatureItem from '@/pages/Public/components/FeatureItem';
 import ProcessStep from '@/pages/Public/components/ProcessStep';
 import SocialIcon from '@/pages/Public/components/SocialIcon';
+import PawBackdrop from '@/Components/PawBackdrop';
 import petImage from '../imports/landingpagepet.png';
 import logoName from '../imports/Bigpaw_logoname-removebg-preview.png';
 import pawLogo from '../imports/pawlogo.png';
@@ -22,6 +23,9 @@ export default function App() {
         </div>
         <div className="paw-nav-border"/>
       </nav>
+
+      <div className="paw-surface">
+        <PawBackdrop />
 
       {/* HERO */}
       <section className="paw-hero">
@@ -55,7 +59,10 @@ export default function App() {
         </div>
       </section>
 
+      </div>
+
       {/* HOW IT WORKS */}
+      <div className="paw-how-band">
       <section className="paw-how">
         <p className="paw-section-label">How it Works</p>
         <h2>Simple steps for the Appointment</h2>
@@ -71,6 +78,7 @@ export default function App() {
           <ProcessStep n={5} icon={<HeartIcon />} bg="#EDE9F8" label="Wait for Approval" desc="Wait for the approval of your appointment in your email"/>
         </div>
       </section>
+      </div>
 
       {/* FOOTER */}
       <footer className="paw-footer">
