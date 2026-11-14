@@ -4,15 +4,6 @@
 
 const DASH = "—";
 
-// Role keys stored in the users.role column -> label shown on screen.
-const ROLE_LABELS = {
-    customer: "Customer",
-    clerk: "Clerk",
-    veterinarian: "Veterinarian",
-    owner: "Owner",
-    admin: "Admin",
-};
-
 // Shows a dash until a real number arrives, otherwise formats it (e.g. 1,250).
 function display(value) {
     return value === null || value === undefined ? DASH : Number(value).toLocaleString();
@@ -73,8 +64,12 @@ const lowStockIcon = (<svg className="w-10 h-10" viewBox="0 0 24 24" fill="none"
     <path d="M12 10v4M12 17h.01" strokeLinecap="round"/>
   </svg>);
 
-function AdminHomeSection({ username, stats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], onNavigate, }) {
+function AdminHomeSection({ username, stats = {}, roles = [], usersByRole = [], recentUsers = [], lowStockSupplies = [], onNavigate, }) {
     const go = (section) => onNavigate?.(section);
+
+    // Role labels come from the backend (Role::LABELS), e.g. { customer: "Pet Owner", ... },
+    // so the home screen and Manage Users always show the same names.
+    const roleLabels = Object.fromEntries(roles.map((r) => [r.name, r.label]));
 
     // Turn [{ role: "clerk", count: 3 }, ...] into { clerk: 3, ... } for quick lookup.
     const roleCounts = Object.fromEntries(usersByRole.map((r) => [r.role, r.count]));
@@ -100,10 +95,10 @@ function AdminHomeSection({ username, stats = {}, usersByRole = [], recentUsers 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <Panel title="Users by Role">
           <div className="flex flex-col gap-3">
-            {Object.entries(ROLE_LABELS).map(([role, label]) => {
-            const count = roleCounts[role] ?? 0;
-            return (<div key={role} className="flex items-center gap-3 text-sm">
-                  <span className="w-24 text-gray-600 flex-shrink-0">{label}</span>
+            {roles.length === 0 ? (<EmptyState message="No roles yet."/>) : roles.map((role) => {
+            const count = roleCounts[role.name] ?? 0;
+            return (<div key={role.id} className="flex items-center gap-3 text-sm">
+                  <span className="w-28 text-gray-600 flex-shrink-0">{role.label}</span>
                   <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-full bg-[#3b0f8c] rounded-full" style={{ width: `${(count / maxRoleCount) * 100}%` }}/>
                   </div>
@@ -120,7 +115,7 @@ function AdminHomeSection({ username, stats = {}, usersByRole = [], recentUsers 
               {recentUsers.map((user) => (<li key={user.id} className="flex items-center justify-between gap-3 py-2.5">
                   <div className="min-w-0">
                     <p className="font-bold text-[#1a0a3c] text-sm truncate">{user.name}</p>
-                    <p className="text-gray-500 text-xs">{ROLE_LABELS[user.role] ?? user.role}</p>
+                    <p className="text-gray-500 text-xs">{roleLabels[user.role] ?? user.role}</p>
                   </div>
                   <span className="text-gray-400 text-xs flex-shrink-0">{formatDate(user.createdAt)}</span>
                 </li>))}

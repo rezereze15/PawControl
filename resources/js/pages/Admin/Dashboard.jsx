@@ -53,7 +53,7 @@ export default function AdminDashboard({ username, onLogout, profile, stats, use
     ];
     return (<StaffDashboardLayout username={username} roleLabel="Admin" dashboardClassName="paw-admin-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
           <FlashToast message={flash?.success}/>
-    {section === "home" && <AdminHomeSection username={username} stats={stats} usersByRole={usersByRole} recentUsers={recentUsers} onNavigate={setSection}/>}
+    {section === "home" && <AdminHomeSection username={username} stats={stats} roles={roles} usersByRole={usersByRole} recentUsers={recentUsers} onNavigate={setSection}/>}
           {section === "services" && <DashboardPlaceholder title="Manage Services"/>}
           {section === "supplies" && <DashboardPlaceholder title="Manage Medical Supplies"/>}
           {section === "users" && <AdminManageUsers users={managedUsers} roles={roles} currentUserId={profile?.id}/>}
