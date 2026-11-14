@@ -2,11 +2,12 @@ import { useState } from 'react';
 import StaffDashboardLayout from '@/Layouts/StaffDashboardLayout';
 import StaffHomeSection from './components/StaffHomeSection';
 import { PersonIcon } from '../shared/dashboard/Icons';
-import { bigpawLogo, maloiPhoto } from '../shared/dashboard/assets';
+import { bigpawLogo } from '../shared/dashboard/assets';
 import { ClerkPlaceholder } from '../shared/dashboard/Placeholder';
 import { ClerkAppointments } from './modules/Appointments';
 import FlashToast from '@/Components/FlashToast';
-export default function ClerkDashboard({ username, onLogout, upcomingAppointments = [], flash, errors = {} }) {
+import UserSettings from '../Customer/modules/UserSettings';
+export default function ClerkDashboard({ username, onLogout, profile, upcomingAppointments = [], flash, errors = {} }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -48,13 +49,13 @@ export default function ClerkDashboard({ username, onLogout, upcomingAppointment
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<StaffDashboardLayout username={username} roleLabel="Clerk" dashboardClassName="paw-clerk-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={maloiPhoto} avatarAlt="" avatarClassName="w-9 h-9 rounded-full bg-teal-500 flex items-center justify-center overflow-hidden border-2 border-orange-400" navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+    return (<StaffDashboardLayout username={username} roleLabel="Clerk" dashboardClassName="paw-clerk-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
         <FlashToast message={flash?.success}/>
         <FlashToast message={errors.appointment} tone="error" title="Could not update appointment"/>
         {section === "home" && (<StaffHomeSection username={username} role="Clerk"/>)}
           {section === "records" && (<ClerkPlaceholder title="Pet Medical Records"/>)}
           {section === "appointments" && <ClerkAppointments appointments={upcomingAppointments}/>}
           {section === "billings" && <ClerkPlaceholder title="Billings"/>}
-          {section === "settings" && <ClerkPlaceholder title="User Settings"/>}
+          {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }

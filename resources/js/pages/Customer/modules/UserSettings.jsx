@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "@inertiajs/react";
 import { PersonIcon } from "../../shared/dashboard/Icons";
+import UserAvatar from "@/Components/UserAvatar";
 
+const ROLE_LABELS = { admin: "Admin", owner: "Clinic Owner", veterinarian: "Veterinarian", clerk: "Clerk", customer: "Pet Owner" };
 const input = "w-full rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c]";
 const readOnly = "w-full rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-500";
 
@@ -33,7 +35,7 @@ function PasswordInput({ id, label, value, onChange, error, autoComplete, placeh
     </div>);
 }
 
-export default function UserSettings({ profile = {}, fallbackAvatar }) {
+export default function UserSettings({ profile = {} }) {
     const fileInput = useRef(null);
     const [preview, setPreview] = useState(null);
     const photo = useForm({ photo: null });
@@ -83,7 +85,7 @@ export default function UserSettings({ profile = {}, fallbackAvatar }) {
         });
     }
 
-    const avatar = preview || profile.photoUrl || fallbackAvatar;
+    const avatar = preview || profile.photoUrl;
     const addressChanged = address.data.address.trim() !== (profile.address ?? "").trim();
 
     return (<div className="flex flex-col gap-6">
@@ -100,7 +102,9 @@ export default function UserSettings({ profile = {}, fallbackAvatar }) {
           <div className="flex flex-col gap-6 md:flex-row">
             <div className="flex flex-col items-center gap-3">
               <div className="relative">
-                <img src={avatar} alt="Your profile photo" className="h-32 w-32 rounded-full border-4 border-white object-cover shadow"/>
+                <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow" role="img" aria-label="Your profile photo">
+                  <UserAvatar photoUrl={avatar} name={profile.name} textClassName="text-5xl"/>
+                </div>
                 <button type="button" onClick={() => fileInput.current?.click()} aria-label="Choose a new profile photo" className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#1a0a3c] text-white shadow hover:bg-[#3b0f8c] focus:outline-none focus:ring-2 focus:ring-violet-300">
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 </button>
@@ -119,13 +123,13 @@ export default function UserSettings({ profile = {}, fallbackAvatar }) {
               <ReadOnlyField label="Username" value={profile.username}/>
               <ReadOnlyField label="Email Address" value={profile.email}/>
               <ReadOnlyField label="Contact Number" value={profile.phone}/>
-              <ReadOnlyField label="Role" value={profile.role === "customer" ? "Pet Owner" : profile.role}/>
+              <ReadOnlyField label="Role" value={ROLE_LABELS[profile.role] ?? profile.role}/>
               <label className="flex min-w-0 flex-col gap-1 sm:col-span-2">
                 <span className="text-xs font-bold text-[#1a0a3c]">Address</span>
                 <input className={input} value={address.data.address} onChange={(event) => address.setData("address", event.target.value)} maxLength={255} autoComplete="street-address" placeholder="House no., street, barangay, city" required/>
                 <FieldError message={address.errors.address}/>
               </label>
-              <p className="text-[11px] text-gray-400 sm:col-span-2">To change your name, email or contact number, please ask the clinic staff.</p>
+              <p className="text-[11px] text-gray-400 sm:col-span-2">To change your name, email or contact number, please ask {profile.role === "customer" ? "the clinic staff" : profile.role === "admin" ? "another admin" : "an admin"}.</p>
               <div className="flex justify-end sm:col-span-2">
                 <button type="submit" disabled={!addressChanged || address.processing} className="rounded-lg bg-[#3b0f8c] px-6 py-2 text-xs font-bold text-white hover:bg-[#2d0a6e] disabled:cursor-not-allowed disabled:opacity-50">{address.processing ? "Saving…" : "Save Changes"}</button>
               </div>

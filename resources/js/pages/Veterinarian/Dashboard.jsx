@@ -2,11 +2,12 @@ import { useState } from 'react';
 import StaffDashboardLayout from '@/Layouts/StaffDashboardLayout';
 import StaffHomeSection from '../Clerk/components/StaffHomeSection';
 import { PersonIcon } from '../shared/dashboard/Icons';
-import { bigpawLogo, haerinPhoto } from '../shared/dashboard/assets';
-import { ClerkPlaceholder } from '../shared/dashboard/Placeholder';
+import { bigpawLogo } from '../shared/dashboard/assets';
+import FlashToast from '@/Components/FlashToast';
+import UserSettings from '../Customer/modules/UserSettings';
 import VetAppointments from './modules/VetAppointments';
 import PatientRecords from './modules/PatientRecords';
-export default function VeterinarianDashboard({ username, onLogout, confirmedAppointments = [], patientRecords = [] }) {
+export default function VeterinarianDashboard({ username, onLogout, profile, flash, confirmedAppointments = [], patientRecords = [] }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -39,10 +40,11 @@ export default function VeterinarianDashboard({ username, onLogout, confirmedApp
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<StaffDashboardLayout username={username} roleLabel="Veterinarian" dashboardClassName="paw-vet-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={haerinPhoto} avatarAlt="Haerin" avatarClassName="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center overflow-hidden border-2 border-orange-400" navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+    return (<StaffDashboardLayout username={username} roleLabel="Veterinarian" dashboardClassName="paw-vet-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+        <FlashToast message={flash?.success}/>
         {section === "home" && (<StaffHomeSection username={username} role="Veterinarian"/>)}
           {section === "records" && <PatientRecords patients={patientRecords}/>}
           {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords}/>}
-          {section === "settings" && <ClerkPlaceholder title="User Settings"/>}
+          {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }

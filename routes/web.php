@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -7,8 +8,8 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\ProfileCompletionController;
-use App\Http\Middleware\EnsureProfileIsComplete;
 use App\Http\Controllers\UserSettingsController;
+use App\Http\Middleware\EnsureProfileIsComplete;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'landingpage')->name('home');
@@ -93,6 +94,13 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
     Route::put('/settings/password', [UserSettingsController::class, 'updatePassword'])
         ->middleware('throttle:6,1')
         ->name('settings.password.update');
+
+    // Admin: manage user accounts and roles.
+    Route::middleware('role:admin')->prefix('admin/users')->name('admin.users.')->group(function (): void {
+        Route::post('/', [AdminUserController::class, 'store'])->name('store');
+        Route::put('/{user}', [AdminUserController::class, 'update'])->name('update');
+        Route::patch('/{user}/status', [AdminUserController::class, 'updateStatus'])->name('status');
+    });
 
     Route::get('/dashboard', [DashboardController::class, 'redirect'])
         ->withoutMiddleware(EnsureProfileIsComplete::class)

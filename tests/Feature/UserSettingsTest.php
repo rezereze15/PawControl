@@ -8,6 +8,7 @@ use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class UserSettingsTest extends TestCase
@@ -49,6 +50,50 @@ class UserSettingsTest extends TestCase
 
         $this->actingAs($user)->get(route('settings.photo.show'))
             ->assertRedirect(self::SUPABASE.'/storage/v1/object/sign/profile-photos/x.png?token=abc');
+    }
+
+    public function test_every_role_can_view_and_update_their_own_settings(): void
+    {
+        foreach (['customer', 'clerk', 'veterinarian', 'owner', 'admin'] as $role) {
+            // Each user gets a fresh browser session, as in real life.
+            $this->flushSession();
+            $user = User::factory()->create([
+                'role' => $role,
+                'status' => 'Active',
+                'username' => "{$role}-user",
+                'address' => 'Old address',
+                'password' => Hash::make('oldpass123'),
+            ]);
+
+            // The dashboard sends the settings page its data.
+            $this->actingAs($user)
+                ->get(route('dashboard.role', ['role' => $role]))
+                ->assertInertia(fn (Assert $page) => $page
+                    ->where('profile.id', $user->id)
+                    ->where('profile.username', "{$role}-user")
+                    ->where('profile.address', 'Old address')
+                    ->where('profile.role', $role));
+
+            $this->actingAs($user)
+                ->put(route('settings.address.update'), ['address' => "New {$role} address"])
+                ->assertSessionHasNoErrors();
+            $this->actingAs($user)
+                ->post(route('settings.photo.update'), ['photo' => $this->png()])
+                ->assertSessionHasNoErrors();
+            $this->actingAs($user)
+                ->put(route('settings.password.update'), [
+                    'current_password' => 'oldpass123',
+                    'password' => 'newpass123',
+                    'password_confirmation' => 'newpass123',
+                ])
+                ->assertSessionHasNoErrors();
+
+            $user->refresh();
+            $this->assertSame("New {$role} address", $user->address, $role);
+            $this->assertNotNull($user->profile_photo_path, $role);
+            $this->assertTrue(Hash::check('newpass123', $user->password), $role);
+            $this->assertSame($role, $user->role, 'Settings never change the role.');
+        }
     }
 
     public function test_profile_photo_must_be_an_image(): void
@@ -104,6 +149,14 @@ class UserSettingsTest extends TestCase
     }
 
     /** @param array<string, mixed> $attributes */
+    private function png(): UploadedFile
+    {
+        return UploadedFile::fake()->createWithContent(
+            'me.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='),
+        );
+    }
+
     private function makeCustomer(array $attributes = []): User
     {
         return User::factory()->create(['role' => 'customer', 'status' => 'Active', ...$attributes]);
