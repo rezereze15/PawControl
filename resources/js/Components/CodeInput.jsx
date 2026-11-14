@@ -1,5 +1,5 @@
 import { useImperativeHandle, useRef, useState } from 'react';
-import '../../css/CodeVerification.css';
+import { codeBoxClass, ui } from '@/Components/authStyles';
 
 /**
  * Six separate digit boxes with auto-advance, Backspace to the previous box,
@@ -82,7 +82,7 @@ export default function CodeInput({ ref, length = 6, invalid = false, labelledBy
         fillFrom(index, event.clipboardData.getData('text'));
     }
 
-    return (<div className="verify-code-boxes" role="group" aria-labelledby={labelledBy}>
-      {digits.map((digit, index) => (<input key={index} ref={(el) => { inputs.current[index] = el; }} className="verify-code-box" data-filled={digit !== ''} aria-invalid={invalid} type="text" inputMode="numeric" pattern="[0-9]*" autoComplete={index === 0 ? 'one-time-code' : 'off'} autoFocus={index === 0} maxLength={length} aria-label={`Digit ${index + 1}`} value={digit} onChange={(event) => handleChange(index, event)} onKeyDown={(event) => handleKeyDown(index, event)} onPaste={(event) => handlePaste(index, event)} onFocus={(event) => event.target.select()}/>))}
+    return (<div className={ui.codeBoxes} role="group" aria-labelledby={labelledBy}>
+      {digits.map((digit, index) => (<input key={index} ref={(el) => { inputs.current[index] = el; }} className={codeBoxClass({ invalid, filled: digit !== '' })} aria-invalid={invalid} type="text" inputMode="numeric" pattern="[0-9]*" autoComplete={index === 0 ? 'one-time-code' : 'off'} autoFocus={index === 0} maxLength={length} aria-label={`Digit ${index + 1}`} value={digit} onChange={(event) => handleChange(index, event)} onKeyDown={(event) => handleKeyDown(index, event)} onPaste={(event) => handlePaste(index, event)} onFocus={(event) => event.target.select()}/>))}
     </div>);
 }

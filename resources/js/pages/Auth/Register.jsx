@@ -2,7 +2,7 @@ import RegisterForm from '@/Components/RegisterForm';
 import registerCatImage from '../../imports/registerCat.png';
 import logoName from '../../imports/Bigpaw_logoname-removebg-preview.png';
 import logoBadge from '../../imports/BIGPAW_LOGO-removebg-preview.png';
-import '../../../css/Register.css';
+import '../../../css/login.css';
 export default function Register() {
     return (<div className="login-page">
       <header className="login-header">

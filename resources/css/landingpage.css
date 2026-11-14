@@ -17,7 +17,11 @@ html, body, #root {
   --muted: #6B7280;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* Inside Tailwind's base layer so utilities (p-4, mt-2, …) can override it.
+   Unlayered, this reset beat every Tailwind padding/margin class on every page. */
+@layer base {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+}
 
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;

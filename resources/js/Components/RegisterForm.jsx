@@ -1,18 +1,11 @@
 import { useForm } from "@inertiajs/react";
 import { useState } from "react";
 import GoogleButton from "@/Components/GoogleButton";
+import { Field, SubmitButton } from "@/Components/AuthUi";
+import { inputClass, ui } from "@/Components/authStyles";
 
-export function Field({ id, label, required = false, optional = false, error, className = "", children }) {
-    return (<div className={`signin-field ${className}`}>
-      <label htmlFor={id} className="signin-label">
-        {label}
-        {required && <span className="signin-required" aria-hidden="true">*</span>}
-        {optional && <span className="signin-optional">Optional</span>}
-      </label>
-      {children}
-      {error && <p id={`${id}-error`} className="signin-field-error" role="alert">{error}</p>}
-    </div>);
-}
+// Re-exported so existing imports (`import { Field } from '@/Components/RegisterForm'`) keep working.
+export { Field };
 
 export default function RegisterForm() {
     const [showPassword, setShowPassword] = useState(false);
@@ -32,9 +25,9 @@ export default function RegisterForm() {
         form.post("/register", { onError: () => form.reset("password", "password_confirmation") });
     }
     // Shared props for each input: value binding, error state and a11y wiring.
-    const bind = (field, id) => ({
+    const bind = (field, id, extraClass = "") => ({
         id,
-        className: "signin-input",
+        className: inputClass(Boolean(form.errors[field]), extraClass),
         value: form.data[field],
         onChange: (event) => {
             form.setData(field, event.target.value);
@@ -43,8 +36,8 @@ export default function RegisterForm() {
         "aria-invalid": Boolean(form.errors[field]),
         "aria-describedby": form.errors[field] ? `${id}-error` : undefined,
     });
-    return (<form className="signin-form register-form" onSubmit={submit}>
-      <div className="register-grid register-grid--3">
+    return (<form className={ui.formTight} onSubmit={submit}>
+      <div className={ui.grid3}>
         <Field id="first-name" label="First name" required error={form.errors.first_name}>
           <input type="text" autoComplete="given-name" placeholder="First name" required {...bind("first_name", "first-name")}/>
         </Field>
@@ -56,7 +49,7 @@ export default function RegisterForm() {
         </Field>
       </div>
 
-      <div className="register-grid register-grid--2">
+      <div className={ui.grid2}>
         <Field id="username" label="Username" required error={form.errors.username}>
           <input type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="Choose a username" required {...bind("username", "username")}/>
         </Field>
@@ -73,11 +66,11 @@ export default function RegisterForm() {
         <input type="text" autoComplete="street-address" placeholder="House no., street, city" required {...bind("address", "address")}/>
       </Field>
 
-      <div className="register-grid register-grid--2">
+      <div className={ui.grid2}>
         <Field id="password" label="Password" required error={form.errors.password}>
-          <div className="signin-password">
-            <input type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="At least 8 characters" required {...bind("password", "password")}/>
-            <button type="button" className="signin-toggle" onClick={() => setShowPassword((shown) => !shown)} aria-pressed={showPassword} aria-controls="password password-confirmation">
+          <div className={ui.passwordWrap}>
+            <input type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="At least 8 characters" required {...bind("password", "password", ui.passwordInputPad)}/>
+            <button type="button" className={ui.toggle} onClick={() => setShowPassword((shown) => !shown)} aria-pressed={showPassword} aria-controls="password password-confirmation">
               {showPassword ? "Hide" : "Show"}
             </button>
           </div>
@@ -87,15 +80,12 @@ export default function RegisterForm() {
         </Field>
       </div>
 
-      <button type="submit" className="signin-submit" disabled={form.processing} aria-busy={form.processing}>
-        {form.processing && <span className="signin-spinner" aria-hidden="true"/>}
-        <span>{form.processing ? "Sending code…" : "Create account"}</span>
-      </button>
+      <SubmitButton processing={form.processing} busyLabel="Sending code…">Create account</SubmitButton>
 
       <GoogleButton label="Sign up with Google"/>
 
-      <p className="signin-footnote">
-        Already have an account? <a href="/login" className="signin-link">Log in</a>
+      <p className={ui.footnote}>
+        Already have an account? <a href="/login" className={ui.link}>Log in</a>
       </p>
     </form>);
 }
