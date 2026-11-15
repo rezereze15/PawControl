@@ -15,6 +15,14 @@ function formatDate(value) {
     return new Date(value).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
 }
 
+// Units are stored singular ("bag"). Add "s" when there's more than one.
+// "pcs" and "ml" never change; "box" needs "es".
+function unitLabel(unit, quantity) {
+    if (quantity === 1 || ["pcs", "ml"].includes(unit))
+        return unit;
+    return unit === "box" ? "boxes" : `${unit}s`;
+}
+
 function StatCard({ icon, iconBg = "bg-gray-100", label, value, note, actionLabel = "Manage", onAction, highlight = false }) {
     return (<div className={`bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm ${highlight ? "ring-2 ring-orange-400" : ""}`}>
       <div className={`${iconBg} rounded-xl p-3 flex-shrink-0`}>{icon}</div>
@@ -130,7 +138,7 @@ function AdminHomeSection({ username, stats = {}, roles = [], usersByRole = [], 
                     <p className="text-gray-400 text-xs">Reorder at {supply.reorderLevel}</p>
                   </div>
                   <span className="text-[#e87c1e] text-xs font-bold flex-shrink-0">
-                    {supply.stockQuantity} {supply.unitOfMeasure} left
+                    {supply.stockQuantity} {unitLabel(supply.unitOfMeasure, supply.stockQuantity)} left
                   </span>
                 </li>))}
             </ul>)}
