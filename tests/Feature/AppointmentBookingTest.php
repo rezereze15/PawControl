@@ -50,6 +50,24 @@ class AppointmentBookingTest extends TestCase
                 ->where('upcomingAppointments.0.pet', 'Buddy'));
     }
 
+    public function test_same_day_appointments_are_rejected_tomorrow_is_the_earliest(): void
+    {
+        $this->travelTo(now()->setTime(8, 0)); // early morning, so a later slot today is still in the future
+        $customer = $this->makeUser('customer');
+        $pet = $this->makePet($customer);
+
+        $this->actingAs($customer)
+            ->post(route('appointments.store'), [...$this->bookingData($pet), 'app_date_time' => now()->setTime(15, 0)->toDateTimeString()])
+            ->assertSessionHasErrors(['app_date_time' => 'Appointments must be booked at least a day ahead. Please choose tomorrow or a later date.']);
+        $this->assertDatabaseCount('appointments', 0);
+
+        // First slot tomorrow is fine.
+        $this->actingAs($customer)
+            ->post(route('appointments.store'), [...$this->bookingData($pet), 'app_date_time' => now()->addDay()->setTime(9, 0)->toDateTimeString()])
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('appointments', 1);
+    }
+
     public function test_customer_can_book_and_the_proof_is_uploaded_to_a_private_supabase_bucket(): void
     {
         $customer = $this->makeUser('customer');

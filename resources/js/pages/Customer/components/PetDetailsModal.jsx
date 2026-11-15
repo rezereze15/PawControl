@@ -1,3 +1,4 @@
+import { formatPetAge } from "../../shared/dashboard/petAge";
 import { useEffect, useState } from "react";
 import { useForm } from "@inertiajs/react";
 import { leanPhoto } from "../../shared/dashboard/assets";
@@ -30,7 +31,7 @@ function PetDetailsModal({ pet, onClose }) {
     const details = [
         ["Species", pet.species],
         ["Breed", pet.breed],
-        ["Age", pet.age == null ? "Not provided" : `${pet.age} ${pet.age === 1 ? "year" : "years"}`],
+        ["Age", formatPetAge(pet, { suffix: false }) ?? "Not provided"],
         ["Sex", pet.sex || "Not provided"],
         ["Date of birth", pet.dateOfBirth || "Not provided"],
         ["Weight", pet.weight == null ? "Not provided" : `${pet.weight} kg`],

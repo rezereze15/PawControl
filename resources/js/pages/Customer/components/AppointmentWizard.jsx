@@ -140,7 +140,7 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
           </svg>
           Dashboard
         </button>
-        <span className="text-gray-400">â€º</span>
+        <span className="text-gray-400">›</span>
         <span className="text-gray-600 font-medium">Appointment</span>
       </div>
 
@@ -159,7 +159,7 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
             {step === 1 && <AppointmentStep2 pets={pets} selectedPetId={form.data.pet_id} onSelectPet={(id) => setData("pet_id", id)} onNext={next} onBack={back}/>}
             {step === 2 && <AppointmentStep3 data={form.data} setData={setData} errors={form.errors} onNext={validateAppointmentDetails} onBack={back}/>}
             {step === 3 && <AppointmentStep4 data={form.data} setData={setData} errors={form.errors} onNext={validatePayment} onBack={back}/>}
-            {step === 4 && <AppointmentStep5 owner={owner} pets={pets} data={form.data} processing={form.processing} onBack={back} onDone={submit}/>}
+            {step === 4 && <AppointmentStep5 owner={owner} pets={pets} data={form.data} processing={form.processing} onBack={back} onDone={submit} onEdit={goTo}/>}
           </div>
         </div>
       </div>

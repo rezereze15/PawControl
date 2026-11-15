@@ -1,3 +1,4 @@
+import { formatPetAge } from "../../shared/dashboard/petAge";
 import { useEffect } from "react";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 
@@ -29,7 +30,7 @@ export default function PatientRecordModal({ patient, appointment, onClose }) {
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [onClose]);
 
-    const age = patient.age == null ? null : `${patient.age} ${Number(patient.age) === 1 ? "year" : "years"}`;
+    const age = formatPetAge(patient, { suffix: false });
     const now = Date.now();
 
     return (<div className="paw-modal-backdrop" onMouseDown={(event) => {

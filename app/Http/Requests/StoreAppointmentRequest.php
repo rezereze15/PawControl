@@ -34,7 +34,8 @@ class StoreAppointmentRequest extends FormRequest
             'app_date_time' => [
                 'required',
                 'date',
-                'after:now',
+                // Same-day bookings aren't allowed: tomorrow (from midnight) or later.
+                'after_or_equal:tomorrow',
                 function (string $attribute, mixed $value, \Closure $fail) {
                     try {
                         $time = \Illuminate\Support\Carbon::parse($value);
@@ -50,6 +51,14 @@ class StoreAppointmentRequest extends FormRequest
             'terms_accepted' => ['accepted'],
             'reference_number' => ['required', 'string', 'regex:/\A[0-9]+\z/', 'max:255', 'unique:appointments,reference_number'],
             'proof_of_down_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'app_date_time.after_or_equal' => 'Appointments must be booked at least a day ahead. Please choose tomorrow or a later date.',
         ];
     }
 }

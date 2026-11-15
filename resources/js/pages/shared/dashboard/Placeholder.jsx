@@ -8,4 +8,4 @@ function DashboardPlaceholder({ title }) {
 }
 export const ClerkPlaceholder = DashboardPlaceholder;
 export default DashboardPlaceholder;
-// â”€â”€â”€ Owner Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Owner Dashboard ──────────────────────────────────────────────────────────

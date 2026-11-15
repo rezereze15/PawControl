@@ -3,6 +3,7 @@ import { CalendarIcon } from "../../shared/dashboard/Icons";
 import { pawLogo } from "../../shared/dashboard/assets";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import ClerkAppointmentDetailsModal from "./ClerkAppointmentDetailsModal";
+import { formatPetAge } from "../../shared/dashboard/petAge";
 
 const peso = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", maximumFractionDigits: 0 });
 
@@ -83,7 +84,7 @@ export default function ClerkHomeSection({ username, appointments = [], stats = 
                       <p className={`text-xs font-bold mb-0.5 ${status.tone}`}>{status.label}</p>
                       <p className="font-extrabold text-[#1a0a3c] text-sm leading-tight truncate">{a.pet}</p>
                       <p className="text-gray-500 text-xs truncate">{[a.breed, a.type].filter(Boolean).join(" · ")}</p>
-                      {a.petAge != null && <p className="text-gray-400 text-xs">{a.petAge} {a.petAge === 1 ? "year" : "years"} old</p>}
+                      {formatPetAge({ dateOfBirth: a.petDateOfBirth, age: a.petAge }) && <p className="text-gray-400 text-xs">{formatPetAge({ dateOfBirth: a.petDateOfBirth, age: a.petAge })}</p>}
                       <button type="button" onClick={() => setSelectedId(a.id)} className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline cursor-pointer">
                         View Details
                       </button>

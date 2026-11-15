@@ -77,7 +77,8 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
             {weeks.map((week, wi) => week.map((day, di) => {
             const dateValue = day ? toDateValue(year, monthIndex, day) : "";
             const dateUnavailable = day && ALL_TIMES.every((time) => isSlotUnavailable(dateValue, time));
-            const disabled = !day || dateValue < todayValue || availabilityLoading || availabilityError || dateUnavailable;
+            // Today and earlier can't be booked: the first selectable day is tomorrow.
+            const disabled = !day || dateValue <= todayValue || availabilityLoading || availabilityError || dateUnavailable;
             const selected = dateValue === data.selected_date;
             return (<button key={`${wi}-${di}`} disabled={disabled} aria-label={dateUnavailable ? `${dateValue}, unavailable` : dateValue} onClick={() => day && setData("selected_date", dateValue)} className={`text-xs py-1.5 rounded-full transition-colors ${!day
                 ? ""

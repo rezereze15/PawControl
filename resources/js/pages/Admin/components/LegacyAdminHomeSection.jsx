@@ -71,7 +71,7 @@ function LegacyAdminHomeSection({ username }) {
         </div>
       </div>
 
-      {/* Bottom row â€” same as Clerk */}
+      {/* Bottom row — same as Clerk */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Today's Operation */}
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm">

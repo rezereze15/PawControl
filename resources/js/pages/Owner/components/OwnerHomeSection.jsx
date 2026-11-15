@@ -100,7 +100,7 @@ function OwnerHomeSection({ username }) {
           </div>
         </div>
 
-        {/* Sales Report preview â€” line chart */}
+        {/* Sales Report preview — line chart */}
         <div className="relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-violet-100 bg-white p-6 shadow-[0_10px_30px_rgba(26,10,60,0.08)]">
           <div className="flex items-center justify-between gap-3">
             <div>

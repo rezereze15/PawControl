@@ -163,6 +163,7 @@ class DashboardController extends Controller
                 'species' => $appointment->pet?->species,
                 'breed' => $appointment->pet?->breed,
                 'petAge' => $appointment->pet?->age,
+                'petDateOfBirth' => $appointment->pet?->dateOfBirth?->toDateString(),
                 'photo' => $this->petPhotoUrl($appointment->pet),
                 // Server-side day/time checks so "today"/"tomorrow" match the app clock.
                 'day' => $appointment->app_date_time->toDateString(),

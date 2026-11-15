@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "@inertiajs/react";
+import { formatPetAge } from "../../shared/dashboard/petAge";
 
 const fields = [
     { name: "petName", label: "Pet name", placeholder: "e.g. Milo", required: true, autoComplete: "off" },
@@ -121,7 +122,8 @@ function AddPetModal({ onClose }) {
                                         {field.options ? <select
                                             id={`new-pet-${field.name}`}
                                             className={fieldClass(field.name)}
-                                            value={form.data[field.name]}
+                                            // Age box shows months under a year ("7 months"); form data keeps whole years for the server.
+                                            value={field.name === "age" ? (formatPetAge({ dateOfBirth: form.data.dateOfBirth }, { suffix: false }) ?? "") : form.data[field.name]}
                                             onChange={(event) => { form.setData(field.name, event.target.value); form.clearErrors(field.name); }}
                                             required={field.required}
                                             aria-invalid={Boolean(form.errors[field.name])}

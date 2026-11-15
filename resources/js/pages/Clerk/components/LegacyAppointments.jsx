@@ -183,5 +183,5 @@ function LegacyAppointments({ veterinarianView = false, }) {
       </div>
     </div>);
 }
-// â”€â”€â”€ Veterinarian Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Veterinarian Dashboard ──────────────────────────────────────────────────
 export default LegacyAppointments;

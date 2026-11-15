@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CalendarIcon } from "../../shared/dashboard/Icons";
 import { leanPhoto, pawLogo } from "../../shared/dashboard/assets";
 import AddPetModal from "./AddPetModal";
+import { formatPetAge } from "../../shared/dashboard/petAge";
 import PetDetailsModal from "./PetDetailsModal";
 import AppointmentDetailsModal, { formatAppointmentDate, formatAppointmentTime } from "./AppointmentDetailsModal";
 import { useAddPetModal } from "../hooks/useAddPetModal";
@@ -61,9 +62,7 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
             My Pets Record
           </h2>
           <div className="flex gap-4 flex-wrap">
-            {pets.length === 0 ? (
-              <p className="text-sm text-gray-500">No pets added yet.</p>
-            ) : pets.map((pet) => (
+            {pets.map((pet) => (
               <div key={pet.id} className="group flex w-56 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md">
                 <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full bg-amber-100 ring-2 ring-white shadow-sm">
                   <img src={pet.photoUrl || leanPhoto} alt={`${pet.name} profile`} className="w-full h-full object-cover"/>
@@ -71,7 +70,7 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
                 <div className="min-w-0">
                   <p className="truncate font-extrabold text-[#1a0a3c] text-sm">{pet.name}</p>
                   <p className="truncate text-gray-500 text-xs">{pet.breed || pet.species}</p>
-                  <p className="text-gray-400 text-xs">{pet.age == null ? "Age unknown" : `${pet.age} ${pet.age === 1 ? "year" : "years"} old`}</p>
+                  <p className="text-gray-400 text-xs">{formatPetAge(pet) ?? "Age unknown"}</p>
                   <button type="button" onClick={() => setSelectedPet(pet)} className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#3b0f8c] hover:underline focus:outline-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-violet-400">
                     View profile <span aria-hidden="true">→</span>
                   </button>
