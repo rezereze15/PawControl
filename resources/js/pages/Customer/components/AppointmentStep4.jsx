@@ -5,9 +5,9 @@ function AppointmentStep4({ data, setData, errors, onNext, onBack }) {
     const termsError = errors.terms_accepted && <p className="mt-1 text-sm text-red-600" role="alert">{errors.terms_accepted}</p>;
     const referenceError = errors.reference_number && <p className="mt-1 text-sm text-red-600" role="alert">{errors.reference_number}</p>;
     return (<div className="flex flex-col gap-5">
-      <div className="grid grid-cols-2 gap-8 items-start">
+      <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-8">
         {/* Left: upload + reference first, then the terms, then the agreement checkbox */}
-        <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4">
           <div>
             <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
               Upload Attachment
@@ -58,7 +58,7 @@ function AppointmentStep4({ data, setData, errors, onNext, onBack }) {
         </div>
 
         {/* Right — QR code */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="order-first flex flex-col items-center gap-3 rounded-xl bg-gray-50 py-4 md:order-none md:bg-transparent md:py-0">
           <p className="font-extrabold text-[#1a0a3c] text-lg underline">
             PAY HERE
           </p>

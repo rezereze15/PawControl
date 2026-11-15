@@ -15,7 +15,7 @@ function AppointmentStep1({ owner, data, setData, errors, onNext, onCancel, }) {
         <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
           Owners Name <span className="text-red-500">*</span>
         </label>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <input className={inp} value={name.firstName} placeholder="First Name" readOnly/>
           <input className={inp} value={name.middleName} placeholder="Middle Name" readOnly/>
           <input className={inp} value={name.lastName} placeholder="Last Name" readOnly/>
@@ -25,7 +25,7 @@ function AppointmentStep1({ owner, data, setData, errors, onNext, onCancel, }) {
         <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
           Authorized Representative <span className="text-red-500">*</span>
         </label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <input className={inp} value={data.ar_first_name} onChange={(event) => setData("ar_first_name", event.target.value)} placeholder="First Name"/>
             {fieldError("ar_first_name")}
@@ -36,7 +36,7 @@ function AppointmentStep1({ owner, data, setData, errors, onNext, onCancel, }) {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
           <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
             Contact Number <span className="text-red-500">*</span>
@@ -47,7 +47,7 @@ function AppointmentStep1({ owner, data, setData, errors, onNext, onCancel, }) {
           <label className="block text-sm font-bold text-[#1a0a3c] mb-2">
             Email Address <span className="text-red-500">*</span>
           </label>
-          <input className={inp} value={owner?.email ?? ""} placeholder="Email Address" readOnly/>
+          <input className={`${inp} truncate`} value={owner?.email ?? ""} placeholder="Email Address" readOnly/>
         </div>
       </div>
       <div>

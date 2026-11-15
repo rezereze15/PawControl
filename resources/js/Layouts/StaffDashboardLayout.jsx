@@ -1,4 +1,5 @@
 import UserAvatar from "@/Components/UserAvatar";
+import { SECTION_ENTER } from "./sectionEnter";
 
 /** avatarSrc is the signed-in user's own photo URL (or null). It never depends on the role. */
 export default function StaffDashboardLayout({ username, roleLabel, dashboardClassName, logoSrc, logoAlt, avatarSrc, navItems, section, onSectionChange, sidebarOpen, onToggleSidebar, onLogout, children }) {
@@ -19,7 +20,7 @@ export default function StaffDashboardLayout({ username, roleLabel, dashboardCla
                 ? "bg-orange-400 text-white"
                 : "text-gray-300 hover:bg-white/10 hover:text-white"}`}>
               {item.icon}
-              {item.label}
+              <span className="paw-sidebar-label">{item.label}</span>
             </button>))}
         </nav>
         <button onClick={onLogout} className="flex items-center gap-3 px-5 py-4 text-white font-bold text-sm hover:bg-red-600 transition-colors border-t border-white/10">
@@ -28,7 +29,7 @@ export default function StaffDashboardLayout({ username, roleLabel, dashboardCla
             <polyline points="16 17 21 12 16 7"/>
             <line x1="21" y1="12" x2="9" y2="12" strokeLinecap="round"/>
           </svg>
-          LOGOUT
+          <span className="paw-sidebar-label">LOGOUT</span>
         </button>
       </aside>
 
@@ -59,7 +60,7 @@ export default function StaffDashboardLayout({ username, roleLabel, dashboardCla
         </header>
         <div className="h-1 bg-orange-400 flex-shrink-0"/>
 
-        <main className="paw-dashboard-main flex-1 overflow-y-auto p-8">{children}</main>
+        <main className={`paw-dashboard-main flex-1 overflow-y-auto p-8 ${SECTION_ENTER}`}>{children}</main>
       </div>
     </div>);
 }

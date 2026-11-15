@@ -497,3 +497,109 @@
   .paw-dashboard-main h1 { font-size: 30px; }
 }
 .paw-clerk-review-modal { width: min(100%, 880px); }
+
+/* ── Customer dashboard on phones: sidebar becomes a slide-in drawer (CustomerDashboardLayout) ──
+   Closed: off-screen, content uses the full width. Open (.mobile-nav-open): slides in over the
+   content with a dimmed backdrop. Drawer easing = iOS-like curve; reduced motion: no slide. */
+@media (max-width: 640px) {
+  .paw-customer-dashboard .paw-customer-topbar { position: sticky; top: 0; z-index: 45; }
+  .paw-customer-dashboard .paw-customer-sidebar {
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    width: min(80vw, 260px);
+    flex-basis: auto;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1), box-shadow 260ms ease;
+  }
+  .paw-customer-dashboard.mobile-nav-open .paw-customer-sidebar {
+    transform: none;
+    box-shadow: 0 24px 48px rgb(0 0 0 / 35%);
+  }
+  /* Full labels inside the drawer (tablet/icon-only rules hide them). */
+  .paw-customer-dashboard .paw-customer-sidebar nav button,
+  .paw-customer-dashboard .paw-customer-sidebar > button:last-child {
+    justify-content: flex-start;
+    min-height: 48px;
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  .paw-customer-dashboard .paw-customer-sidebar nav button svg { width: 18px; height: 18px; }
+  .paw-customer-nav-backdrop {
+    position: fixed;
+    inset: 60px 0 0 0;
+    z-index: 35;
+    background: rgb(15 23 42 / 45%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease;
+  }
+  .paw-customer-dashboard.mobile-nav-open .paw-customer-nav-backdrop { opacity: 1; pointer-events: auto; }
+  /* Keep the top bar compact: name hides on very small phones, avatar stays. */
+  .paw-customer-username { max-width: 96px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .paw-customer-menu-button { width: 36px; margin-left: -8px; }
+}
+@media (max-width: 380px) {
+  .paw-customer-username { display: none; }
+}
+/* Reduced motion on phones: the drawer appears without sliding (phones only). */
+@media (max-width: 640px) and (prefers-reduced-motion: reduce) {
+  .paw-customer-dashboard .paw-customer-sidebar { transition: none; }
+}
+
+/* ── Desktop sidebar collapse/expand (☰): slide instead of snapping ──
+   The bar's width eases (strong ease-in-out, 280ms). Icons keep the same size and the
+   same 22px left padding in both states, so they don't move (22px + 9px ≈ centre of the
+   62px collapsed bar). Labels are clipped by the moving edge and fade, instead of being
+   removed instantly with font-size: 0. Tablet (icon bar) and phone (drawer) are unchanged. */
+@media (min-width: 901px) {
+  .paw-customer-sidebar,
+  .paw-staff-dashboard > .paw-dashboard-sidebar {
+    overflow: hidden;
+    transition: width 280ms cubic-bezier(0.77, 0, 0.175, 1), flex-basis 280ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+
+  /* Same layout in both states: left-aligned, fixed padding, text on one line and clipped. */
+  .paw-customer-sidebar nav button,
+  .paw-customer-dashboard.sidebar-collapsed .paw-customer-sidebar nav button,
+  .paw-staff-dashboard > .paw-dashboard-sidebar nav button,
+  .paw-staff-dashboard.sidebar-collapsed > .paw-dashboard-sidebar nav button {
+    justify-content: flex-start;
+    padding-inline: 22px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .paw-customer-sidebar > button:last-child,
+  .paw-customer-dashboard.sidebar-collapsed .paw-customer-sidebar > button:last-child,
+  .paw-staff-dashboard > .paw-dashboard-sidebar > button:last-child,
+  .paw-staff-dashboard.sidebar-collapsed > .paw-dashboard-sidebar > button:last-child {
+    justify-content: flex-start;
+    padding-inline: 22px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .paw-customer-sidebar nav button svg,
+  .paw-customer-dashboard.sidebar-collapsed .paw-customer-sidebar nav button svg,
+  .paw-staff-dashboard > .paw-dashboard-sidebar nav button svg,
+  .paw-staff-dashboard.sidebar-collapsed > .paw-dashboard-sidebar nav button svg {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Labels fade with the slide: out quickly when closing, in a beat later when opening. */
+  .paw-sidebar-label { opacity: 1; transition: opacity 200ms ease 80ms; }
+  .sidebar-collapsed .paw-sidebar-label { opacity: 0; transition: opacity 120ms ease; }
+}
+
+/* Reduced motion (e.g. Windows "Animation effects" off): keep the slide, just the
+   gentler original one (200ms ease), as the sidebar always had before. */
+@media (min-width: 901px) and (prefers-reduced-motion: reduce) {
+  .paw-customer-sidebar,
+  .paw-staff-dashboard > .paw-dashboard-sidebar { transition: width 200ms ease, flex-basis 200ms ease; }
+}

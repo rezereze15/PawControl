@@ -6,21 +6,21 @@ function AppointmentStep2({ pets = [], selectedPetId, onSelectPet, onNext, onBac
     return (<div className="flex flex-col gap-5">
       {showAddPet && <AddPetModal onClose={() => setShowAddPet(false)}/>}
       <h3 className="text-xl font-extrabold text-[#1a0a3c]">Select pet(s)</h3>
-      <div className="flex gap-4 flex-wrap">
-        {pets.map((pet) => (<button key={pet.id} onClick={() => onSelectPet(String(pet.id))} className={`border-2 rounded-xl p-4 flex items-center gap-3 w-56 transition-colors ${String(selectedPetId) === String(pet.id)
+      <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:gap-4">
+        {pets.map((pet) => (<button key={pet.id} onClick={() => onSelectPet(String(pet.id))} className={`border-2 rounded-xl p-4 flex items-center gap-3 w-full sm:w-56 transition-colors ${String(selectedPetId) === String(pet.id)
             ? "border-[#3b0f8c] bg-purple-50"
             : "border-gray-200 hover:border-[#3b0f8c]"}`}>
           <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center text-[#3b0f8c] font-bold">
             {pet.photoUrl ? <img src={pet.photoUrl} alt={`${pet.name} profile`} className="h-full w-full object-cover"/> : (pet.name?.[0] ?? "?")}
           </div>
-          <div className="text-left">
-            <p className="font-extrabold text-[#1a0a3c] text-sm">{pet.name}</p>
+          <div className="min-w-0 text-left">
+            <p className="truncate font-extrabold text-[#1a0a3c] text-sm">{pet.name}</p>
             <p className="text-gray-500 text-xs">{pet.breed || pet.species || "Pet"}</p>
             <p className="text-gray-400 text-xs">{formatPetAge(pet) ?? ""}</p>
             <span className="text-[#3b0f8c] text-xs font-medium">View Details</span>
           </div>
         </button>))}
-        <button onClick={() => setShowAddPet(true)} className="border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-2 w-40 hover:border-[#3b0f8c] transition-colors">
+        <button onClick={() => setShowAddPet(true)} className="border-2 border-gray-200 rounded-xl p-4 flex flex-row items-center justify-center gap-3 w-full sm:w-40 sm:min-h-[112px] sm:flex-col sm:gap-2 hover:border-[#3b0f8c] transition-colors">
           <div className="w-12 h-12 rounded-full border-2 border-[#3b0f8c] flex items-center justify-center">
             <svg className="w-6 h-6 text-[#3b0f8c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M12 5v14M5 12h14" strokeLinecap="round"/>

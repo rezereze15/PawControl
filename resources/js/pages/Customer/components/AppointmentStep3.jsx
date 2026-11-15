@@ -51,9 +51,9 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
         confirmedSlots.includes(`${date}T${toTimeValue(time)}`);
 
     return (<div className="flex flex-col gap-5">
-      <div className="grid grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
         {/* Service */}
-        <div className="flex flex-col gap-3">
+        <div className="flex min-w-0 flex-col gap-3 md:col-span-2 xl:col-span-1">
           <label htmlFor="appointment-service" className="text-sm font-bold text-[#1a0a3c]">Service type <span className="text-red-500">*</span></label>
           <select id="appointment-service" value={data.service_type} onChange={(event) => setData("service_type", event.target.value)} aria-label="Service type" required className="w-full border border-gray-300 rounded-lg bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]">
             <option value="" disabled>Select a service</option>
@@ -64,11 +64,11 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
         </div>
 
         {/* Calendar */}
-        <div className="border border-gray-300 rounded-xl p-4">
+        <div className="min-w-0 border border-gray-300 rounded-xl p-3 sm:p-4">
           <div className="flex items-center justify-between mb-3">
-            <button type="button" onClick={previousMonth} aria-label="Previous month" disabled={year === today.getFullYear() && monthIndex <= today.getMonth()} className="px-2 text-[#3b0f8c] disabled:opacity-30">‹</button>
+            <button type="button" onClick={previousMonth} aria-label="Previous month" disabled={year === today.getFullYear() && monthIndex <= today.getMonth()} className="grid size-9 place-items-center rounded-full text-lg text-[#3b0f8c] hover:bg-purple-50 disabled:opacity-30">‹</button>
             <p className="text-center font-bold text-[#1a0a3c]">{monthLabel}</p>
-            <button type="button" onClick={nextMonth} aria-label="Next month" className="px-2 text-[#3b0f8c]">›</button>
+            <button type="button" onClick={nextMonth} aria-label="Next month" className="grid size-9 place-items-center rounded-full text-lg text-[#3b0f8c] hover:bg-purple-50">›</button>
           </div>
           <div className="grid grid-cols-7 gap-1 text-center">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (<div key={d} className="text-xs text-gray-500 font-medium py-1">
@@ -80,7 +80,7 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
             // Today and earlier can't be booked: the first selectable day is tomorrow.
             const disabled = !day || dateValue <= todayValue || availabilityLoading || availabilityError || dateUnavailable;
             const selected = dateValue === data.selected_date;
-            return (<button key={`${wi}-${di}`} disabled={disabled} aria-label={dateUnavailable ? `${dateValue}, unavailable` : dateValue} onClick={() => day && setData("selected_date", dateValue)} className={`text-xs py-1.5 rounded-full transition-colors ${!day
+            return (<button key={`${wi}-${di}`} disabled={disabled} aria-label={dateUnavailable ? `${dateValue}, unavailable` : dateValue} onClick={() => day && setData("selected_date", dateValue)} className={`aspect-square text-sm sm:aspect-auto sm:py-1.5 sm:text-xs rounded-full transition-colors ${!day
                 ? ""
                 : selected
                     ? "bg-[#3b0f8c] text-white font-bold"
@@ -94,13 +94,13 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
         </div>
 
         {/* Time slots */}
-        <div className="border border-gray-300 rounded-xl p-4">
+        <div className="min-w-0 border border-gray-300 rounded-xl p-3 sm:p-4">
           <p className="font-bold text-[#1a0a3c] mb-3 text-sm">Select Time</p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {ALL_TIMES.map((t) => {
             const active = data.selected_time === toTimeValue(t);
             const unavailable = data.selected_date && isSlotUnavailable(data.selected_date, t);
-            return (<button key={t} disabled={availabilityLoading || availabilityError || unavailable} aria-label={unavailable ? `${t}, unavailable` : t} onClick={() => setData("selected_time", toTimeValue(t))} className={`text-xs px-2 py-1.5 rounded-full border-2 font-semibold transition-colors ${unavailable
+            return (<button key={t} disabled={availabilityLoading || availabilityError || unavailable} aria-label={unavailable ? `${t}, unavailable` : t} onClick={() => setData("selected_time", toTimeValue(t))} className={`min-h-10 text-xs px-2 py-1.5 rounded-full border-2 font-semibold transition-colors sm:min-h-0 ${unavailable
                         ? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                         : active
                         ? "border-orange-500 bg-orange-400 text-white"
