@@ -112,7 +112,7 @@ class User extends Authenticatable
     public function profilePhotoUrl(): ?string
     {
         if ($this->profile_photo_path) {
-            return route('settings.photo.show', ['v' => substr(md5($this->profile_photo_path), 0, 8)]);
+            return route('users.photo.show', [$this, 'v' => substr(md5($this->profile_photo_path), 0, 8)]);
         }
 
         return $this->avatar;

@@ -88,7 +88,7 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
     Route::post('/pets/{pet}/photo', [PetController::class, 'updatePhoto'])->name('pets.photo.update');
 
     // Self-service settings: profile photo, address and password only.
-    Route::get('/settings/photo', [UserSettingsController::class, 'showPhoto'])->name('settings.photo.show');
+    Route::get('/users/{user}/photo', [UserSettingsController::class, 'showPhoto'])->name('users.photo.show');
     Route::post('/settings/photo', [UserSettingsController::class, 'updatePhoto'])->name('settings.photo.update');
     Route::put('/settings/address', [UserSettingsController::class, 'updateAddress'])->name('settings.address.update');
     Route::put('/settings/password', [UserSettingsController::class, 'updatePassword'])

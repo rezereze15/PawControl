@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
+use App\Models\User;
 use App\Services\SupabaseStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,9 +20,12 @@ class UserSettingsController extends Controller
 {
     public function __construct(private readonly SupabaseStorage $storage) {}
 
-    public function showPhoto(Request $request): Response
+    public function showPhoto(Request $request, User $user): Response
     {
-        $path = $request->user()->profile_photo_path;
+        $viewer = $request->user();
+        abort_unless($viewer->is($user) || $viewer->role === Role::ADMIN, 403);
+
+        $path = $user->profile_photo_path;
         abort_unless($path, 404);
 
         try {

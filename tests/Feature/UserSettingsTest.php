@@ -48,8 +48,22 @@ class UserSettingsTest extends TestCase
         Http::assertSent(fn (HttpRequest $r) => $r->method() === 'POST' && $r->url() === self::SUPABASE.'/storage/v1/object/profile-photos/'.$path);
         Http::assertSent(fn (HttpRequest $r) => $r->method() === 'DELETE' && $r['prefixes'] === ['1/old.png']);
 
-        $this->actingAs($user)->get(route('settings.photo.show'))
+        $this->actingAs($user)->get(route('users.photo.show', $user))
             ->assertRedirect(self::SUPABASE.'/storage/v1/object/sign/profile-photos/x.png?token=abc');
+    }
+
+    public function test_each_user_gets_their_own_photo_url_and_only_admins_see_others(): void
+    {
+        $alice = $this->makeCustomer(['profile_photo_path' => '1/alice.png']);
+        $bob = $this->makeCustomer(['profile_photo_path' => '2/bob.png']);
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'Active']);
+
+        $this->assertNotSame($alice->profilePhotoUrl(), $bob->profilePhotoUrl());
+
+        $this->actingAs($admin)->get(route('users.photo.show', $bob))->assertRedirect();
+        Http::assertSent(fn (HttpRequest $r) => str_contains($r->url(), '/object/sign/profile-photos/2/bob.png'));
+
+        $this->actingAs($alice)->get(route('users.photo.show', $bob))->assertForbidden();
     }
 
     public function test_every_role_can_view_and_update_their_own_settings(): void
@@ -148,7 +162,6 @@ class UserSettingsTest extends TestCase
         $this->assertTrue(Hash::check('newpass123', $user->fresh()->password));
     }
 
-    /** @param array<string, mixed> $attributes */
     private function png(): UploadedFile
     {
         return UploadedFile::fake()->createWithContent(
@@ -157,6 +170,7 @@ class UserSettingsTest extends TestCase
         );
     }
 
+    /** @param array<string, mixed> $attributes */
     private function makeCustomer(array $attributes = []): User
     {
         return User::factory()->create(['role' => 'customer', 'status' => 'Active', ...$attributes]);
