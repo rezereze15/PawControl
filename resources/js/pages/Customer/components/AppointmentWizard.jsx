@@ -1,4 +1,5 @@
-import { useForm } from "@inertiajs/react";
+import { useForm, usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
 import AppointmentStepIndicator from "./AppointmentStepIndicator";
 import AppointmentStep1 from "./AppointmentStep1";
 import AppointmentStep2 from "./AppointmentStep2";
@@ -6,8 +7,16 @@ import AppointmentStep3 from "./AppointmentStep3";
 import AppointmentStep4 from "./AppointmentStep4";
 import AppointmentStep5 from "./AppointmentStep5";
 import { useAppointmentWizard } from "../hooks/useAppointmentWizard";
+import { readBookingDraft, writeBookingDraft } from "../hooks/bookingDraft";
+
+// Steps: 0 owner, 1 pet, 2 date & service, 3 payment (proof upload), 4 review.
+const PAYMENT_STEP = 3;
 function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
-    const { step, next, back, goTo } = useAppointmentWizard();
+    const userId = usePage().props.auth?.user?.id;
+    // Resume a draft saved before a full page reload (see bookingDraft.js). The proof file
+    // can't be saved, so never resume past the payment step.
+    const [draft] = useState(() => readBookingDraft(userId));
+    const { step, next, back, goTo } = useAppointmentWizard(Math.min(draft?.step ?? 0, PAYMENT_STEP));
     const form = useForm({
         ar_first_name: "",
         ar_last_name: "",
@@ -18,8 +27,16 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
         selected_time: "",
         terms_accepted: false,
         reference_number: "",
+        ...(draft?.data ?? {}),
         proof_of_down_payment: null,
     });
+
+    // Save the wizard's place on every change (everything except the uploaded file).
+    useEffect(() => {
+        const data = { ...form.data };
+        delete data.proof_of_down_payment;
+        writeBookingDraft(userId, { open: true, step, data });
+    }, [userId, step, form.data]);
     const setData = (field, value) => {
         form.setData(field, value);
         form.clearErrors(field, "app_date_time");

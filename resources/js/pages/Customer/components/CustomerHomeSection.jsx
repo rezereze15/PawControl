@@ -126,8 +126,14 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
             <p className="mt-1 text-xs text-slate-500">Your next visit will appear here.</p>
             <button type="button" onClick={onViewAppointments} className="mt-3 text-xs font-bold text-violet-800 hover:underline">View appointment history</button>
           </div>}
-          <button onClick={onBookAppointment} className="w-full border border-orange-400 text-orange-500 hover:bg-orange-50 font-bold py-2.5 rounded-lg text-sm transition-colors">
-            + Book New Appointment
+          {/* Primary action: solid brand gold, navy text for contrast, navy "+" badge. */}
+          <button type="button" onClick={onBookAppointment} className="group inline-flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border-0 bg-[#ffbb50] px-4 py-3 text-sm font-extrabold tracking-[0.01em] text-[#19043f] shadow-[0_8px_18px_-8px_rgb(242_139_55/0.75),inset_0_1px_0_rgb(255_255_255/0.45)] transition-[background-color,box-shadow,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-[0_12px_24px_-10px_rgb(242_139_55/0.85),inset_0_1px_0_rgb(255_255_255/0.45)] hover:bg-[#f5a623] active:scale-[0.97] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#19043f] motion-reduce:active:scale-100">
+            <span className="grid size-6 flex-none place-items-center rounded-full bg-[#19043f] text-white transition-[rotate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:rotate-90 motion-reduce:transition-none motion-reduce:group-hover:rotate-0" aria-hidden="true">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"/>
+              </svg>
+            </span>
+            Book New Appointment
           </button>
         </div>
       </div>

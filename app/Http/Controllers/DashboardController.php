@@ -162,7 +162,11 @@ class DashboardController extends Controller
                 'petId' => $appointment->pet_id,
                 'species' => $appointment->pet?->species,
                 'breed' => $appointment->pet?->breed,
+                'petAge' => $appointment->pet?->age,
                 'photo' => $this->petPhotoUrl($appointment->pet),
+                // Server-side day/time checks so "today"/"tomorrow" match the app clock.
+                'day' => $appointment->app_date_time->toDateString(),
+                'hasStarted' => $appointment->app_date_time->lessThanOrEqualTo(now()),
                 'date' => $appointment->app_date_time->format('M j, Y'),
                 'time' => $appointment->app_date_time->format('g:i A'),
                 'startsAt' => $appointment->app_date_time->toIso8601String(),
@@ -177,7 +181,44 @@ class DashboardController extends Controller
                 'proofIsPdf' => $appointment->proofIsPdf(),
             ]);
 
-        return ['upcomingAppointments' => $appointments];
+        return [
+            'upcomingAppointments' => $appointments,
+            'clerkHome' => $this->clerkHomeStats($appointments),
+        ];
+    }
+
+    /**
+     * Numbers for the clerk home cards.
+     *
+     * @param  Collection<int, array<string, mixed>>  $appointments  clerk rows from today on (not cancelled)
+     * @return array<string, mixed>
+     */
+    private function clerkHomeStats(Collection $appointments): array
+    {
+        // Pets have no created_at, so a "new patient" is a pet whose first-ever
+        // appointment was booked this month.
+        $newPatientsThisMonth = Appointment::query()
+            ->select('pet_id')
+            ->groupBy('pet_id')
+            ->havingRaw('MIN(created_at) >= ?', [now()->startOfMonth()])
+            ->get()
+            ->count();
+
+        $active = $appointments->where('status', '!=', Appointment::STATUS_REJECTED);
+        $confirmed = $active->where('status', Appointment::STATUS_CONFIRMED);
+
+        return [
+            'today' => now()->toDateString(),
+            'tomorrow' => now()->addDay()->toDateString(),
+            'totalPatients' => Pet::count(),
+            'newPatientsThisMonth' => $newPatientsThisMonth,
+            // Upcoming (today onward), excluding rejected ones.
+            'upcomingAppointments' => $active->count(),
+            'pendingAppointments' => $active->where('status', Appointment::STATUS_PENDING)->count(),
+            // No billing table yet: every upcoming *confirmed* visit is a bill to settle at the clinic.
+            'upcomingBilling' => $confirmed->count(),
+            'downPaymentsReceived' => $confirmed->count() * Appointment::DOWN_PAYMENT,
+        ];
     }
 
     /** @return array<string, mixed> */

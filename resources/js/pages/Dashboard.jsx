@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { clearBookingDraft, readBookingDraft } from './Customer/hooks/bookingDraft';
 import { PersonIcon } from './shared/dashboard/Icons';
 import { router, usePage } from '@inertiajs/react';
 import FlashToast from '@/Components/FlashToast';
@@ -21,7 +22,13 @@ import bigpawLogo from '../imports/Bigpaw_logoname-removebg-preview.png';
 import '../../css/Dashboard.css';
 function CustomerDashboard({ username, onLogout, owner, profile, pets, customerAppointments = [], incomingAppointment, upcomingAppointmentCount, flash }) {
     const [section, setSection] = useState("home");
-    const [booking, setBooking] = useState(false);
+    const userId = usePage().props.auth?.user?.id;
+    // Reopen the booking wizard if this tab was in the middle of a booking before a reload.
+    const [booking, setBookingState] = useState(() => Boolean(readBookingDraft(userId)?.open));
+    const setBooking = (open) => {
+        if (!open) clearBookingDraft(userId);
+        setBookingState(open);
+    };
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const success = flash?.success
         ? `${flash.success}${flash.referenceNumber ? ` Reference number: ${flash.referenceNumber}.` : ''}`
@@ -119,7 +126,7 @@ export default function Dashboard({ profileCompletion = null, ...props }) {
       <CompleteProfileModal email={profileCompletion.email} firstName={profileCompletion.first_name} middleName={profileCompletion.middle_name} lastName={profileCompletion.last_name} photoUrl={props.profile?.photoUrl}/>
     </>);
 }
-function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], managedUsers = [], roles = [], flash }) {
+function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], managedUsers = [], roles = [], clerkHome = {}, flash }) {
     const { errors = {} } = usePage().props;
     const profiles = {
         customer: 'Karina',
@@ -133,7 +140,7 @@ function RoleDashboard({ role = 'customer', username: authenticatedUsername, own
     if (role === 'admin')
         return <AdminDashboard username={username} onLogout={logout} profile={profile} stats={adminStats} usersByRole={usersByRole} recentUsers={recentUsers} managedUsers={managedUsers} roles={roles} flash={flash}/>;
     if (role === 'clerk')
-        return <ClerkDashboard username={username} onLogout={logout} profile={profile} upcomingAppointments={upcomingAppointments} flash={flash} errors={errors}/>;
+        return <ClerkDashboard username={username} onLogout={logout} profile={profile} upcomingAppointments={upcomingAppointments} clerkHome={clerkHome} flash={flash} errors={errors}/>;
     if (role === 'veterinarian')
         return <VeterinarianDashboard username={username} onLogout={logout} profile={profile} confirmedAppointments={confirmedAppointments} patientRecords={patientRecords} flash={flash}/>;
     if (role === 'owner')

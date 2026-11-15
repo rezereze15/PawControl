@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import StaffDashboardLayout from '@/Layouts/StaffDashboardLayout';
-import StaffHomeSection from './components/StaffHomeSection';
+import ClerkHomeSection from './components/ClerkHomeSection';
 import { PersonIcon } from '../shared/dashboard/Icons';
 import { bigpawLogo } from '../shared/dashboard/assets';
 import { ClerkPlaceholder } from '../shared/dashboard/Placeholder';
 import { ClerkAppointments } from './modules/Appointments';
 import FlashToast from '@/Components/FlashToast';
 import UserSettings from '../Customer/modules/UserSettings';
-export default function ClerkDashboard({ username, onLogout, profile, upcomingAppointments = [], flash, errors = {} }) {
+export default function ClerkDashboard({ username, onLogout, profile, upcomingAppointments = [], clerkHome = {}, flash, errors = {} }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -52,7 +52,7 @@ export default function ClerkDashboard({ username, onLogout, profile, upcomingAp
     return (<StaffDashboardLayout username={username} roleLabel="Clerk" dashboardClassName="paw-clerk-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
         <FlashToast message={flash?.success}/>
         <FlashToast message={errors.appointment} tone="error" title="Could not update appointment"/>
-        {section === "home" && (<StaffHomeSection username={username} role="Clerk"/>)}
+        {section === "home" && (<ClerkHomeSection username={username} appointments={upcomingAppointments} stats={clerkHome} onNavigate={setSection}/>)}
           {section === "records" && (<ClerkPlaceholder title="Pet Medical Records"/>)}
           {section === "appointments" && <ClerkAppointments appointments={upcomingAppointments}/>}
           {section === "billings" && <ClerkPlaceholder title="Billings"/>}

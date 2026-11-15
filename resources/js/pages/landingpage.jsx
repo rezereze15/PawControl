@@ -168,7 +168,7 @@ export default function App({ authModal = null, maskedEmail, resendAvailableIn, 
         </div>
         {/* Soft white spotlight behind the pets (::before) so the orange blob sits in light. */}
         <div className="relative flex min-h-[600px] flex-[1_1_52%] items-center justify-center before:absolute before:inset-x-[4%] before:inset-y-[6%] before:z-0 before:rounded-full before:bg-[radial-gradient(closest-side,rgb(255_255_255/0.95),rgb(255_255_255/0.55)_55%,transparent)] max-[900px]:min-h-[350px] max-[640px]:min-h-[250px]">
-          <img src={petImage} alt="A cat and dog sitting together" className="relative z-[1] max-h-[610px] max-w-full object-contain max-[900px]:max-h-[400px] max-[640px]:max-h-[300px]"/>
+          <img src={petImage} alt="A cat and dog sitting together" className="relative z-[1] h-auto w-full max-w-[630px] object-contain max-[900px]:max-w-[480px] max-[640px]:max-w-[360px]"/>
         </div>
       </section>
 
