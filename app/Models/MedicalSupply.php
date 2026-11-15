@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * ERD: MEDICAL_SUPPLIES. Laravel finds the `medical_supplies` table from the class name.
+ */
+class MedicalSupply extends Model
+{
+    /** Categories the admin can pick from. Add a new one here; no database change needed. */
+    public const CATEGORIES = ['Medication', 'Vaccine', 'IV & Fluids', 'Surgical', 'Diagnostic', 'Consumable'];
+
+    /** Units the admin can pick from. Shown on the home screen, e.g. "3 pcs left". */
+    public const UNITS = ['pcs', 'box', 'pack', 'bottle', 'vial', 'bag', 'tablet', 'ml'];
+
+    protected $fillable = [
+        'name',
+        'description',
+        'category',
+        'unit_of_measure',
+        'stock_quantity',
+        'reorder_level',
+        'unit_price',
+        'is_active',
+    ];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'stock_quantity' => 'integer',
+            'reorder_level' => 'integer',
+            'unit_price' => 'decimal:2',
+            'is_active' => 'boolean',
+        ];
+    }
+}
