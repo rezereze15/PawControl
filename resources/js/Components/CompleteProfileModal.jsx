@@ -62,7 +62,7 @@ export default function CompleteProfileModal({ email, firstName = '', middleName
 
     return (<div className="fixed inset-0 z-[1000] grid place-items-center overflow-y-auto p-4 text-[#151b2a] max-[560px]:place-items-start max-[560px]:p-3">
       {/* Backdrop: fades in; clicking it does nothing on purpose. */}
-      <div className="fixed inset-0 bg-[rgb(25_4_63/0.55)] backdrop-blur-[4px] transition-opacity duration-200 ease-out starting:opacity-0" aria-hidden="true"/>
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-[6px] transition-opacity duration-200 ease-out starting:opacity-0" aria-hidden="true"/>
 
       {/* Panel: modals scale from the centre (not from a trigger). */}
       <div className="relative box-border w-[min(100%,680px)] origin-center rounded-3xl border-t-[5px] border-t-[#ffbb50] bg-white px-[clamp(20px,4vw,40px)] pt-8 pb-7 shadow-[0_1px_2px_rgb(25_4_63/0.08),0_32px_80px_-16px_rgb(25_4_63/0.45)] transition-[opacity,translate,scale] duration-[280ms] ease-[cubic-bezier(0.23,1,0.32,1)] starting:translate-y-2 starting:scale-[0.96] starting:opacity-0 motion-reduce:starting:translate-y-0 motion-reduce:starting:scale-100 max-[560px]:rounded-[20px] max-[560px]:px-[18px] max-[560px]:pt-6 max-[560px]:pb-[22px]" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title" aria-describedby="profile-modal-desc">

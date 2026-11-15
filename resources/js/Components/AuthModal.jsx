@@ -131,8 +131,8 @@ export default function AuthModal({ mode, step = {}, showFlash = true, onModeCha
     return (<div className="fixed inset-0 z-[1000]">
       <Head title={view.title}/>
 
-      {/* Dark translucent overlay with the same 6px blur the features card uses. */}
-      <div className="fixed inset-0 bg-[rgb(25_4_63/0.5)] backdrop-blur-[6px] transition-opacity duration-200 ease-out starting:opacity-0" aria-hidden="true"/>
+      {/* Neutral dark tint (no colour) + the same 6px blur the features card uses. */}
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-[6px] transition-opacity duration-200 ease-out starting:opacity-0" aria-hidden="true"/>
 
       {/* Scroll container: centres the card, scrolls when it's taller than the screen. */}
       <div className="fixed inset-0 overflow-y-auto overscroll-contain" onPointerDown={onOverlayPointerDown} onClick={onOverlayClick}>
