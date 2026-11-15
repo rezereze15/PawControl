@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -35,5 +37,17 @@ class MedicalSupply extends Model
             'unit_price' => 'decimal:2',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Supplies that need restocking: still in use, and at or below their reorder level.
+     * Use it as MedicalSupply::query()->lowStock().
+     */
+    #[Scope]
+    protected function lowStock(Builder $query): void
+    {
+        $query->where('is_active', true)
+            // whereColumn compares two columns in the same row (each supply has its own level).
+            ->whereColumn('stock_quantity', '<=', 'reorder_level');
     }
 }

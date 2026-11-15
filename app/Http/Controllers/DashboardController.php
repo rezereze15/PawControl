@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\MedicalSupply;
 use App\Models\Pet;
 use App\Models\Role;
 use App\Models\Service;
@@ -289,7 +290,23 @@ class DashboardController extends Controller
                 'activeUsers' => User::query()->where('status', User::STATUS_ACTIVE)->count(),
                 'activeServices' => Service::query()->where('is_active', true)->count(),
                 'totalServices' => Service::query()->count(),
+                'activeSupplies' => MedicalSupply::query()->where('is_active', true)->count(),
+                'totalSupplies' => MedicalSupply::query()->count(),
+                'lowStockCount' => MedicalSupply::query()->lowStock()->count(),
             ],
+            // Most urgent first (lowest stock). The card shows the full count; the panel lists up to 5.
+            'lowStockSupplies' => MedicalSupply::query()
+                ->lowStock()
+                ->orderBy('stock_quantity')
+                ->limit(5)
+                ->get(['id', 'name', 'stock_quantity', 'reorder_level', 'unit_of_measure'])
+                ->map(fn (MedicalSupply $supply) => [
+                    'id' => $supply->id,
+                    'name' => $supply->name,
+                    'stockQuantity' => $supply->stock_quantity,
+                    'reorderLevel' => $supply->reorder_level,
+                    'unitOfMeasure' => $supply->unit_of_measure,
+                ]),
             'usersByRole' => $roleCounts
                 ->filter()
                 ->map(fn ($total, $role) => ['role' => $role, 'count' => $total])
