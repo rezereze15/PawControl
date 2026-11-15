@@ -5,11 +5,11 @@ import { ErrorMessage, SubmitButton, SuccessMessage } from '@/Components/AuthUi'
 import { ui } from '@/Components/authStyles';
 
 /**
- * The "enter the 6-digit code" step shared by registration (VerifyCode) and
- * forgot password (ForgotPasswordCode): code boxes, Verify, Resend with a cooldown
- * timer, and a back link supplied by the page.
+ * The "enter the 6-digit code" step, used by the auth modal's "verify" (registration)
+ * and "forgot-code" (forgot password) views: code boxes, Verify, Resend with a cooldown
+ * timer. `backLink` is optional; `showFlash` hides a stale flash after a view switch.
  */
-export default function CodeVerificationForm({ verifyUrl, resendUrl, resendAvailableIn, codeLength = 6, backLink }) {
+export default function CodeVerificationForm({ verifyUrl, resendUrl, resendAvailableIn, codeLength = 6, backLink, showFlash = true }) {
     const { flash } = usePage().props;
     const [cooldown, setCooldown] = useState(resendAvailableIn);
     const [resending, setResending] = useState(false);
@@ -56,7 +56,7 @@ export default function CodeVerificationForm({ verifyUrl, resendUrl, resendAvail
     const complete = form.data.code.length === codeLength;
 
     return (<form className={ui.form} onSubmit={submit}>
-      {flash?.success && <SuccessMessage>{flash.success}</SuccessMessage>}
+      {showFlash && flash?.success && <SuccessMessage>{flash.success}</SuccessMessage>}
 
       <div className={ui.field}>
         <span id="code-label" className={ui.label}>Verification code</span>

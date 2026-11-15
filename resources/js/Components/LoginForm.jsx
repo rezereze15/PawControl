@@ -4,7 +4,7 @@ import GoogleButton from '@/Components/GoogleButton';
 import { ErrorMessage, SubmitButton, SuccessMessage } from '@/Components/AuthUi';
 import { inputClass, ui } from '@/Components/authStyles';
 
-export default function LoginForm({ username, password, error, success = '', processing = false, onUsernameChange, onPasswordChange, onClearError, onSubmit }) {
+export default function LoginForm({ username, password, error, success = '', processing = false, onUsernameChange, onPasswordChange, onClearError, onSubmit, onSwitchToRegister, onForgotPassword }) {
     const [showPassword, setShowPassword] = useState(false);
     const invalid = Boolean(error);
 
@@ -26,7 +26,10 @@ export default function LoginForm({ username, password, error, success = '', pro
           <label htmlFor="password" className={ui.label}>
             Password<span className={ui.required} aria-hidden="true">*</span>
           </label>
-          <Link href="/forgot-password" className={ui.forgot}>Forgot password?</Link>
+          <Link href="/forgot-password" className={ui.forgot} onClick={onForgotPassword ? (event) => {
+            event.preventDefault();
+            onForgotPassword();
+        } : undefined}>Forgot password?</Link>
         </div>
         <div className={ui.passwordWrap}>
           <input id="password" type={showPassword ? 'text' : 'password'} className={inputClass(invalid, ui.passwordInputPad)} autoComplete="current-password" value={password} onChange={(event) => {
@@ -47,7 +50,10 @@ export default function LoginForm({ username, password, error, success = '', pro
 
       <p className={ui.footnote}>
         Don&apos;t have an account yet?{' '}
-        <a href="/register" className={ui.link}>Sign up</a>{' '}
+        <a href="/register" className={ui.link} onClick={onSwitchToRegister ? (event) => {
+            event.preventDefault();
+            onSwitchToRegister();
+        } : undefined}>Sign up</a>{' '}
         to book your pet&apos;s visit.
       </p>
     </form>);

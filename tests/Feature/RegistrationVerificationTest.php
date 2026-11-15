@@ -59,7 +59,7 @@ class RegistrationVerificationTest extends TestCase
 
         $this->get(route('register.verify'))
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->component('VerifyCode')->where('maskedEmail', 'j***@gmail.com'));
+            ->assertInertia(fn ($page) => $page->component('landingpage')->where('authModal', 'verify')->where('maskedEmail', 'j***@gmail.com'));
     }
 
     public function test_correct_code_creates_verified_user_and_logs_in(): void

@@ -20,22 +20,29 @@ use Throwable;
 
 class AuthController extends Controller
 {
+    /**
+     * GET /login. Login is a modal on the landing page, so this renders the landing
+     * page with the login modal open. The URL stays /login, which keeps every existing
+     * redirect working: the auth guard (and "intended" URL), Google sign-in errors,
+     * "Password updated" and inactive-account messages all still flash to this route.
+     */
     public function create(): Response|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
 
-        return Inertia::render('Login');
+        return Inertia::render('landingpage', ['authModal' => 'login']);
     }
 
+    /** GET /register. Same idea: the landing page with the register modal open. */
     public function showRegistration(): Response|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
 
-        return Inertia::render('Register');
+        return Inertia::render('landingpage', ['authModal' => 'register']);
     }
 
     public function register(Request $request): RedirectResponse
@@ -95,7 +102,9 @@ class AuthController extends Controller
             return redirect()->route('register');
         }
 
-        return Inertia::render('VerifyCode', [
+        // Shown as the "verify" view of the auth modal on the landing page (URL stays /register/verify).
+        return Inertia::render('landingpage', [
+            'authModal' => 'verify',
             'maskedEmail' => $pending->maskedEmail(),
             'resendAvailableIn' => $pending->resendAvailableIn(),
             'codeLength' => 6,

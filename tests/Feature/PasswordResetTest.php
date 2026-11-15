@@ -52,7 +52,7 @@ class PasswordResetTest extends TestCase
         $this->assertTrue(Hash::check($code, $record->code_hash));
 
         $this->get(route('password.code'))
-            ->assertInertia(fn ($page) => $page->component('ForgotPasswordCode')->where('maskedEmail', 'j***@gmail.com'));
+            ->assertInertia(fn ($page) => $page->component('landingpage')->where('authModal', 'forgot-code')->where('maskedEmail', 'j***@gmail.com'));
     }
 
     public function test_unknown_email_gets_identical_response_and_no_mail(): void
@@ -157,7 +157,7 @@ class PasswordResetTest extends TestCase
         $this->post(route('password.code.verify'), ['code' => $code])->assertRedirect(route('password.reset'));
         $this->assertDatabaseCount('password_reset_codes', 0); // single use
 
-        $this->get(route('password.reset'))->assertInertia(fn ($page) => $page->component('ResetPassword'));
+        $this->get(route('password.reset'))->assertInertia(fn ($page) => $page->component('landingpage')->where('authModal', 'reset'));
 
         // Same rules as registration.
         $this->post(route('password.update'), ['password' => 'short', 'password_confirmation' => 'short'])

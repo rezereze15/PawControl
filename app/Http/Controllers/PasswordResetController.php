@@ -23,6 +23,9 @@ use Throwable;
  *   2. ForgotPasswordCode   – enter the code (5 attempts, 10 min expiry, 60s resend cooldown)
  *   3. ResetPassword        – choose a new password (only after a correct code, 10 min window)
  *
+ * Each step is a view of the auth modal on the landing page (authModal = forgot,
+ * forgot-code, reset); the URLs below are unchanged so redirects keep working.
+ *
  * The flow is tied to the browser via the session; the email never appears in a URL.
  * Responses are identical whether or not the email is registered.
  */
@@ -30,7 +33,7 @@ class PasswordResetController extends Controller
 {
     public function create(): Response
     {
-        return Inertia::render('ForgotPassword');
+        return Inertia::render('landingpage', ['authModal' => 'forgot']);
     }
 
     public function sendCode(Request $request): RedirectResponse
@@ -62,7 +65,8 @@ class PasswordResetController extends Controller
             return redirect()->route('password.request');
         }
 
-        return Inertia::render('ForgotPasswordCode', [
+        return Inertia::render('landingpage', [
+            'authModal' => 'forgot-code',
             'maskedEmail' => EmailMask::mask($pending['email']),
             'resendAvailableIn' => $this->resendAvailableIn($pending['sent_at']),
             'codeLength' => 6,
@@ -160,7 +164,7 @@ class PasswordResetController extends Controller
             return redirect()->route('password.request');
         }
 
-        return Inertia::render('ResetPassword');
+        return Inertia::render('landingpage', ['authModal' => 'reset']);
     }
 
     public function update(Request $request): RedirectResponse

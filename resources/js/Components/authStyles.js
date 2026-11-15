@@ -39,9 +39,8 @@ export function codeBoxClass({ invalid = false, filled = false } = {}) {
 }
 
 export const ui = {
-    // Page shell
-    main: 'relative isolate box-border flex min-h-[calc(100vh-90px)] items-center justify-center overflow-clip bg-[linear-gradient(180deg,#fbfaff_0%,#fdfcff_55%,#fff_100%)] px-[clamp(16px,4vw,48px)] py-[clamp(28px,5vw,64px)] text-[#151b2a]',
-    card: 'relative z-[1] grid min-h-[600px] overflow-hidden rounded-[28px] border border-[rgb(25_4_63/0.08)] bg-white shadow-[0_1px_2px_rgb(25_4_63/0.06),0_24px_60px_-12px_rgb(25_4_63/0.22)] transition-[opacity,translate,scale] duration-[420ms] ease-[cubic-bezier(0.23,1,0.32,1)] starting:translate-y-3 starting:scale-[0.99] starting:opacity-0 motion-reduce:starting:translate-y-0 motion-reduce:starting:scale-100 max-[860px]:min-h-0 max-[860px]:grid-cols-1 max-[480px]:rounded-[22px]',
+    // Card
+    card: 'relative z-[1] grid min-h-[600px] overflow-hidden rounded-[28px] border border-[rgb(25_4_63/0.08)] bg-white shadow-[0_1px_2px_rgb(25_4_63/0.06),0_24px_60px_-12px_rgb(25_4_63/0.22)] max-[860px]:min-h-0 max-[860px]:grid-cols-1 max-[480px]:rounded-[22px]',
     cardNormal: 'w-[min(100%,1060px)] grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] max-[860px]:w-[min(100%,560px)]',
     cardWide: 'w-[min(100%,1180px)] grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] max-[860px]:w-[min(100%,620px)]',
 
@@ -83,7 +82,7 @@ export const ui = {
     success: 'm-0 rounded-xl border border-[rgb(31_107_58/0.2)] bg-[#effaf3] px-3.5 py-3 text-sm leading-[1.45] text-[#1f6b3a] transition-opacity duration-200 starting:opacity-0',
 
     // Buttons
-    submit: 'mt-1 inline-flex h-[52px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-full border-0 bg-[#19043f] text-base font-bold tracking-[0.01em] text-white shadow-[inset_0_-3px_0_#ffbb50,0_8px_20px_-8px_rgb(25_4_63/0.55)] transition-[background-color,scale,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:enabled:bg-[#2a0c63] active:enabled:scale-[0.97] motion-reduce:active:enabled:scale-100 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#ffbb50] disabled:cursor-progress disabled:opacity-85 aria-[busy=false]:disabled:cursor-not-allowed aria-[busy=false]:disabled:opacity-45 aria-[busy=false]:disabled:shadow-[inset_0_-3px_0_#ffbb50]',
+    submit: 'mt-1 inline-flex h-[52px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-full border-0 bg-[#19043f] text-base font-bold tracking-[0.01em] text-white shadow-[0_8px_20px_-8px_rgb(25_4_63/0.55)] transition-[background-color,scale,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:enabled:bg-[#2a0c63] active:enabled:scale-[0.97] motion-reduce:active:enabled:scale-100 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#ffbb50] disabled:cursor-progress disabled:opacity-85 aria-[busy=false]:disabled:cursor-not-allowed aria-[busy=false]:disabled:opacity-45 aria-[busy=false]:disabled:shadow-none',
     spinner: 'size-4 animate-spin rounded-full border-2 border-white/35 border-t-[#ffbb50] [animation-duration:600ms] motion-reduce:[animation-duration:1.2s]',
     divider: 'flex items-center gap-3 text-[13px] tracking-[0.08em] text-[#8a8f9c] uppercase before:h-px before:flex-1 before:bg-[#dcd8e8] after:h-px after:flex-1 after:bg-[#dcd8e8]',
     google: 'box-border inline-flex h-[50px] w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-[#dcd8e8] bg-white text-[15px] font-semibold text-[#151b2a] no-underline transition-[border-color,background-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#bdb6d3] hover:bg-[#faf9fd] active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#ffbb50]',

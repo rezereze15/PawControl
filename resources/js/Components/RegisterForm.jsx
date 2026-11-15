@@ -7,7 +7,8 @@ import { inputClass, ui } from "@/Components/authStyles";
 // Re-exported so existing imports (`import { Field } from '@/Components/RegisterForm'`) keep working.
 export { Field };
 
-export default function RegisterForm() {
+/** `onSwitchToLogin` (optional): in the landing page modal, swap to the login card instead of navigating. */
+export default function RegisterForm({ onSwitchToLogin }) {
     const [showPassword, setShowPassword] = useState(false);
     const form = useForm({
         first_name: "",
@@ -85,7 +86,10 @@ export default function RegisterForm() {
       <GoogleButton label="Sign up with Google"/>
 
       <p className={ui.footnote}>
-        Already have an account? <a href="/login" className={ui.link}>Log in</a>
+        Already have an account? <a href="/login" className={ui.link} onClick={onSwitchToLogin ? (event) => {
+            event.preventDefault();
+            onSwitchToLogin();
+        } : undefined}>Log in</a>
       </p>
     </form>);
 }
