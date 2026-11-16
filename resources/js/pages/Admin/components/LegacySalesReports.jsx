@@ -11,7 +11,7 @@ function LegacySalesReports({ ownerView = false }) {
     return (<div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Sales Reports</h1>
-        {ownerView && (<button type="button" className="min-h-10 whitespace-nowrap rounded-xl bg-[#19043f] px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_4px_10px_rgba(25,4,63,0.2)] transition-colors hover:bg-[#2d0a6e]">
+        {ownerView && (<button type="button" className="min-h-10 whitespace-nowrap rounded-xl bg-paw-blue px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_4px_10px_rgba(25,4,63,0.2)] transition-colors hover:bg-paw-blue-dark">
             Generate Sales Report
           </button>)}
       </div>

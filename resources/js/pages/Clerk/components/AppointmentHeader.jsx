@@ -10,7 +10,7 @@ export default function AppointmentHeader({ search, onSearchChange, subtitle = "
               </p>
             </div>
             {onSearchChange && (<div className="flex items-center gap-3 flex-shrink-0">
-              <SearchField value={search} onChange={onSearchChange} placeholder="Search by pet, owner, type, reference no..." className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#3b0f8c] w-72"/>
+              <SearchField value={search} onChange={onSearchChange} placeholder="Search by pet, owner, type, reference no..." className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-paw-blue w-72"/>
             </div>)}
           </div>);
 }

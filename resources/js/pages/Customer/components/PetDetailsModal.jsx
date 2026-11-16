@@ -101,7 +101,7 @@ function PetDetailsModal({ pet, onClose }) {
                 <footer className="paw-pet-modal-footer">
                     <p className="mr-auto hidden text-xs text-slate-400 sm:block">Only the profile photo can be changed.</p>
                     <button type="button" onClick={onClose} disabled={form.processing} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50">Close</button>
-                    <button type="submit" disabled={!form.data.photo || form.processing} className="inline-flex min-w-32 items-center justify-center gap-2 rounded-xl bg-[#3b0f8c] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/15 transition hover:bg-[#2d0a6e] focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-50">
+                    <button type="submit" disabled={!form.data.photo || form.processing} className="inline-flex min-w-32 items-center justify-center gap-2 rounded-xl bg-paw-blue px-5 py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/15 transition hover:bg-paw-blue-dark focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-50">
                         {form.processing ? "Saving…" : "Save photo"}
                     </button>
                 </footer>

@@ -12,6 +12,6 @@ export default function AppointmentFilters({ filter, onFilterChange, veterinaria
                     <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500">{counts[f] ?? 0}</span>
                   </button>))}
               </div>
-              {onSearchChange && (<SearchField value={search} onChange={onSearchChange} placeholder="Search by pet, owner, type, reference no..." className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#3b0f8c] w-72 max-w-full"/>)}
+              {onSearchChange && (<SearchField value={search} onChange={onSearchChange} placeholder="Search by pet, owner, type, reference no..." className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-paw-blue w-72 max-w-full"/>)}
             </div>);
 }

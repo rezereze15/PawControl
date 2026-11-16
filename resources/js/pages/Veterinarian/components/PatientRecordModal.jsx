@@ -103,7 +103,7 @@ export default function PatientRecordModal({ patient, appointment, onClose }) {
         </div>
 
         <footer className="paw-pet-modal-footer">
-          <button type="button" onClick={onClose} className="rounded-lg border border-[#3b0f8c] px-6 py-2 text-sm font-semibold text-[#3b0f8c] hover:bg-violet-50">Close</button>
+          <button type="button" onClick={onClose} className="rounded-lg border border-paw-blue px-6 py-2 text-sm font-semibold text-paw-blue hover:bg-paw-blue-soft">Close</button>
         </footer>
       </section>
     </div>);

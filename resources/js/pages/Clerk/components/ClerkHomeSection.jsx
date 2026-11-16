@@ -23,7 +23,7 @@ function StatCard({ icon, label, value, note, noteTone = "text-[#e87c1e]", onDet
         <p className="text-sm text-gray-500 font-medium">{label}</p>
         <p className="text-4xl font-extrabold text-[#1a0a3c] tabular-nums">{value}</p>
         {note && <p className={`${noteTone} text-xs font-semibold mt-0.5`}>{note}</p>}
-        <button type="button" onClick={onDetails} className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline cursor-pointer">
+        <button type="button" onClick={onDetails} className="text-paw-blue text-xs font-medium mt-1 hover:underline cursor-pointer">
           View Details
         </button>
       </div>
@@ -85,7 +85,7 @@ export default function ClerkHomeSection({ username, appointments = [], stats = 
                       <p className="font-extrabold text-[#1a0a3c] text-sm leading-tight truncate">{a.pet}</p>
                       <p className="text-gray-500 text-xs truncate">{[a.breed, a.type].filter(Boolean).join(" · ")}</p>
                       {formatPetAge({ dateOfBirth: a.petDateOfBirth, age: a.petAge }) && <p className="text-gray-400 text-xs">{formatPetAge({ dateOfBirth: a.petDateOfBirth, age: a.petAge })}</p>}
-                      <button type="button" onClick={() => setSelectedId(a.id)} className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline cursor-pointer">
+                      <button type="button" onClick={() => setSelectedId(a.id)} className="text-paw-blue text-xs font-medium mt-1 hover:underline cursor-pointer">
                         View Details
                       </button>
                     </div>
@@ -101,7 +101,7 @@ export default function ClerkHomeSection({ username, appointments = [], stats = 
               <CalendarIcon className="w-5 h-5" color="#3b0f8c"/>
               <span className="text-[#3b0f8c] font-bold text-sm">Next Day Appointment</span>
             </div>
-            <button type="button" onClick={() => onNavigate?.("appointments")} className="text-[#3b0f8c] text-xs font-medium hover:underline cursor-pointer">
+            <button type="button" onClick={() => onNavigate?.("appointments")} className="text-paw-blue text-xs font-medium hover:underline cursor-pointer">
               See more &gt;
             </button>
           </div>
@@ -133,11 +133,11 @@ export default function ClerkHomeSection({ username, appointments = [], stats = 
                       {a.time}
                     </div>
                   </div>
-                  <button type="button" onClick={() => setSelectedId(a.id)} className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 rounded-lg text-xs transition-colors cursor-pointer">
+                  <button type="button" onClick={() => setSelectedId(a.id)} className="w-full bg-paw-blue hover:bg-paw-blue-dark text-white font-bold py-2 rounded-lg text-xs transition-colors cursor-pointer">
                     View Appointment Details
                   </button>
                 </div>))}
-              {tomorrow.length > 3 && (<button type="button" onClick={() => onNavigate?.("appointments")} className="text-center text-xs font-semibold text-[#3b0f8c] hover:underline cursor-pointer">
+              {tomorrow.length > 3 && (<button type="button" onClick={() => onNavigate?.("appointments")} className="text-center text-xs font-semibold text-paw-blue hover:underline cursor-pointer">
                   +{tomorrow.length - 3} more tomorrow
                 </button>)}
             </div>)}

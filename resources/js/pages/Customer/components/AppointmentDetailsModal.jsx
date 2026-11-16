@@ -84,7 +84,7 @@ function AppointmentDetailsModal({ appointment, onClose }) {
                 </div>
 
                 <footer className="paw-pet-modal-footer">
-                    <button type="button" onClick={onClose} className="rounded-xl bg-[#3b0f8c] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/15 transition hover:bg-[#2d0a6e] focus:outline-none focus:ring-4 focus:ring-violet-200">Done</button>
+                    <button type="button" onClick={onClose} className="rounded-xl bg-paw-blue px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/15 transition hover:bg-paw-blue-dark focus:outline-none focus:ring-4 focus:ring-violet-200">Done</button>
                 </footer>
             </section>
         </div>

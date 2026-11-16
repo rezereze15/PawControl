@@ -189,7 +189,7 @@ function AddPetModal({ onClose }) {
 
                 <footer className="paw-pet-modal-footer">
                     <button type="button" onClick={onClose} disabled={form.processing} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50">Cancel</button>
-                    <button type="submit" disabled={form.processing} className="inline-flex min-w-36 items-center justify-center gap-2 rounded-xl bg-[#3b0f8c] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/15 transition hover:-translate-y-0.5 hover:bg-[#2d0a6e] hover:shadow-violet-900/25 focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-70">
+                    <button type="submit" disabled={form.processing} className="inline-flex min-w-36 items-center justify-center gap-2 rounded-xl bg-paw-blue px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-900/15 transition hover:-translate-y-0.5 hover:bg-paw-blue-dark hover:shadow-violet-900/25 focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-70">
                         {form.processing && <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity=".3" strokeWidth="3"/><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>}
                         {form.processing ? "Saving pet…" : "Add pet"}
                     </button>

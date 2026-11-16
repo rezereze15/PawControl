@@ -6,6 +6,15 @@
  * page is pages/landingpage.jsx (+ pages/Public/components).
  */
 
+/* Shared colour tokens (Tailwind utilities: bg-paw-blue, text-paw-blue, border-paw-blue, …).
+   paw-blue is the dark blue of the login button (authStyles.js 'submit'): the one colour for
+   buttons, links and focus outlines in the dashboards. -dark is its hover, -soft a light tint. */
+@theme {
+  --color-paw-blue: #19043f;
+  --color-paw-blue-dark: #2a0c63;
+  --color-paw-blue-soft: #f1eef8;
+}
+
 html, body, #root {
   height: 100%;
 }

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 
-const input = "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c] disabled:bg-gray-50 disabled:text-gray-500";
+const input = "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-paw-blue focus:outline-none focus:ring-1 focus:ring-paw-blue disabled:bg-gray-50 disabled:text-gray-500";
 
 function Field({ id, label, required, error, children, className = "" }) {
     return (<div className={className}>
@@ -124,7 +124,7 @@ export default function UserFormModal({ user, roles, isSelf, onClose }) {
 
         <footer className="paw-pet-modal-footer">
           <button type="button" onClick={onClose} disabled={form.processing} className="rounded-lg border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
-          <button type="submit" disabled={form.processing} className="rounded-lg bg-[#3b0f8c] px-6 py-2 text-sm font-bold text-white hover:bg-[#2d0a6e] disabled:opacity-60">
+          <button type="submit" disabled={form.processing} className="rounded-lg bg-paw-blue px-6 py-2 text-sm font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
             {form.processing ? "Saving…" : editing ? "Save Changes" : "Create Account"}
           </button>
         </footer>

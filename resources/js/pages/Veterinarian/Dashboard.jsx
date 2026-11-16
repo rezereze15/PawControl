@@ -4,6 +4,7 @@ import StaffHomeSection from '../Clerk/components/StaffHomeSection';
 import { PersonIcon } from '../shared/dashboard/Icons';
 import { bigpawLogo } from '../shared/dashboard/assets';
 import FlashToast from '@/Components/FlashToast';
+import { veterinarianNotifications } from '../shared/dashboard/notifications';
 import UserSettings from '../Customer/modules/UserSettings';
 import VetAppointments from './modules/VetAppointments';
 import PatientRecords from './modules/PatientRecords';
@@ -40,7 +41,7 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<StaffDashboardLayout username={username} roleLabel="Veterinarian" dashboardClassName="paw-vet-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+    return (<StaffDashboardLayout username={username} roleLabel="Veterinarian" dashboardClassName="paw-vet-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout} notifications={veterinarianNotifications(confirmedAppointments)} notificationKey={`paw-notifications-read:${profile?.id ?? username}`}>
         <FlashToast message={flash?.success}/>
         {section === "home" && (<StaffHomeSection username={username} role="Veterinarian"/>)}
           {section === "records" && <PatientRecords patients={patientRecords}/>}

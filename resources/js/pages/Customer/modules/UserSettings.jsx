@@ -4,7 +4,7 @@ import { PersonIcon } from "../../shared/dashboard/Icons";
 import UserAvatar from "@/Components/UserAvatar";
 
 const ROLE_LABELS = { admin: "Admin", owner: "Clinic Owner", veterinarian: "Veterinarian", clerk: "Clerk", customer: "Pet Owner" };
-const input = "w-full rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c]";
+const input = "w-full rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 focus:border-paw-blue focus:outline-none focus:ring-1 focus:ring-paw-blue";
 const readOnly = "w-full rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-500";
 
 function ReadOnlyField({ label, value }) {
@@ -105,14 +105,14 @@ export default function UserSettings({ profile = {} }) {
                 <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow" role="img" aria-label="Your profile photo">
                   <UserAvatar photoUrl={avatar} name={profile.name} textClassName="text-5xl"/>
                 </div>
-                <button type="button" onClick={() => fileInput.current?.click()} aria-label="Choose a new profile photo" className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#1a0a3c] text-white shadow hover:bg-[#3b0f8c] focus:outline-none focus:ring-2 focus:ring-violet-300">
+                <button type="button" onClick={() => fileInput.current?.click()} aria-label="Choose a new profile photo" className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-paw-blue text-white shadow hover:bg-paw-blue-dark focus:outline-none focus:ring-2 focus:ring-violet-300">
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 </button>
                 <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={choosePhoto}/>
               </div>
               {photo.data.photo && (<div className="flex gap-2">
                   <button type="button" onClick={() => { photo.reset(); setPreview(null); }} disabled={photo.processing} className="rounded-full border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
-                  <button type="button" onClick={savePhoto} disabled={photo.processing} className="rounded-full bg-[#3b0f8c] px-3 py-1 text-xs font-bold text-white hover:bg-[#2d0a6e] disabled:opacity-60">{photo.processing ? "Uploading…" : "Save photo"}</button>
+                  <button type="button" onClick={savePhoto} disabled={photo.processing} className="rounded-full bg-paw-blue px-3 py-1 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">{photo.processing ? "Uploading…" : "Save photo"}</button>
                 </div>)}
               <FieldError message={photo.errors.photo}/>
               <p className="max-w-[10rem] text-center text-[11px] text-gray-400">JPG, PNG or WebP, up to 5 MB</p>
@@ -131,7 +131,7 @@ export default function UserSettings({ profile = {} }) {
               </label>
               <p className="text-[11px] text-gray-400 sm:col-span-2">To change your name, email or contact number, please ask {profile.role === "customer" ? "the clinic staff" : profile.role === "admin" ? "another admin" : "an admin"}.</p>
               <div className="flex justify-end sm:col-span-2">
-                <button type="submit" disabled={!addressChanged || address.processing} className="rounded-lg bg-[#3b0f8c] px-6 py-2 text-xs font-bold text-white hover:bg-[#2d0a6e] disabled:cursor-not-allowed disabled:opacity-50">{address.processing ? "Saving…" : "Save Changes"}</button>
+                <button type="submit" disabled={!addressChanged || address.processing} className="rounded-lg bg-paw-blue px-6 py-2 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:cursor-not-allowed disabled:opacity-50">{address.processing ? "Saving…" : "Save Changes"}</button>
               </div>
             </form>
           </div>
@@ -147,7 +147,7 @@ export default function UserSettings({ profile = {} }) {
             <PasswordInput id="new-password" label="New Password" value={password.data.password} onChange={(v) => password.setData("password", v)} error={password.errors.password} autoComplete="new-password" placeholder="At least 8 characters, letters and numbers"/>
             <PasswordInput id="confirm-password" label="Confirm New Password" value={password.data.password_confirmation} onChange={(v) => password.setData("password_confirmation", v)} error={password.errors.password_confirmation} autoComplete="new-password" placeholder="Confirm new password"/>
             <div className="flex justify-end">
-              <button type="submit" disabled={password.processing} className="rounded-lg bg-[#3b0f8c] px-6 py-2 text-xs font-bold text-white hover:bg-[#2d0a6e] disabled:opacity-60">{password.processing ? "Updating…" : "Update Password"}</button>
+              <button type="submit" disabled={password.processing} className="rounded-lg bg-paw-blue px-6 py-2 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">{password.processing ? "Updating…" : "Update Password"}</button>
             </div>
           </form>
         </section>

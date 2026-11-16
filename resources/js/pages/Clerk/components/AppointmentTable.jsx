@@ -53,7 +53,7 @@ export default function AppointmentTable({ appointments, veterinarianView, onVie
                     </StatusBadge>
                       </td>)}
                     <td className="px-5 py-4">
-                      <button type="button" onClick={() => onView?.(a)} aria-label={`View ${a.pet}'s appointment`} className="flex w-fit items-center gap-1.5 rounded-lg p-2 text-gray-500 transition hover:bg-violet-50 hover:text-[#3b0f8c] focus:outline-none focus:ring-2 focus:ring-violet-300">
+                      <button type="button" onClick={() => onView?.(a)} aria-label={`View ${a.pet}'s appointment`} className="flex w-fit items-center gap-1.5 rounded-lg p-2 text-gray-500 transition hover:bg-paw-blue-soft hover:text-paw-blue focus:outline-none focus:ring-2 focus:ring-violet-300">
                         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                           <circle cx="12" cy="12" r="3"/>

@@ -40,7 +40,7 @@ function ActionsMenu({ user, isSelf, onEdit, onToggleStatus }) {
       <button type="button" onClick={() => setOpen((v) => !v)} aria-haspopup="menu" aria-expanded={open} aria-label={`Actions for ${user.name}`} className="paw-admin-user-actions flex items-center justify-center rounded p-2 text-gray-500 transition-colors hover:bg-gray-100">
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/></svg>
       </button>
-      {open && (<div role="menu" className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-gray-100 bg-white py-1 shadow-lg">
+      {open && (<div role="menu" className="paw-pop absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-gray-100 bg-white py-1 shadow-lg">
           <button type="button" role="menuitem" onClick={choose(onEdit)} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-[#1a0a3c] hover:bg-gray-50">
             <svg className="h-4 w-4 text-[#4a6cf7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" strokeLinejoin="round"/></svg>
             Edit details &amp; role

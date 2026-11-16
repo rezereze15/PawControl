@@ -3,6 +3,7 @@ import { clearBookingDraft, readBookingDraft } from './Customer/hooks/bookingDra
 import { PersonIcon } from './shared/dashboard/Icons';
 import { router, usePage } from '@inertiajs/react';
 import FlashToast from '@/Components/FlashToast';
+import { customerNotifications, ownerNotifications } from './shared/dashboard/notifications';
 import CompleteProfileModal from '@/Components/CompleteProfileModal';
 import UserSettings from './Customer/modules/UserSettings';
 import VeterinarianDashboard from './Veterinarian/Dashboard';
@@ -63,7 +64,7 @@ function CustomerDashboard({ username, onLogout, owner, profile, pets, customerA
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<CustomerDashboardLayout username={username} onLogout={onLogout} logoSrc={bigpawLogo} avatarSrc={profile?.photoUrl} navItems={navItems} section={section} booking={booking} sidebarOpen={sidebarOpen} onNavigate={(nextSection) => { setSection(nextSection); setBooking(false); }} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
+    return (<CustomerDashboardLayout username={username} onLogout={onLogout} logoSrc={bigpawLogo} avatarSrc={profile?.photoUrl} navItems={navItems} section={section} booking={booking} sidebarOpen={sidebarOpen} onNavigate={(nextSection) => { setSection(nextSection); setBooking(false); }} onToggleSidebar={() => setSidebarOpen((open) => !open)} notifications={customerNotifications(customerAppointments)} notificationKey={`paw-notifications-read:${profile?.id ?? username}`}>
         {booking ? (<AppointmentWizard owner={owner} pets={pets} onBack={() => setBooking(false)} onSuccess={() => setBooking(false)}/>) : (<>
               <FlashToast message={success}/>
               {section === "home" && (<CustomerHomeSection username={username} pets={pets} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} onBookAppointment={() => setBooking(true)} onViewRecords={() => setSection("records")} onViewAppointments={() => setSection("appointments")}/>)}
@@ -107,7 +108,7 @@ function OwnerDashboard({ username, onLogout, profile, petRecords = [], flash })
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<StaffDashboardLayout username={username} onLogout={onLogout} roleLabel="Owner" dashboardClassName="paw-owner-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)}>
+    return (<StaffDashboardLayout username={username} onLogout={onLogout} roleLabel="Owner" dashboardClassName="paw-owner-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} notifications={ownerNotifications(petRecords)} notificationKey={`paw-notifications-read:${profile?.id ?? username}`}>
           <FlashToast message={flash?.success}/>
     {section === "home" && <OwnerHomeSection username={username}/>}
           {section === "records" && <PetMedicalRecords records={petRecords}/>}

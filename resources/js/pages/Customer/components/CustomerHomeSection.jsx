@@ -25,7 +25,7 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
               Upcoming Appointments
             </p>
             <p className="text-4xl font-extrabold text-[#1a0a3c]">{upcomingAppointmentCount}</p>
-            <button onClick={onViewAppointments} className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+            <button onClick={onViewAppointments} className="text-paw-blue text-xs font-medium mt-1 hover:underline">
               View Details
             </button>
           </div>
@@ -35,7 +35,7 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
           <div>
             <p className="text-sm text-gray-500 font-medium">Pet's Records</p>
             <p className="text-4xl font-extrabold text-[#1a0a3c]">{pets.length}</p>
-            <button onClick={onViewRecords} className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">View Details</button>
+            <button onClick={onViewRecords} className="text-paw-blue text-xs font-medium mt-1 hover:underline">View Details</button>
           </div>
         </div>
         <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm">
@@ -49,7 +49,7 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
               Appointment History
             </p>
             <p className="text-4xl font-extrabold text-[#1a0a3c]">1</p>
-            <button onClick={onViewAppointments} className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+            <button onClick={onViewAppointments} className="text-paw-blue text-xs font-medium mt-1 hover:underline">
               View Details
             </button>
           </div>
@@ -71,7 +71,7 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
                   <p className="truncate font-extrabold text-[#1a0a3c] text-sm">{pet.name}</p>
                   <p className="truncate text-gray-500 text-xs">{pet.breed || pet.species}</p>
                   <p className="text-gray-400 text-xs">{formatPetAge(pet) ?? "Age unknown"}</p>
-                  <button type="button" onClick={() => setSelectedPet(pet)} className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[#3b0f8c] hover:underline focus:outline-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-violet-400">
+                  <button type="button" onClick={() => setSelectedPet(pet)} className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-paw-blue hover:underline focus:outline-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-violet-400">
                     View profile <span aria-hidden="true">→</span>
                   </button>
                 </div>
@@ -116,18 +116,18 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
                 {formatAppointmentTime(incomingAppointment.startsAt)}
               </div>
             </div>
-            <button type="button" onClick={() => setSelectedAppointment(incomingAppointment)} className="w-full rounded-xl bg-orange-400 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-orange-100">
+            <button type="button" onClick={() => setSelectedAppointment(incomingAppointment)} className="w-full rounded-xl bg-paw-blue py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-paw-blue-dark focus:outline-none focus:ring-4 focus:ring-violet-100">
               View appointment details
             </button>
           </> : <div className="flex flex-1 flex-col items-center justify-center rounded-xl bg-slate-50 px-4 py-7 text-center">
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-violet-700 shadow-sm"><CalendarIcon className="h-5 w-5" color="#3b0f8c"/></span>
             <p className="mt-3 text-sm font-bold text-slate-800">No upcoming appointment</p>
             <p className="mt-1 text-xs text-slate-500">Your next visit will appear here.</p>
-            <button type="button" onClick={onViewAppointments} className="mt-3 text-xs font-bold text-violet-800 hover:underline">View appointment history</button>
+            <button type="button" onClick={onViewAppointments} className="mt-3 text-xs font-bold text-paw-blue hover:underline">View appointment history</button>
           </div>}
-          {/* Primary action: solid brand gold, navy text for contrast, navy "+" badge. */}
-          <button type="button" onClick={onBookAppointment} className="group inline-flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border-0 bg-[#ffbb50] px-4 py-3 text-sm font-extrabold tracking-[0.01em] text-[#19043f] shadow-[0_8px_18px_-8px_rgb(242_139_55/0.75),inset_0_1px_0_rgb(255_255_255/0.45)] transition-[background-color,box-shadow,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-[0_12px_24px_-10px_rgb(242_139_55/0.85),inset_0_1px_0_rgb(255_255_255/0.45)] hover:bg-[#f5a623] active:scale-[0.97] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#19043f] motion-reduce:active:scale-100">
-            <span className="grid size-6 flex-none place-items-center rounded-full bg-[#19043f] text-white transition-[rotate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:rotate-90 motion-reduce:transition-none motion-reduce:group-hover:rotate-0" aria-hidden="true">
+          {/* Primary action: solid blue like every other button, white text, white "+" badge. */}
+          <button type="button" onClick={onBookAppointment} className="group inline-flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border-0 bg-paw-blue px-4 py-3 text-sm font-extrabold tracking-[0.01em] text-white shadow-[0_8px_18px_-8px_rgb(25_4_63/0.75),inset_0_1px_0_rgb(255_255_255/0.25)] transition-[background-color,box-shadow,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:shadow-[0_12px_24px_-10px_rgb(25_4_63/0.85),inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-paw-blue-dark active:scale-[0.97] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#19043f] motion-reduce:active:scale-100">
+            <span className="grid size-6 flex-none place-items-center rounded-full bg-white text-paw-blue transition-[rotate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:rotate-90 motion-reduce:transition-none motion-reduce:group-hover:rotate-0" aria-hidden="true">
               <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"/>
               </svg>

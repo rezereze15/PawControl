@@ -35,7 +35,7 @@ function ProofPreview({ appointment }) {
         </div>) : failed ? (<p className="flex h-56 w-full items-center justify-center rounded-xl bg-red-50 px-4 text-center text-sm text-red-700">The image could not be loaded. Try “View full size”.</p>) : (<a href={appointment.proofUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
           <img src={appointment.proofUrl} alt={`Proof of payment for reference ${appointment.referenceNumber}`} onError={() => setFailed(true)} className="max-h-72 w-full rounded-xl bg-violet-50 object-contain"/>
         </a>)}
-      <a href={appointment.proofUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-[#4a7fdc] px-6 py-2 text-xs font-bold text-white transition hover:bg-[#3a6cc5] focus:outline-none focus:ring-2 focus:ring-blue-300">
+      <a href={appointment.proofUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-paw-blue px-6 py-2 text-xs font-bold text-white transition hover:bg-paw-blue-dark focus:outline-none focus:ring-2 focus:ring-violet-300">
         View full size
       </a>
     </div>);
@@ -133,11 +133,11 @@ export default function ClerkAppointmentDetailsModal({ appointment, onClose }) {
               <label htmlFor="rejection-preset" className="mb-2 block text-sm font-bold text-[#1a0a3c]">
                 Remarks <span className="font-normal text-gray-400">(required only when rejecting)</span>
               </label>
-              <select id="rejection-preset" value={preset} onChange={(event) => { setPreset(event.target.value); reject.clearErrors(); }} className="mb-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c] sm:w-80">
+              <select id="rejection-preset" value={preset} onChange={(event) => { setPreset(event.target.value); reject.clearErrors(); }} className="mb-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-paw-blue focus:outline-none focus:ring-1 focus:ring-paw-blue sm:w-80">
                 <option value="">Select a reason…</option>
                 {REJECTION_REASONS.map((option) => <option key={option} value={option}>{option}</option>)}
               </select>
-              <textarea value={details} onChange={(event) => { setDetails(event.target.value); reject.clearErrors(); }} maxLength={400} rows={3} aria-label="Additional details for the pet owner" placeholder="Add details for the pet owner (e.g. which part of the receipt is unreadable)" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c]"/>
+              <textarea value={details} onChange={(event) => { setDetails(event.target.value); reject.clearErrors(); }} maxLength={400} rows={3} aria-label="Additional details for the pet owner" placeholder="Add details for the pet owner (e.g. which part of the receipt is unreadable)" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-paw-blue focus:outline-none focus:ring-1 focus:ring-paw-blue"/>
               {reject.errors.rejection_reason && <p className="mt-1 text-sm text-red-600" role="alert">{reject.errors.rejection_reason}</p>}
             </div>)}
 
@@ -158,7 +158,7 @@ export default function ClerkAppointmentDetailsModal({ appointment, onClose }) {
                     setConfirmingReject(true);
                 }} disabled={busy} className="mr-auto rounded-lg border-2 border-red-500 px-5 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60">Reject Appointment</button>
                 <button type="button" onClick={submitAccept} disabled={busy} className="rounded-lg border-2 border-green-700 bg-green-700 px-5 py-2 text-sm font-bold text-white hover:bg-green-800 disabled:opacity-60">{accept.processing ? "Accepting…" : "Confirm Payment & Accept"}</button>
-              </>)) : (<button type="button" onClick={onClose} className="rounded-xl bg-[#3b0f8c] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#2d0a6e]">Close</button>)}
+              </>)) : (<button type="button" onClick={onClose} className="rounded-xl bg-paw-blue px-6 py-2.5 text-sm font-bold text-white hover:bg-paw-blue-dark">Close</button>)}
         </footer>
       </section>
     </div>);

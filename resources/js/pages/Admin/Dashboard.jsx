@@ -7,6 +7,7 @@ import AdminManageUsers from './modules/ManageUsers';
 import DashboardPlaceholder from '../shared/dashboard/Placeholder';
 import UserSettings from '../Customer/modules/UserSettings';
 import FlashToast from '@/Components/FlashToast';
+import { adminNotifications } from '../shared/dashboard/notifications';
 export { DashboardPlaceholder as AdminPlaceholder };
 export default function AdminDashboard({ username, onLogout, profile, stats, usersByRole, recentUsers, lowStockSupplies, managedUsers = [], roles = [], flash }) {
     const [section, setSection] = useState("home");
@@ -51,7 +52,7 @@ export default function AdminDashboard({ username, onLogout, profile, stats, use
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<StaffDashboardLayout username={username} roleLabel="Admin" dashboardClassName="paw-admin-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+    return (<StaffDashboardLayout username={username} roleLabel="Admin" dashboardClassName="paw-admin-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout} notifications={adminNotifications(lowStockSupplies)} notificationKey={`paw-notifications-read:${profile?.id ?? username}`}>
           <FlashToast message={flash?.success}/>
     {section === "home" && <AdminHomeSection username={username} stats={stats} roles={roles} usersByRole={usersByRole} recentUsers={recentUsers} lowStockSupplies={lowStockSupplies} onNavigate={setSection}/>}
           {section === "services" && <DashboardPlaceholder title="Manage Services"/>}

@@ -134,7 +134,7 @@ function AppointmentWizard({ owner, pets, onBack, onSuccess }) {
     return (<div className="paw-appointment-flow flex flex-col gap-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm">
-        <button onClick={onBack} className="text-[#3b0f8c] font-medium hover:underline flex items-center gap-1">
+        <button onClick={onBack} className="text-paw-blue font-medium hover:underline flex items-center gap-1">
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M15 18l-6-6 6-6" strokeLinecap="round"/>
           </svg>

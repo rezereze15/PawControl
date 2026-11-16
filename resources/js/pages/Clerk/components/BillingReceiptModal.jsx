@@ -18,8 +18,8 @@ function formatDate(day) {
     return new Date(`${day}T00:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-const headerButton = 'rounded-lg border border-[#3b0f8c] px-4 py-1.5 text-sm text-[#1a0a3c] transition hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-violet-300';
-const cellInput = 'w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-[#3b0f8c] focus:outline-none';
+const headerButton = 'rounded-lg border border-paw-blue px-4 py-1.5 text-sm font-medium text-paw-blue transition hover:bg-paw-blue-soft focus:outline-none focus:ring-2 focus:ring-violet-300';
+const cellInput = 'w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-paw-blue focus:outline-none';
 
 function NumberCell({ value, editing, onChange, money }) {
     if (!editing) return <span>{money ? peso.format(Number(value) || 0) : value}</span>;
@@ -57,12 +57,12 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
         setSaved(true);
     };
 
-    return (<div className="paw-billing-receipt-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-labelledby="billing-receipt-title" onClick={(event) => event.stopPropagation()} className="paw-billing-receipt flex max-h-[92vh] w-full max-w-3xl flex-col overflow-y-auto rounded-3xl bg-white shadow-2xl">
+    return (<div className="paw-billing-receipt-overlay paw-overlay-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-labelledby="billing-receipt-title" onClick={(event) => event.stopPropagation()} className="paw-billing-receipt paw-dialog-in flex max-h-[92vh] w-full max-w-3xl flex-col overflow-y-auto rounded-3xl bg-white shadow-2xl">
         <div className="paw-receipt-noprint flex flex-wrap items-center justify-between gap-3 px-6 pb-4 pt-6">
           <h2 id="billing-receipt-title" className="text-2xl font-extrabold text-[#1a0a3c]">Billing Receipt</h2>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setEditing((on) => !on)} aria-pressed={editing} className={`${headerButton} ${editing ? 'bg-violet-50' : ''}`}>
+            <button type="button" onClick={() => setEditing((on) => !on)} aria-pressed={editing} className={`${headerButton} ${editing ? 'bg-paw-blue-soft' : ''}`}>
               {editing ? 'Done' : 'Edit'}
             </button>
             <button type="button" onClick={() => window.print()} className={headerButton}>Print</button>
@@ -190,10 +190,10 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
           </p>
 
           <div className="paw-receipt-noprint mt-4 flex flex-col gap-6">
-            <input type="text" value={draft.referenceNumber ?? ''} onChange={(event) => update({ referenceNumber: event.target.value })} placeholder="Enter receipt reference number" aria-label="Receipt reference number" className="w-full max-w-sm rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:border-[#3b0f8c] focus:outline-none"/>
+            <input type="text" value={draft.referenceNumber ?? ''} onChange={(event) => update({ referenceNumber: event.target.value })} placeholder="Enter receipt reference number" aria-label="Receipt reference number" className="w-full max-w-sm rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:border-paw-blue focus:outline-none"/>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <button type="button" onClick={save} className="rounded-lg bg-[#3b0f8c] px-6 py-2 text-sm font-semibold text-white transition hover:bg-[#2d0a6e] focus:outline-none focus:ring-2 focus:ring-violet-300">
+                <button type="button" onClick={save} className="rounded-lg bg-paw-blue px-6 py-2 text-sm font-semibold text-white transition hover:bg-paw-blue-dark focus:outline-none focus:ring-2 focus:ring-violet-300">
                   Save
                 </button>
                 {saved && <span className="text-sm text-green-600" role="status">Saved</span>}

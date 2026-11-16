@@ -1,11 +1,11 @@
 import SearchField from "@/Components/SearchField";
 export default function UserFilters({ roles = [], search, roleFilter, statusFilter, onSearchChange, onRoleChange, onStatusChange, onReset }) {
-    const select = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#3b0f8c] focus:outline-none";
+    const select = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-paw-blue focus:outline-none";
     return (<div className="paw-admin-users-filters rounded-xl bg-white px-5 py-4 shadow-sm">
       <div className="paw-admin-users-filter-controls flex flex-wrap items-end gap-4">
         <div className="min-w-[200px] flex-1">
           <label className="mb-1 block text-xs font-semibold text-gray-500">Search</label>
-          <SearchField value={search} onChange={onSearchChange} placeholder="Search by name, username, email..." className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c]"/>
+          <SearchField value={search} onChange={onSearchChange} placeholder="Search by name, username, email..." className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm focus:border-paw-blue focus:outline-none focus:ring-1 focus:ring-paw-blue"/>
         </div>
         <div>
           <label htmlFor="role-filter" className="mb-1 block text-xs font-semibold text-gray-500">Roles</label>

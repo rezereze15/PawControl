@@ -1,6 +1,6 @@
 import { qrCode } from "../../shared/dashboard/assets";
 function AppointmentStep4({ data, setData, errors, onNext, onBack }) {
-    const inp = "border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full focus:outline-none focus:border-[#3b0f8c] focus:ring-1 focus:ring-[#3b0f8c]";
+    const inp = "border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full focus:outline-none focus:border-paw-blue focus:ring-1 focus:ring-paw-blue";
     const proofError = errors.proof_of_down_payment && <p className="mt-1 text-sm text-red-600" role="alert">{errors.proof_of_down_payment}</p>;
     const termsError = errors.terms_accepted && <p className="mt-1 text-sm text-red-600" role="alert">{errors.terms_accepted}</p>;
     const referenceError = errors.reference_number && <p className="mt-1 text-sm text-red-600" role="alert">{errors.reference_number}</p>;
@@ -73,7 +73,7 @@ function AppointmentStep4({ data, setData, errors, onNext, onBack }) {
         <button onClick={onBack} className="border-2 border-gray-400 text-gray-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-gray-50 transition-colors">
           Back
         </button>
-        <button onClick={onNext} className="border-2 border-[#1a0a3c] text-[#1a0a3c] px-6 py-2 rounded-full text-sm font-bold hover:bg-[#1a0a3c] hover:text-white transition-colors">
+        <button onClick={onNext} className="border-2 border-paw-blue bg-paw-blue text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-paw-blue-dark hover:border-paw-blue-dark transition-colors">
           Next
         </button>
       </div>

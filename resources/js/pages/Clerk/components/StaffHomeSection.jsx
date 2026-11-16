@@ -20,7 +20,7 @@ function StaffHomeSection({ username, role, }) {
             <p className="text-[#e87c1e] text-xs font-semibold mt-0.5">
               +30 this month
             </p>
-            <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+            <button className="text-paw-blue text-xs font-medium mt-1 hover:underline">
               View Details
             </button>
           </div>
@@ -34,7 +34,7 @@ function StaffHomeSection({ username, role, }) {
             {!isVeterinarian && (<p className="text-red-500 text-xs font-semibold mt-0.5">
                 1 Pending
               </p>)}
-            <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+            <button className="text-paw-blue text-xs font-medium mt-1 hover:underline">
               View Details
             </button>
           </div>
@@ -53,7 +53,7 @@ function StaffHomeSection({ username, role, }) {
             <p className="text-4xl font-extrabold text-[#1a0a3c]">
               {isVeterinarian ? 4 : 3}
             </p>
-            {!isVeterinarian && (<button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+            {!isVeterinarian && (<button className="text-paw-blue text-xs font-medium mt-1 hover:underline">
                 View Details
               </button>)}
           </div>
@@ -83,7 +83,7 @@ function StaffHomeSection({ username, role, }) {
                   <p className="text-gray-400 text-xs">
                     {p.age} {p.age === 1 ? "year" : "years"} old
                   </p>
-                  <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+                  <button className="text-paw-blue text-xs font-medium mt-1 hover:underline">
                     View Details
                   </button>
                 </div>
@@ -100,7 +100,7 @@ function StaffHomeSection({ username, role, }) {
                 Next Day Appointment
               </span>
             </div>
-            <button className="text-[#3b0f8c] text-xs font-medium hover:underline">
+            <button className="text-paw-blue text-xs font-medium hover:underline">
               See more &gt;
             </button>
           </div>
@@ -131,7 +131,7 @@ function StaffHomeSection({ username, role, }) {
                     {apt.time}
                   </div>
                 </div>
-                <button className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 rounded-lg text-xs transition-colors">
+                <button className="w-full bg-paw-blue hover:bg-paw-blue-dark text-white font-bold py-2 rounded-lg text-xs transition-colors">
                   View Appointment Details
                 </button>
               </div>))}

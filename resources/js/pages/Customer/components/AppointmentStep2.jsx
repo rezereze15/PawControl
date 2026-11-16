@@ -33,7 +33,7 @@ function AppointmentStep2({ pets = [], selectedPetId, onSelectPet, onNext, onBac
         <button onClick={onBack} className="border-2 border-gray-400 text-gray-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-gray-50 transition-colors">
           Back
         </button>
-        <button onClick={onNext} disabled={!selectedPetId} className="border-2 border-[#1a0a3c] text-[#1a0a3c] px-6 py-2 rounded-full text-sm font-bold hover:bg-[#1a0a3c] hover:text-white transition-colors disabled:opacity-50">
+        <button onClick={onNext} disabled={!selectedPetId} className="border-2 border-paw-blue bg-paw-blue text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-paw-blue-dark hover:border-paw-blue-dark transition-colors disabled:opacity-50">
           Next
         </button>
       </div>

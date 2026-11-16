@@ -7,6 +7,7 @@ import { ClerkPlaceholder } from '../shared/dashboard/Placeholder';
 import { ClerkAppointments } from './modules/Appointments';
 import { ClerkBillings } from './modules/Billings';
 import FlashToast from '@/Components/FlashToast';
+import { clerkNotifications } from '../shared/dashboard/notifications';
 import UserSettings from '../Customer/modules/UserSettings';
 export default function ClerkDashboard({ username, onLogout, profile, upcomingAppointments = [], clerkHome = {}, flash, errors = {} }) {
     const [section, setSection] = useState("home");
@@ -50,7 +51,7 @@ export default function ClerkDashboard({ username, onLogout, profile, upcomingAp
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
         },
     ];
-    return (<StaffDashboardLayout username={username} roleLabel="Clerk" dashboardClassName="paw-clerk-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout}>
+    return (<StaffDashboardLayout username={username} roleLabel="Clerk" dashboardClassName="paw-clerk-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout} notifications={clerkNotifications(upcomingAppointments, clerkHome.today)} notificationKey={`paw-notifications-read:${profile?.id ?? username}`}>
         <FlashToast message={flash?.success}/>
         <FlashToast message={errors.appointment} tone="error" title="Could not update appointment"/>
         {section === "home" && (<ClerkHomeSection username={username} appointments={upcomingAppointments} stats={clerkHome} onNavigate={setSection}/>)}

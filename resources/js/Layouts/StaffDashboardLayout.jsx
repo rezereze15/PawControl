@@ -1,8 +1,9 @@
 import UserAvatar from "@/Components/UserAvatar";
+import NotificationBell from "@/Components/NotificationBell";
 import { SECTION_ENTER } from "./sectionEnter";
 
 /** avatarSrc is the signed-in user's own photo URL (or null). It never depends on the role. */
-export default function StaffDashboardLayout({ username, roleLabel, dashboardClassName, logoSrc, logoAlt, avatarSrc, navItems, section, onSectionChange, sidebarOpen, onToggleSidebar, onLogout, children }) {
+export default function StaffDashboardLayout({ username, roleLabel, dashboardClassName, logoSrc, logoAlt, avatarSrc, navItems, section, onSectionChange, sidebarOpen, onToggleSidebar, onLogout, notifications = [], notificationKey, children }) {
     return (<div className={`paw-dashboard-shell paw-staff-dashboard ${dashboardClassName} ${sidebarOpen ? "" : "sidebar-collapsed"} flex h-screen bg-gray-100 overflow-hidden`}>
       {/* Sidebar */}
       <aside className="paw-dashboard-sidebar w-64 bg-[#1a0a3c] flex flex-col flex-shrink-0">
@@ -40,14 +41,7 @@ export default function StaffDashboardLayout({ username, roleLabel, dashboardCla
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/></svg>
           </button>
           <img src={logoSrc} alt="PawControl" className="paw-customer-brand"/>
-          <div className="relative">
-            <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" strokeLinecap="round"/>
-            </svg>
-            <span className="absolute -top-1 -right-1 bg-orange-400 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-              3
-            </span>
-          </div>
+          <NotificationBell className="relative" notifications={notifications} storageKey={notificationKey} onNavigate={onSectionChange}/>
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border-2 border-orange-400">
               <UserAvatar photoUrl={avatarSrc} name={username}/>

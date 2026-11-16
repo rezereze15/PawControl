@@ -33,7 +33,7 @@ function Card({ title, icon, onEdit, style, children }) {
           <span className="grid size-7 place-items-center rounded-full bg-[#f3eefe] text-[#3b0f8c]" aria-hidden="true">{icon}</span>
           {title}
         </h3>
-        {onEdit && (<button type="button" onClick={onEdit} className="cursor-pointer rounded-md px-2 py-1 text-xs font-semibold text-[#3b0f8c] transition-colors hover:bg-[#f3eefe] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#ffbb50]">
+        {onEdit && (<button type="button" onClick={onEdit} className="cursor-pointer rounded-md px-2 py-1 text-xs font-semibold text-paw-blue transition-colors hover:bg-paw-blue-soft focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#ffbb50]">
             Edit
           </button>)}
       </header>
@@ -147,7 +147,7 @@ function AppointmentStep5({ owner, pets = [], data, processing, onBack, onDone, 
         <button type="button" onClick={onBack} className="cursor-pointer rounded-full border-2 border-gray-300 px-6 py-2.5 text-sm font-bold text-gray-600 transition-[background-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-gray-50 active:scale-[0.97] motion-reduce:active:scale-100">
           Back
         </button>
-        <button type="button" onClick={onDone} disabled={processing} aria-busy={processing} className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-[#3b0f8c] px-8 py-3 text-sm font-bold text-white shadow-[0_10px_22px_-10px_rgb(59_15_140/0.7)] transition-[background-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:enabled:bg-[#2d0a6e] active:enabled:scale-[0.97] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#ffbb50] disabled:cursor-progress disabled:opacity-80 motion-reduce:active:enabled:scale-100">
+        <button type="button" onClick={onDone} disabled={processing} aria-busy={processing} className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-paw-blue px-8 py-3 text-sm font-bold text-white shadow-[0_10px_22px_-10px_rgb(25_4_63/0.7)] transition-[background-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:enabled:bg-paw-blue-dark active:enabled:scale-[0.97] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#ffbb50] disabled:cursor-progress disabled:opacity-80 motion-reduce:active:enabled:scale-100">
           {processing && <span className="size-4 animate-spin rounded-full border-2 border-white/35 border-t-[#ffbb50]" aria-hidden="true"/>}
           {processing ? "Booking…" : "Confirm booking"}
         </button>

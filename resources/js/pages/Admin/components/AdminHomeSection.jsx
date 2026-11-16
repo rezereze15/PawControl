@@ -2,6 +2,8 @@
 // All numbers come in as props from the backend (DashboardController). Until the backend
 // sends them, the cards show a dash and the lists show an empty message.
 
+
+import { unitLabel } from "../../shared/dashboard/units";
 const DASH = "—";
 
 // Shows a dash until a real number arrives, otherwise formats it (e.g. 1,250).
@@ -15,13 +17,6 @@ function formatDate(value) {
     return new Date(value).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
 }
 
-// Units are stored singular ("bag"). Add "s" when there's more than one.
-// "pcs" and "ml" never change; "box" needs "es".
-function unitLabel(unit, quantity) {
-    if (quantity === 1 || ["pcs", "ml"].includes(unit))
-        return unit;
-    return unit === "box" ? "boxes" : `${unit}s`;
-}
 
 function StatCard({ icon, iconBg = "bg-gray-100", label, value, note, actionLabel = "Manage", onAction, highlight = false }) {
     return (<div className={`bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm ${highlight ? "ring-2 ring-orange-400" : ""}`}>
@@ -32,7 +27,7 @@ function StatCard({ icon, iconBg = "bg-gray-100", label, value, note, actionLabe
           {value}
         </p>
         {note && <p className="text-gray-400 text-xs font-semibold mt-0.5">{note}</p>}
-        <button type="button" onClick={onAction} className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+        <button type="button" onClick={onAction} className="text-paw-blue text-xs font-medium mt-1 hover:underline">
           {actionLabel} &rarr;
         </button>
       </div>

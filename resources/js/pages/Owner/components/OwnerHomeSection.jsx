@@ -21,7 +21,7 @@ function OwnerHomeSection({ username }) {
             <p className="text-[#e87c1e] text-xs font-semibold mt-0.5">
               +30 this month
             </p>
-            <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+            <button className="text-paw-blue text-xs font-medium mt-1 hover:underline">
               View Details
             </button>
           </div>
@@ -45,7 +45,7 @@ function OwnerHomeSection({ username }) {
             <p className="text-green-500 text-xs font-semibold mt-0.5">
               +8.64% vs last week
             </p>
-            <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+            <button className="text-paw-blue text-xs font-medium mt-1 hover:underline">
               View Details
             </button>
           </div>
@@ -64,7 +64,7 @@ function OwnerHomeSection({ username }) {
             <p className="text-green-500 text-xs font-semibold mt-0.5">
               +23 vs last week
             </p>
-            <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+            <button className="text-paw-blue text-xs font-medium mt-1 hover:underline">
               View Details
             </button>
           </div>
@@ -92,7 +92,7 @@ function OwnerHomeSection({ username }) {
                   <p className="text-gray-400 text-xs">
                     {p.age} {p.age === 1 ? "year" : "years"} old
                   </p>
-                  <button className="text-[#3b0f8c] text-xs font-medium mt-1 hover:underline">
+                  <button className="text-paw-blue text-xs font-medium mt-1 hover:underline">
                     View Details
                   </button>
                 </div>
@@ -107,7 +107,7 @@ function OwnerHomeSection({ username }) {
               <span className="text-xs font-bold uppercase tracking-[0.12em] text-violet-500">Performance</span>
               <h2 className="mt-1 text-lg font-extrabold text-[#1a0a3c]">Sales Report</h2>
             </div>
-            <button className="rounded-lg px-2 py-1 text-xs font-bold text-[#3b0f8c] transition-colors hover:bg-violet-50">
+            <button className="rounded-lg px-2 py-1 text-xs font-bold text-paw-blue transition-colors hover:bg-paw-blue-soft">
               See more <span aria-hidden="true">→</span>
             </button>
           </div>

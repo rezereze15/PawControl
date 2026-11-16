@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/Components/UserAvatar";
+import NotificationBell from "@/Components/NotificationBell";
 import { SECTION_ENTER } from "./sectionEnter";
 
 const PHONE_QUERY = "(max-width: 640px)";
@@ -28,7 +29,7 @@ function useMediaQuery(query) {
  *
  * avatarSrc is the signed-in user's own photo URL (or null). It never depends on the role.
  */
-export default function CustomerDashboardLayout({ username, onLogout, logoSrc, avatarSrc, navItems, section, booking, sidebarOpen, onNavigate, onToggleSidebar, children }) {
+export default function CustomerDashboardLayout({ username, onLogout, logoSrc, avatarSrc, navItems, section, booking, sidebarOpen, onNavigate, onToggleSidebar, notifications = [], notificationKey, children }) {
     const isPhone = useMediaQuery(PHONE_QUERY);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const drawerVisible = isPhone && drawerOpen;
@@ -75,12 +76,7 @@ export default function CustomerDashboardLayout({ username, onLogout, logoSrc, a
         </button>
         <img src={logoSrc} alt="PawControl" className="paw-customer-brand"/>
         <div className="paw-customer-userbar">
-          <div className="relative paw-customer-bell">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" strokeLinecap="round"/>
-            </svg>
-            <span>3</span>
-          </div>
+          <NotificationBell className="relative paw-customer-bell" notifications={notifications} storageKey={notificationKey} onNavigate={onNavigate}/>
           <div className="paw-customer-avatar overflow-hidden" aria-hidden="true">
             <UserAvatar photoUrl={avatarSrc} name={username} className="rounded-full"/>
           </div>

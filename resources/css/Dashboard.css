@@ -145,23 +145,12 @@
 .paw-appointment-filter-grid label { min-width: 0; }
 .paw-appointment-filter-grid input,
 .paw-appointment-filter-grid select { min-width: 0; }
-.paw-appointments-table-page table th { white-space: nowrap; font-size: 13px; }
 .paw-appointments-table-page table tbody td { vertical-align: middle; }
-.paw-appointment-results table tbody tr { height: 82px; }
-.paw-appointment-results footer { min-height: 48px; }
-.paw-appointment-history-heading h2 { margin: 0; font-size: clamp(25px, 2.4vw, 32px); line-height: 1.12; }
-.paw-appointment-results thead { background: #f8f7fb; }
-.paw-appointment-results tbody tr:hover { background: #faf8ff; }
-.paw-appointment-results tbody td { padding-block: 18px; }
-.paw-appointment-results footer { background: transparent; border-radius: 0; }
+.paw-appointment-history-heading h2 { margin: 0; font-size: 29px; line-height: 1.25; }
 @container (min-width: 640px) {
   .paw-appointment-filter-grid { grid-template-columns: minmax(210px, 1.8fr) repeat(3, minmax(105px, .75fr)) auto auto; gap: 16px; }
   .paw-appointment-filter-grid > div { width: auto; }
 }
-.paw-appointment-results table th,
-.paw-appointment-results table td { padding-inline: 30px; }
-.paw-appointment-results table th { padding-block: 19px; }
-.paw-appointment-results tbody tr { min-height: 90px; }
 .paw-appointments-page { width: 100%; max-width: 1480px; min-width: 0; margin-inline: auto; }
 .paw-customer-main > .paw-appointments-page { gap: 30px; }
 .paw-customer-main .paw-appointments-page h1 { margin: 0; font-size: clamp(32px, 3vw, 40px); line-height: 1.08; }
@@ -197,11 +186,11 @@
 .paw-appointment-card .flex.justify-between.pt-2 > button:first-child,
 .paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:first-child { border-color: #aab3c2; color: #334155; }
 .paw-appointment-card .flex.justify-between.pt-2 > button:first-child:hover,
-.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:first-child:hover { border-color: #4918a0; color: #4918a0; background: #f7f2ff; }
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:first-child:hover { border-color: #19043f; color: #19043f; background: #f1eef8; }
 .paw-appointment-card .flex.justify-between.pt-2 > button:last-child,
-.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:last-child { border-color: #4918a0; color: #fff; background: #4918a0; box-shadow: 0 3px 8px rgb(73 24 160 / 22%); }
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:last-child { border-color: #19043f; color: #fff; background: #19043f; box-shadow: 0 3px 8px rgb(25 4 63 / 22%); }
 .paw-appointment-card .flex.justify-between.pt-2 > button:last-child:hover,
-.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:last-child:hover { border-color: #351076; background: #351076; box-shadow: 0 5px 12px rgb(73 24 160 / 28%); transform: translateY(-1px); }
+.paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:last-child:hover { border-color: #2a0c63; background: #2a0c63; box-shadow: 0 5px 12px rgb(25 4 63 / 28%); transform: translateY(-1px); }
 .paw-appointment-card .flex.justify-between.pt-2 > button:focus-visible,
 .paw-add-pet-card .flex.justify-between.items-center.mt-8 > button:focus-visible { outline: 3px solid rgb(255 135 0 / 45%); outline-offset: 2px; }
 .paw-appointment-card button.w-40 { min-height: 112px; border-radius: 14px; box-shadow: 0 2px 6px rgb(23 4 61 / 6%); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
@@ -307,37 +296,37 @@
 .paw-appointments-view:not(.vet-view) .paw-appointments-heading h1 { font-size: 30px; line-height: 1.15; }
 .paw-appointments-view:not(.vet-view) .paw-appointments-heading p { margin-top: 5px; font-size: 13px; }
 .paw-appointments-view:not(.vet-view) .paw-appointments-heading input { width: 288px; height: 38px; border-radius: 8px; }
-.paw-appointments-view:not(.vet-view) .paw-appointments-heading input:focus { box-shadow: 0 0 0 3px rgb(73 24 160 / 10%); }
+.paw-appointments-view:not(.vet-view) .paw-appointments-heading input:focus { box-shadow: 0 0 0 3px rgb(25 4 63 / 14%); }
 .paw-appointments-view:not(.vet-view) .paw-appointments-heading > div:last-child > button { min-height: 38px; padding: 8px 18px; border-radius: 9px; box-shadow: 0 2px 6px rgb(23 4 61 / 12%); transition: transform .16s ease, box-shadow .16s ease; }
 .paw-appointments-view:not(.vet-view) .paw-appointments-heading > div:last-child > button:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgb(23 4 61 / 18%); }
 .paw-appointment-filterbar { min-height: 54px; padding: 12px 22px; gap: 24px; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 2px rgb(23 4 61 / 7%); }
 .paw-appointment-filterbar button { min-height: 26px; font-size: 13px; }
 .paw-appointment-filterbar button span { width: 12px; height: 12px; }
-.paw-appointments-table-card { border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 2px 5px rgb(23 4 61 / 7%); }
-.paw-appointments-table-card table { border-collapse: separate; border-spacing: 0; }
-.paw-appointments-table-card th { height: 52px; padding: 14px 18px; font-size: 12px; white-space: nowrap; }
-.paw-appointments-table-card td { height: 72px; padding: 12px 18px; font-size: 13px; }
-.paw-appointments-table-card tbody tr { transition: background-color .16s ease; }
-.paw-appointments-table-card td p:first-child { font-size: 13px; }
-.paw-appointments-table-card td p + p { margin-top: 2px; }
-.paw-appointments-table-card td span[class*="border-yellow-400"] { border-color: #fbbf24; background: #fff; color: #c27800; }
-.paw-appointments-table-card td span[class*="border-blue-400"] { border-color: #60a5fa; background: #fff; color: #2563eb; }
-.paw-appointments-table-card td span[class*="bg-red-400"] { background: #ff6269; }
-.paw-appointments-table-card td span[class*="rounded-full"] { padding: 5px 12px; font-size: 11px; }
-.paw-appointments-table-card td .w-10.h-10 { width: 40px; height: 40px; }
-.paw-appointments-table-card td button.flex.flex-col { padding: 8px; }
-.paw-appointments-table-card .paw-appointments-pagination { min-height: 64px; padding: 12px 18px; }
-.paw-appointments-pagination p { font-size: 12px; }
-.paw-appointments-pagination button { min-height: 32px; padding: 6px 11px; border-radius: 8px; transition: background-color .16s ease, border-color .16s ease; }
+:is(.paw-appointments-table-card, .paw-list-card) { border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 2px 5px rgb(23 4 61 / 7%); }
+:is(.paw-appointments-table-card, .paw-list-card) table { border-collapse: separate; border-spacing: 0; }
+:is(.paw-appointments-table-card, .paw-list-card) th { height: 52px; padding: 14px 18px; font-size: 12px; white-space: nowrap; }
+:is(.paw-appointments-table-card, .paw-list-card) td { height: 72px; padding: 12px 18px; font-size: 13px; }
+:is(.paw-appointments-table-card, .paw-list-card) tbody tr { transition: background-color .16s ease; }
+:is(.paw-appointments-table-card, .paw-list-card) td p:first-child { font-size: 13px; }
+:is(.paw-appointments-table-card, .paw-list-card) td p + p { margin-top: 2px; }
+:is(.paw-appointments-table-card, .paw-list-card) td span[class*="border-yellow-400"] { border-color: #fbbf24; background: #fff; color: #c27800; }
+:is(.paw-appointments-table-card, .paw-list-card) td span[class*="border-blue-400"] { border-color: #60a5fa; background: #fff; color: #2563eb; }
+:is(.paw-appointments-table-card, .paw-list-card) td span[class*="bg-red-400"] { background: #ff6269; }
+:is(.paw-appointments-table-card, .paw-list-card) td span[class*="rounded-full"] { padding: 5px 12px; font-size: 11px; }
+:is(.paw-appointments-table-card, .paw-list-card) td .w-10.h-10 { width: 40px; height: 40px; }
+:is(.paw-appointments-table-card, .paw-list-card) td button.flex.flex-col { padding: 8px; }
+:is(.paw-appointments-table-card, .paw-list-card) :is(.paw-appointments-pagination, .paw-list-pagination) { min-height: 64px; padding: 12px 18px; }
+:is(.paw-appointments-pagination, .paw-list-pagination) p { font-size: 12px; }
+:is(.paw-appointments-pagination, .paw-list-pagination) button { min-height: 32px; padding: 6px 11px; border-radius: 8px; transition: background-color .16s ease, border-color .16s ease; }
 
 @media (max-width: 760px) {
   .paw-appointments-view:not(.vet-view) .paw-appointments-heading { align-items: stretch; flex-direction: column; }
   .paw-appointments-view:not(.vet-view) .paw-appointments-heading > div:last-child { width: 100%; }
   .paw-appointments-view:not(.vet-view) .paw-appointments-heading input { width: min(100%, 340px); }
   .paw-appointments-view:not(.vet-view) .paw-appointment-filterbar { gap: 16px; padding-inline: 14px; overflow-x: auto; }
-  .paw-appointments-view:not(.vet-view) .paw-appointments-table-card { overflow-x: auto; }
-  .paw-appointments-view:not(.vet-view) .paw-appointments-table-card table { min-width: 760px; }
-  .paw-appointments-view:not(.vet-view) .paw-appointments-pagination { min-width: 760px; }
+  .paw-appointments-view:not(.vet-view) :is(.paw-appointments-table-card, .paw-list-card) { overflow-x: auto; }
+  .paw-appointments-view:not(.vet-view) :is(.paw-appointments-table-card, .paw-list-card) table { min-width: 760px; }
+  .paw-appointments-view:not(.vet-view) :is(.paw-appointments-pagination, .paw-list-pagination) { min-width: 760px; }
 }
 
 /* Admin user management reference layout. */
@@ -406,7 +395,6 @@
   .paw-appointment-filter-grid label:first-child { grid-column: 1 / -1; }
   .paw-appointment-filter-grid > div { align-self: end; }
   .paw-appointment-filter-grid > button:last-child { grid-column: 1 / -1; justify-content: flex-start; }
-  .paw-appointment-results table tbody tr { height: 76px; }
   .paw-customer-main > .paw-appointments-page { gap: 20px; }
   .paw-customer-main .paw-appointments-page h1 { font-size: 28px; }
   .paw-appointments-header { align-items: flex-start; }
@@ -429,7 +417,7 @@
   .paw-admin-users-filter-controls > div:last-child { grid-column: 1 / -1; justify-content: flex-start; }
   .paw-admin-users-table { overflow-x: auto; }
   .paw-admin-users-table table { min-width: 760px; }
-  .paw-admin-users-pagination { min-width: 760px; }
+  .paw-admin-users-pagination, .paw-admin-users-table .paw-list-pagination { min-width: 760px; }
 }
 
 @media (max-width: 900px) {
@@ -450,7 +438,7 @@
   .paw-customer-sidebar { width: 54px; flex-basis: 54px; }
   .paw-customer-sidebar nav button { min-height: 46px; }
   .paw-customer-main { padding: 22px 14px; }
-  .paw-customer-main h1 { font-size: 23px; }
+  .paw-customer-main h1, .paw-appointment-history-heading h2 { font-size: 23px; }
   .paw-appointment-card { padding: 20px 16px; }
   .paw-appointment-card > h1 { font-size: 22px; }
   .paw-add-pet-card { padding: 24px 20px; }
@@ -612,4 +600,33 @@
   .paw-billing-receipt-overlay { position: static; background: none; padding: 0; }
   .paw-billing-receipt { position: absolute; inset: 0 auto auto 0; width: 100%; max-width: none; max-height: none; overflow: visible; border-radius: 0; box-shadow: none; }
   .paw-billing-receipt .paw-receipt-noprint { display: none; }
+}
+
+/* ── Shared motion (all dashboards) ──────────────────────────────────────────────
+   Small and quick on purpose: things people click all day shouldn't make them wait.
+   - Buttons: colours ease over 160ms and the button dips 3% while pressed.
+   - Menus / filter panels: fade + 4px settle from where they open (150ms).
+   - Popups reuse paw-fade-in / paw-modal-in above.
+   :where() keeps these at zero specificity, so any more specific rule in this file wins.
+   Reduced motion: colour fades stay, movement and scaling are dropped. */
+:where(.paw-dashboard-main) :where(button, a[class*="rounded"]) {
+  transition-property: color, background-color, border-color, box-shadow, opacity, scale, translate, transform;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :where(.paw-dashboard-main) :where(button, a[class*="rounded"]):not(:disabled):active { scale: 0.97; }
+}
+.paw-pop { animation: paw-pop-in 150ms cubic-bezier(0.23, 1, 0.32, 1) both; transform-origin: top right; }
+.paw-pop-left { transform-origin: center right; }
+.paw-reveal { animation: paw-reveal-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+.paw-overlay-in { animation: paw-fade-in .18s ease-out both; }
+.paw-dialog-in { animation: paw-modal-in .22s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes paw-pop-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes paw-reveal-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .paw-pop, .paw-reveal, .paw-dialog-in { animation: paw-fade-in 150ms ease-out both; }
+}
+@media print {
+  .paw-overlay-in, .paw-dialog-in { animation: none; }
 }

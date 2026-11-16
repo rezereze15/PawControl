@@ -78,7 +78,7 @@ function LegacyAppointments({ veterinarianView = false, }) {
             </svg>
             <input type="text" placeholder="Search by pet name, owner, breed, veterinarian..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#3b0f8c] w-72"/>
           </div>
-          <button className="bg-[#1a0a3c] hover:bg-[#2d0a6e] text-white text-sm font-bold px-5 py-2 rounded-lg transition-colors whitespace-nowrap">
+          <button className="bg-paw-blue hover:bg-paw-blue-dark text-white text-sm font-bold px-5 py-2 rounded-lg transition-colors whitespace-nowrap">
             + New Appointment
           </button>
         </div>
