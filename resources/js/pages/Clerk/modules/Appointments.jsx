@@ -18,8 +18,8 @@ function ClerkAppointments({ appointments = [] }) {
     // Look the appointment up by id so the modal always reflects the latest server data.
     const selected = appointments.find((a) => a.id === selectedId) ?? null;
     return (<div className="paw-appointments-view flex flex-col gap-6">
-      <AppointmentHeader search={search} onSearchChange={setSearch}/>
-      <AppointmentFilters filter={filter} onFilterChange={setFilter} counts={counts}/>
+      <AppointmentHeader/>
+      <AppointmentFilters filter={filter} onFilterChange={setFilter} counts={counts} search={search} onSearchChange={setSearch}/>
       <div className="paw-appointments-table-card bg-white rounded-xl shadow-sm overflow-visible">
         <AppointmentTable appointments={filtered} onView={(a) => setSelectedId(a.id)}/>
         <Pagination itemCount={filtered.length} totalEntries={appointments.length} lastPage={Math.max(1, Math.ceil(appointments.length / 5))} className="paw-appointments-pagination flex items-center justify-between px-5 py-4 border-t border-gray-100"/>

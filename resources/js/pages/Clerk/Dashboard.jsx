@@ -5,6 +5,7 @@ import { PersonIcon } from '../shared/dashboard/Icons';
 import { bigpawLogo } from '../shared/dashboard/assets';
 import { ClerkPlaceholder } from '../shared/dashboard/Placeholder';
 import { ClerkAppointments } from './modules/Appointments';
+import { ClerkBillings } from './modules/Billings';
 import FlashToast from '@/Components/FlashToast';
 import UserSettings from '../Customer/modules/UserSettings';
 export default function ClerkDashboard({ username, onLogout, profile, upcomingAppointments = [], clerkHome = {}, flash, errors = {} }) {
@@ -55,7 +56,7 @@ export default function ClerkDashboard({ username, onLogout, profile, upcomingAp
         {section === "home" && (<ClerkHomeSection username={username} appointments={upcomingAppointments} stats={clerkHome} onNavigate={setSection}/>)}
           {section === "records" && (<ClerkPlaceholder title="Pet Medical Records"/>)}
           {section === "appointments" && <ClerkAppointments appointments={upcomingAppointments}/>}
-          {section === "billings" && <ClerkPlaceholder title="Billings"/>}
+          {section === "billings" && <ClerkBillings/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }
