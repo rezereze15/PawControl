@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import SearchField from '@/Components/SearchField';
 import DataTable from '@/Components/DataTable';
 import StatusBadge from '@/Components/StatusBadge';
 import { PetAvatar } from '../../shared/dashboard/PetAvatar';
 import { MOCK_BILLINGS } from '../../shared/dashboard/data';
+import BillingReceiptModal, { billingTotals } from '../components/BillingReceiptModal';
 
 const PAGE_SIZE = 5;
 
@@ -37,11 +38,6 @@ function daysAgo(days) {
     const date = new Date();
     date.setDate(date.getDate() - days);
     return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
-}
-
-function formatDate(day) {
-    if (!day) return '—';
-    return new Date(`${day}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function SelectField({ label, value, onChange, children }) {
@@ -79,44 +75,6 @@ function RowMenu({ bill, open, onToggle, onView }) {
     </div>);
 }
 
-function BillingDetailsModal({ bill, onClose }) {
-    const rows = [
-        ['Pet', `${bill.pet} (ID-${String(bill.petId).padStart(4, '0')})`],
-        ['Species / Breed', [bill.species, bill.breed].filter(Boolean).join(' · ')],
-        ['Owner', bill.owner],
-        ['Email', bill.email],
-        ['Phone', bill.phone],
-        ['Type', bill.type],
-        ['Veterinarian', bill.veterinarian],
-        ['Last Visit', formatDate(bill.lastVisit)],
-        ['Status', bill.status],
-    ];
-    return (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="billing-details-title" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(event) => event.stopPropagation()}>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <PetAvatar name={bill.pet} photo={bill.photo}/>
-            <div>
-              <h2 id="billing-details-title" className="text-xl font-extrabold text-[#1a0a3c]">{bill.pet}</h2>
-              <p className="text-2xl font-bold text-[#1a0a3c]">{peso.format(bill.amount)}</p>
-            </div>
-          </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
-        <dl className="mt-5 divide-y divide-gray-100 text-sm">
-          {rows.map(([label, value]) => (<div key={label} className="flex justify-between gap-4 py-2">
-              <dt className="text-gray-500">{label}</dt>
-              <dd className="text-right font-medium text-[#1a0a3c]">{value || '—'}</dd>
-            </div>))}
-        </dl>
-      </div>
-    </div>);
-}
-
 function BillingPagination({ page, pageCount, from, to, total, onPageChange }) {
     const navButton = 'rounded-lg border border-gray-300 px-3 py-1.5 text-xs text-gray-500 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50';
     return (<div className="paw-appointments-pagination flex items-center justify-between px-5 py-4 border-t border-gray-100">
@@ -139,7 +97,9 @@ function BillingPagination({ page, pageCount, from, to, total, onPageChange }) {
  * Upcoming billed items for pets. Not linked to the database yet: rows come in through
  * `billings` (sample data by default) until the step that creates billing records exists.
  */
-export function ClerkBillings({ billings = MOCK_BILLINGS }) {
+export function ClerkBillings({ billings: initialBillings = MOCK_BILLINGS }) {
+    // Kept in memory so receipt edits show in the list; nothing is persisted yet.
+    const [billings, setBillings] = useState(initialBillings);
     const [search, setSearch] = useState('');
     const [species, setSpecies] = useState('All');
     const [status, setStatus] = useState('All');
@@ -189,6 +149,7 @@ export function ClerkBillings({ billings = MOCK_BILLINGS }) {
     };
 
     const selected = billings.find((b) => b.id === selectedId) ?? null;
+    const closeReceipt = useCallback(() => setSelectedId(null), []);
 
     return (<div className="paw-billings-view paw-appointments-view flex flex-col gap-6">
       <div>
@@ -273,7 +234,7 @@ export function ClerkBillings({ billings = MOCK_BILLINGS }) {
                   {b.breed && <p className="text-gray-400 text-xs">{b.breed}</p>}
                 </td>
                 <td className="px-5 py-4">
-                  <p className="font-semibold text-[#1a0a3c]">{peso.format(b.amount ?? 0)}</p>
+                  <p className="font-semibold text-[#1a0a3c]">{peso.format(billingTotals(b).total)}</p>
                   {b.status && <p className={`text-xs font-semibold ${STATUS_TEXT[b.status] ?? 'text-gray-400'}`}>{b.status}</p>}
                 </td>
                 <td className="px-5 py-4">
@@ -294,7 +255,7 @@ export function ClerkBillings({ billings = MOCK_BILLINGS }) {
         <BillingPagination page={currentPage} pageCount={pageCount} from={filtered.length ? start + 1 : 0} to={start + rows.length} total={filtered.length} onPageChange={setPage}/>
       </div>
 
-      {selected && <BillingDetailsModal bill={selected} onClose={() => setSelectedId(null)}/>}
+      {selected && (<BillingReceiptModal key={selected.id} bill={selected} onClose={closeReceipt} onSave={(updated) => setBillings((list) => list.map((b) => (b.id === updated.id ? updated : b)))}/>)}
     </div>);
 }
 
