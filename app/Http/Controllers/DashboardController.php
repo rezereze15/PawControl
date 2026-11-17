@@ -307,6 +307,18 @@ class DashboardController extends Controller
                     'reorderLevel' => $supply->reorder_level,
                     'unitOfMeasure' => $supply->unit_of_measure,
                 ]),
+            // Full list for the Manage Services page: active first, then A-Z.
+            'services' => Service::query()
+                ->orderByDesc('is_active')
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Service $service) => [
+                    'id' => $service->id,
+                    'name' => $service->name,
+                    'description' => $service->description,
+                    'price' => $service->price,
+                    'isActive' => $service->is_active,
+                ]),
             'usersByRole' => $roleCounts
                 ->filter()
                 ->map(fn ($total, $role) => ['role' => $role, 'count' => $total])
