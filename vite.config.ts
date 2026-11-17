@@ -7,11 +7,29 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { networkInterfaces } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-// This PC's Wi-Fi IP, so a phone on the same network can load the dev assets.
-// Check it with `ipconfig` (Wi-Fi → IPv4 Address) and update it if your router gives a new one.
-const DEV_HOST = '192.168.1.13';
+// This PC's LAN IP, so a phone on the same network can load the dev assets.
+// Detected on each `npm run dev` (Wi-Fi adapter preferred) so a new IP from the
+// router doesn't leave pages blank. Override with DEV_HOST=x.x.x.x if needed.
+function detectLanIp(): string {
+    const nets = Object.entries(networkInterfaces());
+    const ipv4 = (name: string) =>
+        (nets.find(([n]) => n === name)?.[1] ?? []).find(
+            (a) => a.family === 'IPv4' && !a.internal,
+        )?.address;
+    const wifi = nets.find(([n]) => /wi-?fi|wlan/i.test(n))?.[0];
+    if (wifi && ipv4(wifi)) return ipv4(wifi)!;
+    for (const [name] of nets) {
+        if (/virtual|vethernet|vmware|bluetooth|loopback/i.test(name)) continue;
+        const ip = ipv4(name);
+        if (ip && !ip.startsWith('169.254.')) return ip;
+    }
+    return 'localhost';
+}
+
+const DEV_HOST = process.env.DEV_HOST || detectLanIp();
 
 export default defineConfig({
     plugins: lazyPlugins(() => [

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RejectAppointmentRequest;
 use App\Http\Requests\StoreAppointmentRequest;
+use App\Mail\AppointmentStatusMail;
 use App\Models\Appointment;
 use App\Services\SupabaseStorage;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -156,6 +158,9 @@ class AppointmentController extends Controller
             return back()->withErrors(['appointment' => $result]);
         }
 
+        // Sent after the transaction so a slow or failed email never blocks the decision.
+        $this->emailOwner($appointment->id);
+
         return back()->with('success', 'Appointment accepted. It is now visible to the veterinarians.');
     }
 
@@ -176,7 +181,30 @@ class AppointmentController extends Controller
             return back()->withErrors(['appointment' => 'This appointment has already been reviewed.']);
         }
 
+        $this->emailOwner($appointment->id);
+
         return back()->with('success', 'Appointment rejected. The pet owner will see your reason.');
+    }
+
+    /** Emails the owner the clerk's decision; logs (instead of throwing) if sending fails. */
+    private function emailOwner(int $appointmentId): void
+    {
+        // Fresh copy so the email shows the saved status and rejection reason.
+        $appointment = Appointment::with(['pet', 'user'])->find($appointmentId);
+        $email = $appointment?->user?->email;
+
+        if (! $email) {
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new AppointmentStatusMail($appointment));
+        } catch (Throwable $exception) {
+            Log::error('Failed to send appointment status email.', [
+                'appointment' => $appointmentId,
+                'exception' => $exception,
+            ]);
+        }
     }
 
     private function slotIsTaken(mixed $dateTime, ?int $exceptId = null): bool
