@@ -16,7 +16,7 @@ function AdminManageServices({ services = [] }) {
     return (<div className="flex flex-col gap-6">
       <div>
         <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Manage Services</h1>
-        <p className="mt-1 text-sm text-gray-500">The services the clinic offers and their prices</p>
+        <p className="mt-1 text-sm text-gray-500">Create, edit, or deactivate the services that the Clinic can offer</p>
       </div>
 
       <div className="rounded-xl bg-white px-5 py-4 shadow-sm">
