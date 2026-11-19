@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminServiceController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
@@ -100,6 +101,12 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
         Route::post('/', [AdminUserController::class, 'store'])->name('store');
         Route::put('/{user}', [AdminUserController::class, 'update'])->name('update');
         Route::patch('/{user}/status', [AdminUserController::class, 'updateStatus'])->name('status');
+    });
+
+    // Admin: manage the clinic's services. Services are never deleted, only deactivated.
+    Route::middleware('role:admin')->prefix('admin/services')->name('admin.services.')->group(function (): void {
+        Route::post('/', [AdminServiceController::class, 'store'])->name('store');
+        Route::put('/{service}', [AdminServiceController::class, 'update'])->name('update');
     });
 
     Route::get('/dashboard', [DashboardController::class, 'redirect'])
