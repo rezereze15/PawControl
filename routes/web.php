@@ -107,6 +107,7 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
     Route::middleware('role:admin')->prefix('admin/services')->name('admin.services.')->group(function (): void {
         Route::post('/', [AdminServiceController::class, 'store'])->name('store');
         Route::put('/{service}', [AdminServiceController::class, 'update'])->name('update');
+        Route::patch('/{service}/status', [AdminServiceController::class, 'updateStatus'])->name('status');
     });
 
     Route::get('/dashboard', [DashboardController::class, 'redirect'])

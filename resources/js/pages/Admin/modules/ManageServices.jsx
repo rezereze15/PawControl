@@ -2,13 +2,14 @@ import { useState } from 'react';
 import SearchField from '@/Components/SearchField';
 import ServiceTable from '../components/ServiceTable';
 import ServiceFormModal from '../components/ServiceFormModal';
+import ServiceStatusModal from '../components/ServiceStatusModal';
 
 const select = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#3b0f8c] focus:outline-none";
 
 function AdminManageServices({ services = [] }) {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
-    // { mode: "create" } | { mode: "edit", id }
+    // { mode: "create" } | { mode: "edit", id } | { mode: "status", id }
     const [dialog, setDialog] = useState(null);
     // Look the service up by id so the form always shows the latest server data.
     const dialogService = dialog?.id ? services.find((s) => s.id === dialog.id) : null;
@@ -46,13 +47,14 @@ function AdminManageServices({ services = [] }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm">
-        <ServiceTable services={filtered} onEdit={(s) => setDialog({ mode: "edit", id: s.id })}/>
+      <div className="overflow-visible rounded-xl bg-white shadow-sm">
+        <ServiceTable services={filtered} onEdit={(s) => setDialog({ mode: "edit", id: s.id })} onToggleStatus={(s) => setDialog({ mode: "status", id: s.id })}/>
       </div>
       <p className="text-sm text-gray-500">Showing {filtered.length} of {services.length} services</p>
 
       {dialog?.mode === "create" && <ServiceFormModal services={services} onClose={() => setDialog(null)}/>}
       {dialog?.mode === "edit" && dialogService && <ServiceFormModal key={dialogService.id} service={dialogService} services={services} onClose={() => setDialog(null)}/>}
+      {dialog?.mode === "status" && dialogService && <ServiceStatusModal service={dialogService} onClose={() => setDialog(null)}/>}
     </div>);
 }
 export default AdminManageServices;

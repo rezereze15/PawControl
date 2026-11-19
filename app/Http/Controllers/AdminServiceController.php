@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ManagedServiceRequest;
 use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 /**
- * Admin: add and edit services. Services are never deleted; deactivating
- * (Step 8c) hides them but keeps past appointments' history intact.
+ * Admin: add, edit, activate and deactivate services. Services are never deleted;
+ * deactivating hides them from booking but keeps past appointments' history intact.
  */
 class AdminServiceController extends Controller
 {
@@ -24,5 +25,18 @@ class AdminServiceController extends Controller
         $service->update($request->validated());
 
         return back()->with('success', "{$service->name} was updated.");
+    }
+
+    public function updateStatus(Request $request, Service $service): RedirectResponse
+    {
+        $validated = $request->validate([
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $service->update(['is_active' => $validated['is_active']]);
+
+        return back()->with('success', $service->is_active
+            ? "{$service->name} is active again."
+            : "{$service->name} was deactivated.");
     }
 }
