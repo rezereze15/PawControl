@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
+import { usePage } from "@inertiajs/react";
 import { useAppointmentSchedule } from "../hooks/useAppointmentSchedule";
-import { ALL_TIMES, SERVICE_TYPES } from "./appointmentConstants";
+import { ALL_TIMES } from "./appointmentConstants";
+
+// Formats "1500.00" as "₱1,500.00".
+const peso = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" });
+
 function toTimeValue(label) {
     const [time, meridiem] = label.split(" ");
     let hour = Number(time.split(":")[0]);
@@ -15,6 +20,8 @@ function toDateValue(year, monthIndex, day) {
 
 function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
     const { year, monthIndex, monthLabel, weeks, previousMonth, nextMonth } = useAppointmentSchedule();
+    // Active services from the server (the admin decides what can be booked).
+    const { bookableServices = [] } = usePage().props;
     const [today] = useState(() => new Date());
     const [confirmedSlots, setConfirmedSlots] = useState([]);
     const [availabilityLoading, setAvailabilityLoading] = useState(true);
@@ -56,8 +63,8 @@ function AppointmentStep3({ data, setData, errors, onNext, onBack }) {
         <div className="flex min-w-0 flex-col gap-3 md:col-span-2 xl:col-span-1">
           <label htmlFor="appointment-service" className="text-sm font-bold text-[#1a0a3c]">Service type <span className="text-red-500">*</span></label>
           <select id="appointment-service" value={data.service_type} onChange={(event) => setData("service_type", event.target.value)} aria-label="Service type" required className="w-full border border-gray-300 rounded-lg bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-paw-blue focus:ring-1 focus:ring-paw-blue">
-            <option value="" disabled>Select a service</option>
-            {SERVICE_TYPES.map((service) => <option key={service} value={service}>{service}</option>)}
+            <option value="" disabled>{bookableServices.length ? "Select a service" : "No services available right now"}</option>
+            {bookableServices.map((service) => <option key={service.name} value={service.name}>{service.name} — {peso.format(Number(service.price))}</option>)}
           </select>
           <label htmlFor="appointment-notes" className="text-sm font-bold text-[#1a0a3c]">Pet concern or details <span className="text-gray-400">(optional)</span></label>
           <textarea id="appointment-notes" maxLength={500} value={data.notes} onChange={(event) => setData("notes", event.target.value)} placeholder="Tell us what your pet needs" aria-label="Pet concern or details" rows={3} className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-paw-blue focus:ring-1 focus:ring-paw-blue"/>

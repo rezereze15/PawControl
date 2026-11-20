@@ -140,6 +140,12 @@ class DashboardController extends Controller
                     'weight' => $pet->weight,
                     'photoUrl' => $this->petPhotoUrl($pet),
                 ]),
+            // Only active services can be booked (the admin's Manage Services page decides).
+            'bookableServices' => Service::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['name', 'price'])
+                ->map(fn (Service $service) => ['name' => $service->name, 'price' => $service->price]),
         ];
     }
 

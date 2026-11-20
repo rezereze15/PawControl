@@ -16,11 +16,3 @@ export const ALL_TIMES = [
     "4 PM",
     "5 PM",
 ];
-export const SERVICE_TYPES = [
-    "Emergency Response",
-    "Advanced Diagnosis",
-    "Critical Care",
-    "ICU",
-    "Blood Transfusion",
-    "Surgery & Intensive Monitoring",
-];

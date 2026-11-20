@@ -22,14 +22,9 @@ class StoreAppointmentRequest extends FormRequest
                 'integer',
                 Rule::exists('pets', 'petID')->where('petOwnerID', $this->user()?->getAuthIdentifier()),
             ],
-            'service_type' => ['required', 'string', Rule::in([
-                'Emergency Response',
-                'Advanced Diagnosis',
-                'Critical Care',
-                'ICU',
-                'Blood Transfusion',
-                'Surgery & Intensive Monitoring',
-            ])],
+            // Must be an active service from the admin's Manage Services page.
+            'service_type' => ['required', 'string', Rule::exists('services', 'name')
+                ->where(fn ($query) => $query->where('is_active', true))],
             'notes' => ['nullable', 'string', 'max:500'],
             'app_date_time' => [
                 'required',
@@ -59,6 +54,7 @@ class StoreAppointmentRequest extends FormRequest
     {
         return [
             'app_date_time.after_or_equal' => 'Appointments must be booked at least a day ahead. Please choose tomorrow or a later date.',
+            'service_type.exists' => 'This service is not available. Please choose another one.',
         ];
     }
 }

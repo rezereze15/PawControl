@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\Pet;
+use App\Models\Service;
 use App\Models\User;
 use Database\Seeders\ClerkUpcomingAppointmentDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -253,6 +254,35 @@ class AppointmentBookingTest extends TestCase
         }
 
         $this->assertSame('Pending', $appointment->fresh()->status);
+    }
+
+    public function test_customer_only_sees_active_services_to_book(): void
+    {
+        Service::query()->where('name', 'ICU')->update(['is_active' => false]);
+        $customer = $this->makeUser('customer');
+
+        $this->actingAs($customer)
+            ->get(route('dashboard.role', ['role' => 'customer']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('bookableServices', 5)
+                ->where('bookableServices.0.name', 'Advanced Diagnosis')
+                ->where('bookableServices.0.price', '3500.00')
+                ->where('bookableServices', fn ($services) => ! $services->pluck('name')->contains('ICU')));
+    }
+
+    public function test_inactive_or_unknown_services_cannot_be_booked(): void
+    {
+        Service::query()->where('name', 'ICU')->update(['is_active' => false]);
+        $customer = $this->makeUser('customer');
+        $pet = $this->makePet($customer);
+
+        foreach (['ICU', 'Haircut'] as $service) {
+            $this->actingAs($customer)
+                ->post(route('appointments.store'), [...$this->bookingData($pet), 'service_type' => $service])
+                ->assertSessionHasErrors(['service_type' => 'This service is not available. Please choose another one.']);
+        }
+
+        $this->assertDatabaseCount('appointments', 0);
     }
 
     private function makeUser(string $role): User
