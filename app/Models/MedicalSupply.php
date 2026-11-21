@@ -50,4 +50,10 @@ class MedicalSupply extends Model
             // whereColumn compares two columns in the same row (each supply has its own level).
             ->whereColumn('stock_quantity', '<=', 'reorder_level');
     }
+
+    /** Same rule as lowStock() above, but for one supply that is already loaded. */
+    public function isLowStock(): bool
+    {
+        return $this->is_active && $this->stock_quantity <= $this->reorder_level;
+    }
 }

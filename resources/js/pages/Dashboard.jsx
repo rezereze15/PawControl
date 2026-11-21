@@ -127,7 +127,7 @@ export default function Dashboard({ profileCompletion = null, ...props }) {
       <CompleteProfileModal email={profileCompletion.email} firstName={profileCompletion.first_name} middleName={profileCompletion.middle_name} lastName={profileCompletion.last_name} photoUrl={props.profile?.photoUrl}/>
     </>);
 }
-function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], services = [], managedUsers = [], roles = [], clerkHome = {}, flash }) {
+function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], clerkHome = {}, flash }) {
     const { errors = {} } = usePage().props;
     const profiles = {
         customer: 'Karina',
@@ -139,7 +139,7 @@ function RoleDashboard({ role = 'customer', username: authenticatedUsername, own
     const username = authenticatedUsername || profiles[role] || profiles.customer;
     const logout = () => router.post('/logout');
     if (role === 'admin')
-        return <AdminDashboard username={username} onLogout={logout} profile={profile} stats={adminStats} usersByRole={usersByRole} recentUsers={recentUsers} lowStockSupplies={lowStockSupplies} services={services} managedUsers={managedUsers} roles={roles} flash={flash}/>;
+        return <AdminDashboard username={username} onLogout={logout} profile={profile} stats={adminStats} usersByRole={usersByRole} recentUsers={recentUsers} lowStockSupplies={lowStockSupplies} services={services} supplies={supplies} supplyOptions={supplyOptions} managedUsers={managedUsers} roles={roles} flash={flash}/>;
     if (role === 'clerk')
         return <ClerkDashboard username={username} onLogout={logout} profile={profile} upcomingAppointments={upcomingAppointments} clerkHome={clerkHome} flash={flash} errors={errors}/>;
     if (role === 'veterinarian')

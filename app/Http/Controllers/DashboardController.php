@@ -325,6 +325,28 @@ class DashboardController extends Controller
                     'price' => $service->price,
                     'isActive' => $service->is_active,
                 ]),
+            // Full list for the Manage Medical Supplies page: active first, then A-Z.
+            'supplies' => MedicalSupply::query()
+                ->orderByDesc('is_active')
+                ->orderBy('name')
+                ->get()
+                ->map(fn (MedicalSupply $supply) => [
+                    'id' => $supply->id,
+                    'name' => $supply->name,
+                    'description' => $supply->description,
+                    'category' => $supply->category,
+                    'unitOfMeasure' => $supply->unit_of_measure,
+                    'stockQuantity' => $supply->stock_quantity,
+                    'reorderLevel' => $supply->reorder_level,
+                    'unitPrice' => $supply->unit_price,
+                    'isActive' => $supply->is_active,
+                    'isLowStock' => $supply->isLowStock(),
+                ]),
+            // Dropdown choices come from the model, so the page and the server always match.
+            'supplyOptions' => [
+                'categories' => MedicalSupply::CATEGORIES,
+                'units' => MedicalSupply::UNITS,
+            ],
             'usersByRole' => $roleCounts
                 ->filter()
                 ->map(fn ($total, $role) => ['role' => $role, 'count' => $total])

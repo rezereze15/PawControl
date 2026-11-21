@@ -5,12 +5,13 @@ import { bigpawLogo } from '../shared/dashboard/assets';
 import AdminHomeSection from './components/AdminHomeSection';
 import AdminManageUsers from './modules/ManageUsers';
 import AdminManageServices from './modules/ManageServices';
+import AdminManageSupplies from './modules/ManageSupplies';
 import DashboardPlaceholder from '../shared/dashboard/Placeholder';
 import UserSettings from '../Customer/modules/UserSettings';
 import FlashToast from '@/Components/FlashToast';
 import { adminNotifications } from '../shared/dashboard/notifications';
 export { DashboardPlaceholder as AdminPlaceholder };
-export default function AdminDashboard({ username, onLogout, profile, stats, usersByRole, recentUsers, lowStockSupplies, services = [], managedUsers = [], roles = [], flash }) {
+export default function AdminDashboard({ username, onLogout, profile, stats, usersByRole, recentUsers, lowStockSupplies, services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], flash }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -57,7 +58,7 @@ export default function AdminDashboard({ username, onLogout, profile, stats, use
           <FlashToast message={flash?.success}/>
     {section === "home" && <AdminHomeSection username={username} stats={stats} roles={roles} usersByRole={usersByRole} recentUsers={recentUsers} lowStockSupplies={lowStockSupplies} onNavigate={setSection}/>}
           {section === "services" && <AdminManageServices services={services}/>}
-          {section === "supplies" && <DashboardPlaceholder title="Manage Medical Supplies"/>}
+          {section === "supplies" && <AdminManageSupplies supplies={supplies} options={supplyOptions}/>}
           {section === "users" && <AdminManageUsers users={managedUsers} roles={roles} currentUserId={profile?.id}/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
