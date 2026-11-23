@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import SearchField from '@/Components/SearchField';
 import SupplyTable from '../components/SupplyTable';
+import SupplyFormModal from '../components/SupplyFormModal';
+import SupplyStatusModal from '../components/SupplyStatusModal';
 
 const select = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#3b0f8c] focus:outline-none";
 
@@ -10,6 +12,10 @@ function AdminManageSupplies({ supplies = [], options = {} }) {
     // "" (all) | "Active" | "Inactive" | "Low stock"
     const [statusFilter, setStatusFilter] = useState("");
     const lowStockCount = supplies.filter((s) => s.isLowStock).length;
+    // { mode: "create" } | { mode: "edit", id } | { mode: "status", id }
+    const [dialog, setDialog] = useState(null);
+    // Look the supply up by id so the form always shows the latest server data.
+    const dialogSupply = dialog?.id ? supplies.find((s) => s.id === dialog.id) : null;
 
     // Filtering happens in the browser, like Manage Services.
     const query = search.trim().toLowerCase();
@@ -23,6 +29,9 @@ function AdminManageSupplies({ supplies = [], options = {} }) {
           <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Manage Medical Supplies</h1>
           <p className="mt-1 text-sm text-gray-500">Track the clinic's medical supplies and their stock levels</p>
         </div>
+        <button type="button" onClick={() => setDialog({ mode: "create" })} className="whitespace-nowrap rounded-lg bg-[#1a0a3c] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#2d0a6e]">
+          + Add New Supply
+        </button>
       </div>
 
       <div className="rounded-xl bg-white px-5 py-4 shadow-sm">
@@ -50,11 +59,15 @@ function AdminManageSupplies({ supplies = [], options = {} }) {
         </div>
       </div>
 
-      {/* overflow-visible so the ⋮ menu (Step 10b) isn't cut off on the last row. */}
+      {/* overflow-visible so the ⋮ menu isn't cut off on the last row. */}
       <div className="overflow-visible rounded-xl bg-white shadow-sm">
-        <SupplyTable supplies={filtered}/>
+        <SupplyTable supplies={filtered} onEdit={(s) => setDialog({ mode: "edit", id: s.id })} onToggleStatus={(s) => setDialog({ mode: "status", id: s.id })}/>
       </div>
       <p className="text-sm text-gray-500">Showing {filtered.length} of {supplies.length} supplies</p>
+
+      {dialog?.mode === "create" && <SupplyFormModal supplies={supplies} options={options} onClose={() => setDialog(null)}/>}
+      {dialog?.mode === "edit" && dialogSupply && <SupplyFormModal key={dialogSupply.id} supply={dialogSupply} supplies={supplies} options={options} onClose={() => setDialog(null)}/>}
+      {dialog?.mode === "status" && dialogSupply && <SupplyStatusModal supply={dialogSupply} onClose={() => setDialog(null)}/>}
     </div>);
 }
 export default AdminManageSupplies;

@@ -1,6 +1,7 @@
 import DataTable from "@/Components/DataTable";
 import StatusBadge from "@/Components/StatusBadge";
 import { unitLabel } from "../../shared/dashboard/units";
+import RowActionsMenu from "./RowActionsMenu";
 
 // Formats "250.00" as "₱250.00".
 const peso = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" });
@@ -11,15 +12,15 @@ function rowColor(supply) {
     return supply.isLowStock ? "bg-orange-50/60" : "";
 }
 
-export default function SupplyTable({ supplies }) {
+export default function SupplyTable({ supplies, onEdit, onToggleStatus }) {
     return (<DataTable className="w-full text-sm">
       <thead>
         <tr className="border-b border-gray-100">
-          {["Supply", "Category", "Stock", "Unit Price", "Status"].map((h) => (<th key={h} className="px-6 py-4 text-left text-sm font-bold text-[#1a0a3c]">{h}</th>))}
+          {["Supply", "Category", "Stock", "Unit Price", "Status", "Actions"].map((h) => (<th key={h} className="px-6 py-4 text-left text-sm font-bold text-[#1a0a3c]">{h}</th>))}
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-100">
-        {supplies.length === 0 && (<tr><td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-400">No supplies match these filters.</td></tr>)}
+        {supplies.length === 0 && (<tr><td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-400">No supplies match these filters.</td></tr>)}
         {supplies.map((s) => (<tr key={s.id} className={`transition-colors hover:bg-gray-50 ${rowColor(s)}`}>
             <td className="px-6 py-4">
               <p className="font-semibold text-[#1a0a3c]">{s.name}</p>
@@ -38,6 +39,9 @@ export default function SupplyTable({ supplies }) {
             <td className="whitespace-nowrap px-6 py-4 font-semibold text-[#1a0a3c]">{peso.format(Number(s.unitPrice))}</td>
             <td className="px-6 py-4">
               <StatusBadge className={`rounded-full border px-3 py-1 text-xs font-semibold ${s.isActive ? "border-green-400 bg-green-50 text-green-600" : "border-gray-300 bg-gray-50 text-gray-500"}`}>{s.isActive ? "Active" : "Inactive"}</StatusBadge>
+            </td>
+            <td className="px-6 py-4">
+              <RowActionsMenu label={`Actions for ${s.name}`} editLabel="Edit supply" active={s.isActive} onEdit={() => onEdit(s)} onToggleStatus={() => onToggleStatus(s)}/>
             </td>
           </tr>))}
       </tbody>

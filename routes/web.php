@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminServiceController;
+use App\Http\Controllers\AdminSupplyController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
@@ -108,6 +109,13 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
         Route::post('/', [AdminServiceController::class, 'store'])->name('store');
         Route::put('/{service}', [AdminServiceController::class, 'update'])->name('update');
         Route::patch('/{service}/status', [AdminServiceController::class, 'updateStatus'])->name('status');
+    });
+
+    // Admin: manage medical supplies. Supplies are never deleted, only deactivated.
+    Route::middleware('role:admin')->prefix('admin/supplies')->name('admin.supplies.')->group(function (): void {
+        Route::post('/', [AdminSupplyController::class, 'store'])->name('store');
+        Route::put('/{supply}', [AdminSupplyController::class, 'update'])->name('update');
+        Route::patch('/{supply}/status', [AdminSupplyController::class, 'updateStatus'])->name('status');
     });
 
     Route::get('/dashboard', [DashboardController::class, 'redirect'])
