@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { useForm } from "@inertiajs/react";
+import ServiceSuppliesField from "./ServiceSuppliesField";
 
 const input = "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c]";
+
+// Same limit as the server (ManagedServiceRequest).
+const MAX_AMOUNT = 10000;
 
 function Field({ id, label, required, error, hint, children }) {
     return (<div>
@@ -28,17 +32,24 @@ function validate(data, otherNames) {
     else if (!/^\d+(\.\d{1,2})?$/.test(price)) errors.price = "Enter a valid amount with up to 2 decimals (e.g. 1500 or 1500.50).";
     else if (Number(price) > 99999999.99) errors.price = "The price is too high.";
 
+    // Each supply amount: a whole number from 1 to 10,000 (same as the server).
+    data.supplies.forEach((row, index) => {
+        const amount = String(row.quantity).trim();
+        if (!/^\d+$/.test(amount) || Number(amount) < 1) errors[`supplies.${index}.quantity`] = "Enter a whole number, 1 or more.";
+        else if (Number(amount) > MAX_AMOUNT) errors[`supplies.${index}.quantity`] = "That amount is too high.";
+    });
+
     return errors;
 }
 
 /** Add (service = null) or edit a service. New services start as Active. */
-export default function ServiceFormModal({ service, services = [], onClose }) {
+export default function ServiceFormModal({ service, services = [], allSupplies = [], onClose }) {
     const editing = Boolean(service);
     const form = useForm({
         name: service?.name ?? "",
         description: service?.description ?? "",
         price: service?.price ?? "",
-        // The supplies this service uses. Picking them comes in Step 11e; for now they are sent back unchanged.
+        // The supplies this service uses, edited in the "Supplies Used" section below.
         supplies: (service?.supplies ?? []).map(({ id, quantity }) => ({ id, quantity })),
     });
     // Names already used by OTHER services (lower-case), for the instant duplicate check.
@@ -68,11 +79,11 @@ export default function ServiceFormModal({ service, services = [], onClose }) {
     return (<div className="paw-modal-backdrop" onMouseDown={(event) => {
             if (event.target === event.currentTarget && !form.processing) onClose();
         }}>
-      <form onSubmit={submit} role="dialog" aria-modal="true" aria-labelledby="service-form-title" className="paw-pet-modal" style={{ width: "min(100%, 520px)" }} noValidate>
+      <form onSubmit={submit} role="dialog" aria-modal="true" aria-labelledby="service-form-title" className="paw-pet-modal" style={{ width: "min(100%, 560px)" }} noValidate>
         <header className="paw-pet-modal-header">
           <div>
             <h2 id="service-form-title" className="text-xl font-extrabold text-[#1a0a3c]">{editing ? "Edit Service" : "Add New Service"}</h2>
-            <p className="text-xs text-gray-500">{editing ? `Update ${service.name}'s details and price.` : "New services start as Active."}</p>
+            <p className="text-xs text-gray-500">{editing ? `Update ${service.name}'s details, price and supplies.` : "New services start as Active."}</p>
           </div>
           <button type="button" onClick={onClose} disabled={form.processing} aria-label="Close" className="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500">
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" strokeLinecap="round"/></svg>
@@ -89,6 +100,7 @@ export default function ServiceFormModal({ service, services = [], onClose }) {
           <Field id="service-price" label="Price (₱)" required error={form.errors.price}>
             <input id="service-price" type="number" inputMode="decimal" min="0" step="0.01" className={input} value={form.data.price} onChange={set("price")} placeholder="0.00" required/>
           </Field>
+          <ServiceSuppliesField rows={form.data.supplies} allSupplies={allSupplies} errors={form.errors} onChange={(rows) => form.setData("supplies", rows)}/>
         </div>
 
         <footer className="paw-pet-modal-footer">

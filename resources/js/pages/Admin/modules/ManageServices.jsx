@@ -6,7 +6,7 @@ import ServiceStatusModal from '../components/ServiceStatusModal';
 
 const select = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#3b0f8c] focus:outline-none";
 
-function AdminManageServices({ services = [] }) {
+function AdminManageServices({ services = [], supplies = [] }) {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     // { mode: "create" } | { mode: "edit", id } | { mode: "status", id }
@@ -16,7 +16,7 @@ function AdminManageServices({ services = [] }) {
 
     // Filtering happens in the browser: there are only a few services, so no need to ask the server.
     const query = search.trim().toLowerCase();
-    const filtered = services.filter((s) => (!query || [s.name, s.description].some((f) => String(f ?? "").toLowerCase().includes(query)))
+    const filtered = services.filter((s) => (!query || [s.name, s.description, ...s.supplies.map((x) => x.name)].some((f) => String(f ?? "").toLowerCase().includes(query)))
         && (!statusFilter || (statusFilter === "Active") === s.isActive));
 
     return (<div className="flex flex-col gap-6">
@@ -34,7 +34,7 @@ function AdminManageServices({ services = [] }) {
         <div className="flex flex-wrap items-end gap-4">
           <div className="min-w-[200px] flex-1">
             <label className="mb-1 block text-xs font-semibold text-gray-500">Search</label>
-            <SearchField value={search} onChange={setSearch} placeholder="Search by name or description..." className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c]"/>
+            <SearchField value={search} onChange={setSearch} placeholder="Search by name, description or supply..." className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c]"/>
           </div>
           <div>
             <label htmlFor="service-status-filter" className="mb-1 block text-xs font-semibold text-gray-500">Status</label>
@@ -52,8 +52,8 @@ function AdminManageServices({ services = [] }) {
       </div>
       <p className="text-sm text-gray-500">Showing {filtered.length} of {services.length} services</p>
 
-      {dialog?.mode === "create" && <ServiceFormModal services={services} onClose={() => setDialog(null)}/>}
-      {dialog?.mode === "edit" && dialogService && <ServiceFormModal key={dialogService.id} service={dialogService} services={services} onClose={() => setDialog(null)}/>}
+      {dialog?.mode === "create" && <ServiceFormModal services={services} allSupplies={supplies} onClose={() => setDialog(null)}/>}
+      {dialog?.mode === "edit" && dialogService && <ServiceFormModal key={dialogService.id} service={dialogService} services={services} allSupplies={supplies} onClose={() => setDialog(null)}/>}
       {dialog?.mode === "status" && dialogService && <ServiceStatusModal service={dialogService} onClose={() => setDialog(null)}/>}
     </div>);
 }

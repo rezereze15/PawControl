@@ -237,7 +237,7 @@ class AdminSupplyManagementTest extends TestCase
     /**
      * A valid "Add Supply" form; each test overrides only what it checks.
      *
-     * @param array<string, mixed> $overrides
+     * @param  array<string, mixed>  $overrides
      */
     private function supplyData(array $overrides = []): array
     {
@@ -257,7 +257,7 @@ class AdminSupplyManagementTest extends TestCase
      * The "Edit Supply" form opens filled with the supply's current values,
      * so this starts from those and changes only what the test needs.
      *
-     * @param array<string, mixed> $changes
+     * @param  array<string, mixed>  $changes
      */
     private function editForm(MedicalSupply $supply, array $changes = []): array
     {
