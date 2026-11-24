@@ -1,5 +1,5 @@
 import SearchField from "@/Components/SearchField";
-export default function AppointmentHeader({ search, onSearchChange, subtitle = "Review and confirm upcoming appointment requests" }) {
+export default function AppointmentHeader({ search, onSearchChange, subtitle = "Review and confirm upcoming appointment requests", action }) {
     return (<div className="paw-appointments-heading flex items-start justify-between gap-4">
             <div>
               <h1 className="text-3xl font-extrabold text-[#1a0a3c]">
@@ -9,6 +9,7 @@ export default function AppointmentHeader({ search, onSearchChange, subtitle = "
                 {subtitle}
               </p>
             </div>
+            {action}
             {onSearchChange && (<div className="flex items-center gap-3 flex-shrink-0">
               <SearchField value={search} onChange={onSearchChange} placeholder="Search by pet, owner, type, reference no..." className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-paw-blue w-72"/>
             </div>)}

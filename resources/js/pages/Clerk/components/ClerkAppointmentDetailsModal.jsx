@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "@inertiajs/react";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
-import { STATUS_BADGE } from "./AppointmentTable";
+import { EmergencyTag, STATUS_BADGE } from "./AppointmentTable";
 
 export const REJECTION_REASONS = [
     "Proof of payment is unclear / blurry",
@@ -18,6 +18,19 @@ function Row({ label, children }) {
     return (<div className="grid grid-cols-[88px_1fr] items-start gap-3 py-1.5 text-sm">
       <dt className="text-gray-500">{label}</dt>
       <dd className="min-w-0 break-words font-semibold text-[#1a0a3c]">{children}</dd>
+    </div>);
+}
+
+/** Replaces the payment panel for emergency walk-ins (no online booking, no down payment). */
+function EmergencyPanel({ appointment }) {
+    return (<div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+      <h3 className="mb-2 flex items-center gap-2 text-sm font-bold">
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><path d="M12 5v14M5 12h14" strokeLinecap="round"/></svg>
+        Emergency walk-in
+      </h3>
+      <p>Registered at the clinic{appointment.createdBy ? ` by ${appointment.createdBy}` : ""} and sent straight to the veterinarians&apos; queue. No down payment was collected online.</p>
+      {appointment.isWalkIn && <p className="mt-2 text-xs text-red-800">The owner has no account yet. The record is tagged as a walk-in so it can be linked to their account later.</p>}
+      <p className="mt-3 text-xs text-red-700">Reference no. <span className="font-mono font-bold">{appointment.referenceNumber}</span></p>
     </div>);
 }
 
@@ -92,6 +105,7 @@ export default function ClerkAppointmentDetailsModal({ appointment, onClose }) {
                 <div className="min-w-0">
                   <p className="text-lg font-extrabold text-[#1a0a3c]">{appointment.pet}</p>
                   <p className="text-xs text-gray-500">{[appointment.species, appointment.breed].filter(Boolean).join(" · ")}</p>
+                  {appointment.isEmergency && <EmergencyTag walkIn={appointment.isWalkIn}/>}
                 </div>
               </div>
               <dl>
@@ -103,9 +117,9 @@ export default function ClerkAppointmentDetailsModal({ appointment, onClose }) {
                 <Row label="Status">
                   <span className={`inline-block rounded-full px-3 py-0.5 text-xs font-semibold ${STATUS_BADGE[appointment.status] ?? ""}`}>{appointment.status}</span>
                 </Row>
-                {appointment.notes && <Row label="Concern">{appointment.notes}</Row>}
+                {appointment.notes && <Row label={appointment.isEmergency ? "Symptoms" : "Concern"}>{appointment.notes}</Row>}
               </dl>
-              <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
+              {!appointment.isEmergency && (<div className="mt-4 grid grid-cols-2 gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
                 <div>
                   <p className="text-xs text-gray-500">Payment amount</p>
                   <p className="text-base font-extrabold text-[#1a0a3c]">{peso.format(appointment.paymentAmount ?? 200)}</p>
@@ -114,17 +128,17 @@ export default function ClerkAppointmentDetailsModal({ appointment, onClose }) {
                   <p className="text-xs text-gray-500">Reference no.</p>
                   <p className="break-all font-mono text-base font-extrabold text-[#1a0a3c]">{appointment.referenceNumber}</p>
                 </div>
-              </div>
+              </div>)}
             </div>
 
-            <div className="rounded-2xl border border-gray-200 p-4">
+            {appointment.isEmergency ? <EmergencyPanel appointment={appointment}/> : (<div className="rounded-2xl border border-gray-200 p-4">
               <h3 className="mb-3 text-sm font-bold text-[#1a0a3c]">Payment Proof</h3>
               <ProofPreview appointment={appointment}/>
               <p className="mt-3 text-center text-[11px] text-gray-400">Compare the reference number on the receipt with the one above.</p>
-            </div>
+            </div>)}
           </div>
 
-          {!isPending && (<div className={`mt-5 rounded-xl border p-4 text-sm ${appointment.status === "Rejected" ? "border-red-100 bg-red-50 text-red-800" : "border-blue-100 bg-blue-50 text-blue-800"}`}>
+          {!isPending && !appointment.isEmergency && (<div className={`mt-5 rounded-xl border p-4 text-sm ${appointment.status === "Rejected" ? "border-red-100 bg-red-50 text-red-800" : "border-blue-100 bg-blue-50 text-blue-800"}`}>
               <p className="font-bold">{appointment.status}{appointment.reviewedBy ? ` by ${appointment.reviewedBy}` : ""}</p>
               {appointment.rejectionReason && <p className="mt-1">Reason: {appointment.rejectionReason}</p>}
             </div>)}

@@ -76,10 +76,10 @@ export function veterinarianNotifications(appointments = []) {
         .filter((a) => localDay(new Date(a.startsAt)) === today)
         .map((a) => ({
             id: `appt-${a.id}-vet-today`,
-            title: `Consultation today: ${a.pet}`,
+            title: a.isEmergency ? `Emergency walk-in: ${a.pet}` : `Consultation today: ${a.pet}`,
             body: `${a.type} at ${a.time} · ${a.owner}`,
             when: formatWhen(a.startsAt),
-            tone: "info",
+            tone: a.isEmergency ? "danger" : "info",
             section: "appointments",
         }));
 }

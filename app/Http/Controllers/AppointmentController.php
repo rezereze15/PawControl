@@ -31,6 +31,8 @@ class AppointmentController extends Controller
 
         $confirmedSlots = Appointment::query()
             ->where('status', Appointment::STATUS_CONFIRMED)
+            // Emergency walk-ins are seen on arrival and don't take a bookable slot.
+            ->where('is_emergency', false)
             ->whereBetween('app_date_time', [
                 $month->copy()->startOfMonth(),
                 $month->copy()->endOfMonth(),
@@ -211,6 +213,7 @@ class AppointmentController extends Controller
     {
         return Appointment::query()
             ->where('status', Appointment::STATUS_CONFIRMED)
+            ->where('is_emergency', false)
             ->where('app_date_time', Carbon::parse($dateTime))
             ->when($exceptId, fn ($query) => $query->whereKeyNot($exceptId))
             ->exists();

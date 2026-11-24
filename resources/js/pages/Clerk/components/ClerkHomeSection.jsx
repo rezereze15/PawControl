@@ -4,11 +4,13 @@ import { pawLogo } from "../../shared/dashboard/assets";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import ClerkAppointmentDetailsModal from "./ClerkAppointmentDetailsModal";
 import { formatPetAge } from "../../shared/dashboard/petAge";
+import EmergencyButton from "./EmergencyButton";
 
 const peso = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", maximumFractionDigits: 0 });
 
 /** Status line for a card in "Today's Operation". */
 function operationStatus(appointment) {
+    if (appointment.isEmergency) return { label: "Emergency walk-in", tone: "text-red-600" };
     if (appointment.status === "Pending") return { label: "Pending approval", tone: "text-amber-500" };
     if (appointment.hasStarted) return { label: "On Going", tone: "text-green-500" };
     return { label: `Up Next · ${appointment.time}`, tone: "text-orange-400" };
@@ -38,7 +40,7 @@ function EmptyState({ children }) {
  * Clerk home: live numbers and lists built from the clerk's appointment data
  * (DashboardController::clerkProps / clerkHomeStats).
  */
-export default function ClerkHomeSection({ username, appointments = [], stats = {}, onNavigate }) {
+export default function ClerkHomeSection({ username, appointments = [], stats = {}, onNavigate, onEmergency }) {
     const [selectedId, setSelectedId] = useState(null);
     // Look the appointment up on every render so Accept/Reject in the modal shows fresh data.
     const selected = appointments.find((a) => a.id === selectedId) ?? null;
@@ -52,7 +54,10 @@ export default function ClerkHomeSection({ username, appointments = [], stats = 
     return (<div className="flex flex-col gap-6">
       {selected && <ClerkAppointmentDetailsModal key={selected.id} appointment={selected} onClose={() => setSelectedId(null)}/>}
 
-      <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Hi, {username}!</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Hi, {username}!</h1>
+        {onEmergency && <EmergencyButton onClick={onEmergency}/>}
+      </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -78,7 +83,7 @@ export default function ClerkHomeSection({ username, appointments = [], stats = 
             : (<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {today.map((a) => {
                     const status = operationStatus(a);
-                    return (<div key={a.id} className="border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+                    return (<div key={a.id} className={`border rounded-xl p-4 flex items-center gap-3 ${a.isEmergency ? "border-red-200 bg-red-50/40" : "border-gray-200"}`}>
                     <PetAvatar name={a.pet} photo={a.photo}/>
                     <div className="min-w-0">
                       <p className={`text-xs font-bold mb-0.5 ${status.tone}`}>{status.label}</p>

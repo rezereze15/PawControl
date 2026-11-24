@@ -4,10 +4,11 @@ import AppointmentFilters from '../components/AppointmentFilters';
 import AppointmentTable from '../components/AppointmentTable';
 import ClerkAppointmentDetailsModal from '../components/ClerkAppointmentDetailsModal';
 import TablePagination, { paginate } from '@/Components/TablePagination';
+import EmergencyButton from '../components/EmergencyButton';
 
 const PAGE_SIZE = 10;
 
-function ClerkAppointments({ appointments = [] }) {
+function ClerkAppointments({ appointments = [], onEmergency }) {
     const [filter, setFilter] = useState("Pending");
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
@@ -16,7 +17,7 @@ function ClerkAppointments({ appointments = [] }) {
     const query = search.trim().toLowerCase();
     const filtered = appointments.filter((a) => {
         const matchFilter = filter === "All" || a.status === filter;
-        const matchSearch = !query || [a.owner, a.pet, a.type, a.referenceNumber, a.phone].some((f) => String(f ?? "").toLowerCase().includes(query));
+        const matchSearch = !query || [a.owner, a.pet, a.type, a.referenceNumber, a.phone, a.isEmergency ? "emergency walk-in" : ""].some((f) => String(f ?? "").toLowerCase().includes(query));
         return matchFilter && matchSearch;
     });
     const { currentPage, pageCount, rows } = paginate(filtered, page, PAGE_SIZE);
@@ -28,7 +29,7 @@ function ClerkAppointments({ appointments = [] }) {
     // Look the appointment up by id so the modal always reflects the latest server data.
     const selected = appointments.find((a) => a.id === selectedId) ?? null;
     return (<div className="paw-appointments-view flex flex-col gap-6">
-      <AppointmentHeader/>
+      <AppointmentHeader subtitle="Review online requests and register emergency walk-ins" action={onEmergency && <EmergencyButton onClick={onEmergency}/>}/>
       <AppointmentFilters filter={filter} onFilterChange={withReset(setFilter)} counts={counts} search={search} onSearchChange={withReset(setSearch)}/>
       <div className="paw-list-card bg-white rounded-xl shadow-sm overflow-visible">
         <AppointmentTable appointments={rows} onView={(a) => setSelectedId(a.id)}/>

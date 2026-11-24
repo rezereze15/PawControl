@@ -7,6 +7,14 @@ export const STATUS_BADGE = {
     Rejected: "border border-red-400 text-red-600 bg-red-50",
     Cancelled: "bg-red-400 text-white",
 };
+/** Marks a clerk-created emergency walk-in (and whether the owner has no account yet). */
+export function EmergencyTag({ walkIn, className = "" }) {
+    return (<span className={`mt-1 flex flex-wrap gap-1 ${className}`}>
+      <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-700">Emergency</span>
+      {walkIn && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800">Walk-in · no account</span>}
+    </span>);
+}
+
 export default function AppointmentTable({ appointments, veterinarianView, onView }) {
     return (<DataTable className="w-full text-sm">
               <thead>
@@ -46,7 +54,10 @@ export default function AppointmentTable({ appointments, veterinarianView, onVie
                     </td>
                     <td className="px-5 py-4 text-gray-600">{a.date}</td>
                     <td className="px-5 py-4 text-gray-600">{a.time}</td>
-                    <td className="px-5 py-4 text-gray-600">{a.type}</td>
+                    <td className="px-5 py-4 text-gray-600">
+                      {a.type}
+                      {a.isEmergency && <EmergencyTag walkIn={a.isWalkIn}/>}
+                    </td>
                     {!veterinarianView && (<td className="px-5 py-4">
                     <StatusBadge className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_BADGE[a.status] ?? ""}`}>
                           {a.status}

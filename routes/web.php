@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminSupplyController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClerkEmergencyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\PasswordResetController;
@@ -83,6 +84,14 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
         ->name('appointments.accept');
     Route::post('/appointments/{appointment}/reject', [AppointmentController::class, 'reject'])
         ->name('appointments.reject');
+
+    // Clerk: emergency walk-ins (pet + visit created on the owner's behalf).
+    Route::middleware('role:clerk')->prefix('clerk/emergency')->name('clerk.emergency.')->group(function (): void {
+        Route::get('/owners', [ClerkEmergencyController::class, 'owners'])
+            ->middleware('throttle:60,1')
+            ->name('owners');
+        Route::post('/', [ClerkEmergencyController::class, 'store'])->name('store');
+    });
 
     // Pets
     Route::post('/pets', [PetController::class, 'store'])->name('pets.store');

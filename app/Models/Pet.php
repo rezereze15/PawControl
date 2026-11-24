@@ -28,6 +28,23 @@ class Pet extends Model
         return $this->belongsTo(User::class, 'petOwnerID');
     }
 
+    /** Owner's name: the linked account, or the walk-in owner the clerk entered. */
+    public function ownerName(): string
+    {
+        return $this->owner?->name ?? $this->walk_in_owner_name ?? 'Unknown owner';
+    }
+
+    public function ownerPhone(): ?string
+    {
+        return $this->owner?->phone ?? $this->walk_in_owner_phone;
+    }
+
+    /** Registered by a clerk during an emergency walk-in and not linked to an account yet. */
+    public function isUnlinkedWalkIn(): bool
+    {
+        return $this->petOwnerID === null;
+    }
+
     /** Cache-busted URL of the authorized route that serves this pet's photo. */
     public function photoUrl(): ?string
     {

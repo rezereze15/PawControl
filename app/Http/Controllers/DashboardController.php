@@ -153,7 +153,7 @@ class DashboardController extends Controller
     private function clerkProps(): array
     {
         $appointments = Appointment::query()
-            ->with(['pet', 'user', 'reviewer:id,name'])
+            ->with(['pet', 'user', 'reviewer:id,name', 'creator:id,name'])
             ->where('app_date_time', '>=', now()->startOfDay())
             ->where('status', '!=', Appointment::STATUS_CANCELLED)
             ->orderBy('app_date_time')
@@ -161,9 +161,9 @@ class DashboardController extends Controller
             ->map(fn (Appointment $appointment) => [
                 'id' => $appointment->id,
                 'referenceNumber' => $appointment->reference_number,
-                'owner' => $appointment->user?->name ?? 'Unknown owner',
-                'phone' => $appointment->user?->phone ?? '',
-                'email' => $appointment->user?->email ?? '',
+                'owner' => $appointment->ownerName(),
+                'phone' => $appointment->ownerPhone() ?? '',
+                'email' => $appointment->ownerEmail() ?? '',
                 'representative' => trim($appointment->ar_first_name.' '.$appointment->ar_last_name),
                 'pet' => $appointment->pet?->petName ?? 'Unknown pet',
                 'petId' => $appointment->pet_id,
@@ -184,9 +184,11 @@ class DashboardController extends Controller
                 'rejectionReason' => $appointment->rejection_reason,
                 'reviewedBy' => $appointment->reviewer?->name,
                 'reviewedAt' => $appointment->reviewed_at?->toIso8601String(),
-                'paymentAmount' => Appointment::DOWN_PAYMENT,
+                'paymentAmount' => $appointment->is_emergency ? 0 : Appointment::DOWN_PAYMENT,
                 'proofUrl' => $appointment->proofUrl(),
                 'proofIsPdf' => $appointment->proofIsPdf(),
+                ...$this->emergencyFields($appointment),
+                'createdBy' => $appointment->creator?->name,
             ]);
 
         return [
@@ -225,7 +227,8 @@ class DashboardController extends Controller
             'pendingAppointments' => $active->where('status', Appointment::STATUS_PENDING)->count(),
             // No billing table yet: every upcoming *confirmed* visit is a bill to settle at the clinic.
             'upcomingBilling' => $confirmed->count(),
-            'downPaymentsReceived' => $confirmed->count() * Appointment::DOWN_PAYMENT,
+            // Emergency walk-ins skip the online down payment.
+            'downPaymentsReceived' => $confirmed->where('isEmergency', false)->count() * Appointment::DOWN_PAYMENT,
         ];
     }
 
@@ -233,7 +236,7 @@ class DashboardController extends Controller
     private function veterinarianProps(): array
     {
         $confirmed = Appointment::query()
-            ->with(['pet', 'user'])
+            ->with(['pet.owner', 'user'])
             ->where('status', Appointment::STATUS_CONFIRMED)
             ->orderBy('app_date_time')
             ->get();
@@ -254,14 +257,15 @@ class DashboardController extends Controller
                     'petId' => $appointment->pet_id,
                     'pet' => $appointment->pet?->petName ?? 'Unknown pet',
                     'photo' => $this->petPhotoUrl($appointment->pet),
-                    'owner' => $appointment->user?->name ?? 'Unknown owner',
-                    'phone' => $appointment->user?->phone ?? '',
+                    'owner' => $appointment->ownerName(),
+                    'phone' => $appointment->ownerPhone() ?? '',
                     'date' => $appointment->app_date_time->format('M j, Y'),
                     'time' => $appointment->app_date_time->format('g:i A'),
                     'startsAt' => $appointment->app_date_time->toIso8601String(),
                     'type' => $appointment->service_type ?? 'Appointment',
                     'notes' => $appointment->notes,
                     'status' => $appointment->status,
+                    ...$this->emergencyFields($appointment),
                 ])
                 ->values(),
             'patientRecords' => $patients,
@@ -420,10 +424,11 @@ class DashboardController extends Controller
             'weight' => $pet->weight,
             'photo' => $this->petPhotoUrl($pet),
             'owner' => [
-                'name' => $pet->owner?->name ?? 'Unknown owner',
+                'name' => $pet->ownerName(),
                 'email' => $pet->owner?->email,
-                'phone' => $pet->owner?->phone,
+                'phone' => $pet->ownerPhone(),
             ],
+            'isWalkIn' => $pet->isUnlinkedWalkIn(),
             'status' => $status,
             'lastVisitAt' => $lastVisit?->app_date_time->toIso8601String(),
             'veterinarian' => null, // appointments don't record an assigned vet yet
@@ -433,6 +438,7 @@ class DashboardController extends Controller
                 'type' => $appointment->service_type ?? 'Appointment',
                 'notes' => $appointment->notes,
                 'status' => $appointment->status,
+                'isEmergency' => $appointment->is_emergency,
             ])->values(),
         ];
     }
@@ -446,7 +452,6 @@ class DashboardController extends Controller
         /** @var Appointment $first */
         $first = $visits->first();
         $pet = $first->pet;
-        $owner = $first->user;
         $past = $visits->filter(fn (Appointment $appointment) => $appointment->app_date_time->lessThan(now()));
         $lastVisit = $past->last() ?? $visits->first();
 
@@ -460,11 +465,13 @@ class DashboardController extends Controller
             'age' => $pet?->dateOfBirth ? $pet->dateOfBirth->age : $pet?->age,
             'weight' => $pet?->weight,
             'photo' => $this->petPhotoUrl($pet),
+            // The pet's owner (account or walk-in), falling back to whoever booked.
             'owner' => [
-                'name' => $owner?->name ?? 'Unknown owner',
-                'email' => $owner?->email,
-                'phone' => $owner?->phone,
+                'name' => $pet?->owner?->name ?? $pet?->walk_in_owner_name ?? $first->ownerName(),
+                'email' => $pet?->owner?->email ?? $first->ownerEmail(),
+                'phone' => $pet?->ownerPhone() ?? $first->ownerPhone(),
             ],
+            'isWalkIn' => (bool) $pet?->isUnlinkedWalkIn(),
             'lastVisitAt' => $lastVisit->app_date_time->toIso8601String(),
             'visits' => $visits
                 ->sortByDesc('app_date_time')
@@ -474,8 +481,22 @@ class DashboardController extends Controller
                     'type' => $appointment->service_type ?? 'Appointment',
                     'notes' => $appointment->notes,
                     'status' => $appointment->status,
+                    'isEmergency' => $appointment->is_emergency,
                 ])
                 ->values(),
+        ];
+    }
+
+    /**
+     * Emergency walk-in flags shared by the clerk and veterinarian appointment rows.
+     *
+     * @return array{isEmergency: bool, isWalkIn: bool}
+     */
+    private function emergencyFields(Appointment $appointment): array
+    {
+        return [
+            'isEmergency' => $appointment->is_emergency,
+            'isWalkIn' => $appointment->isWalkInWithoutAccount(),
         ];
     }
 

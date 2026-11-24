@@ -9,9 +9,12 @@ import { ClerkBillings } from './modules/Billings';
 import FlashToast from '@/Components/FlashToast';
 import { clerkNotifications } from '../shared/dashboard/notifications';
 import UserSettings from '../Customer/modules/UserSettings';
+import EmergencyWalkInModal from './components/EmergencyWalkInModal';
 export default function ClerkDashboard({ username, onLogout, profile, upcomingAppointments = [], clerkHome = {}, flash, errors = {} }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [emergencyOpen, setEmergencyOpen] = useState(false);
+    const openEmergency = () => setEmergencyOpen(true);
     const navItems = [
         {
             id: "home",
@@ -54,9 +57,10 @@ export default function ClerkDashboard({ username, onLogout, profile, upcomingAp
     return (<StaffDashboardLayout username={username} roleLabel="Clerk" dashboardClassName="paw-clerk-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout} notifications={clerkNotifications(upcomingAppointments, clerkHome.today)} notificationKey={`paw-notifications-read:${profile?.id ?? username}`}>
         <FlashToast message={flash?.success}/>
         <FlashToast message={errors.appointment} tone="error" title="Could not update appointment"/>
-        {section === "home" && (<ClerkHomeSection username={username} appointments={upcomingAppointments} stats={clerkHome} onNavigate={setSection}/>)}
+        {emergencyOpen && <EmergencyWalkInModal onClose={() => setEmergencyOpen(false)}/>}
+        {section === "home" && (<ClerkHomeSection username={username} appointments={upcomingAppointments} stats={clerkHome} onNavigate={setSection} onEmergency={openEmergency}/>)}
           {section === "records" && (<ClerkPlaceholder title="Pet Medical Records"/>)}
-          {section === "appointments" && <ClerkAppointments appointments={upcomingAppointments}/>}
+          {section === "appointments" && <ClerkAppointments appointments={upcomingAppointments} onEmergency={openEmergency}/>}
           {section === "billings" && <ClerkBillings/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
