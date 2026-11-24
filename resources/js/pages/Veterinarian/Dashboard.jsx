@@ -67,7 +67,7 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
         <FlashToast message={flash?.success}/>
         {section === "home" && <VetHomeSection username={username} stats={vetHome} appointments={confirmedAppointments} patients={patientRecords} onNavigate={setSection} onSelectRecord={selectRecord} selectingId={selectingId}/>}
           {section === "records" && <PatientRecords patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId}/>}
-          {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId}/>}
+          {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords}/>}
           {editingRecord && <MedicalRecordEditor key={editingRecord.id} patient={editingPatient} record={editingRecord} options={recordOptions} onClose={() => setEditingId(null)}/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);

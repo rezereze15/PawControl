@@ -1,7 +1,7 @@
 import DataTable from "@/Components/DataTable";
 import StatusBadge from "@/Components/StatusBadge";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
-import { RecordStatusBadge, selectLabel } from "../../shared/dashboard/recordStatus";
+import { RecordStatusBadge } from "../../shared/dashboard/recordStatus";
 export const STATUS_BADGE = {
     Pending: "border border-yellow-400 text-yellow-600 bg-yellow-50",
     Confirmed: "border border-blue-400 text-blue-600 bg-blue-50",
@@ -16,7 +16,11 @@ export function EmergencyTag({ walkIn, className = "" }) {
     </span>);
 }
 
-export default function AppointmentTable({ appointments, veterinarianView, onView, onSelect, selectingId }) {
+/**
+ * Appointment list. Clerk view: appointment status + visit status, and a Review action.
+ * Veterinarian view: read-only list of accepted appointments, with no status UI.
+ */
+export default function AppointmentTable({ appointments, veterinarianView, onView }) {
     return (<DataTable className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
@@ -26,7 +30,7 @@ export default function AppointmentTable({ appointments, veterinarianView, onVie
             "Date",
             "Time",
             "Type",
-            "Status",
+            ...(veterinarianView ? [] : ["Status"]),
             "Actions",
         ].map((h) => (<th key={h} className="px-5 py-4 text-left font-bold text-[#1a0a3c]">
                       {h}
@@ -35,7 +39,7 @@ export default function AppointmentTable({ appointments, veterinarianView, onVie
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {appointments.length === 0 && (<tr>
-                    <td colSpan={7} className="px-5 py-12 text-center text-sm text-gray-400">No appointments match these filters.</td>
+                    <td colSpan={veterinarianView ? 6 : 7} className="px-5 py-12 text-center text-sm text-gray-400">No appointments match these filters.</td>
                   </tr>)}
                 {appointments.map((a) => (<tr key={a.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-4">
@@ -59,15 +63,15 @@ export default function AppointmentTable({ appointments, veterinarianView, onVie
                       {a.type}
                       {a.isEmergency && <EmergencyTag walkIn={a.isWalkIn}/>}
                     </td>
-                    <td className="px-5 py-4">
+                    {!veterinarianView && (<td className="px-5 py-4">
                       <div className="flex flex-col items-start gap-1">
-                        {!veterinarianView && (<StatusBadge className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_BADGE[a.status] ?? ""}`}>
-                            {a.status}
-                          </StatusBadge>)}
+                        <StatusBadge className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_BADGE[a.status] ?? ""}`}>
+                          {a.status}
+                        </StatusBadge>
                         {/* Visit progress from the medical record (Upcoming / Ongoing / Completed). */}
                         <RecordStatusBadge status={a.visitStatus}/>
                       </div>
-                    </td>
+                    </td>)}
                     <td className="px-5 py-4">
                       <button type="button" onClick={() => onView?.(a)} aria-label={`View ${a.pet}'s appointment`} className="flex w-fit items-center gap-1.5 rounded-lg p-2 text-gray-500 transition hover:bg-paw-blue-soft hover:text-paw-blue focus:outline-none focus:ring-2 focus:ring-violet-300">
                         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -76,9 +80,6 @@ export default function AppointmentTable({ appointments, veterinarianView, onVie
                         </svg>
                         {!veterinarianView && a.status === "Pending" && <span className="text-xs font-bold">Review</span>}
                       </button>
-                      {onSelect && a.medicalRecordId && (<button type="button" onClick={() => onSelect(a)} disabled={selectingId === a.medicalRecordId} className="mt-1 whitespace-nowrap rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
-                          {selectingId === a.medicalRecordId ? "Opening…" : a.visitStatus === "Upcoming" ? "Select" : selectLabel(a.visitStatus)}
-                        </button>)}
                     </td>
                   </tr>))}
               </tbody>

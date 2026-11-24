@@ -80,9 +80,10 @@ function Field({ label, value }) {
 /**
  * Pet medical record: animal signalment, owner contact, the appointment being viewed
  * (if any) and every medical record. Read-only unless `onSelect` is given (veterinarians),
- * which adds a "Select (Start Diagnosis)" button per record.
+ * which adds a "Select (Start Diagnosis)" button per record. `showStatus={false}` hides
+ * every status badge (used by the veterinarian's read-only Appointments module).
  */
-export default function PatientRecordModal({ patient, appointment, onClose, onSelect, selectingId }) {
+export default function PatientRecordModal({ patient, appointment, onClose, onSelect, selectingId, showStatus = true }) {
     useEffect(() => {
         const onKeyDown = (event) => event.key === "Escape" && onClose();
         window.addEventListener("keydown", onKeyDown);
@@ -117,7 +118,7 @@ export default function PatientRecordModal({ patient, appointment, onClose, onSe
                 {formatDate(appointment.startsAt)} at {formatTime(appointment.startsAt)}
               </span>
               <span><span className="text-violet-400">Service:</span> <strong>{appointment.type}</strong></span>
-              <RecordStatusBadge status={appointment.recordStatus}/>
+              {showStatus && <RecordStatusBadge status={appointment.recordStatus}/>}
               {appointment.notes && <span className="w-full text-gray-700"><span className={`font-semibold ${appointment.isEmergency ? "text-red-500" : "text-violet-400"}`}>{appointment.isEmergency ? "Symptoms:" : "Owner's concern:"}</span> {appointment.notes}</span>}
             </div>)}
 
@@ -163,7 +164,7 @@ export default function PatientRecordModal({ patient, appointment, onClose, onSe
                       <div className="flex flex-col items-end gap-2 text-xs text-gray-600">
                         <div className="flex items-center gap-3">
                           <span>{formatDate(visit.startsAt, { month: "short", day: "numeric", year: "numeric" })} · {formatTime(visit.startsAt)}</span>
-                          {visit.recordStatus
+                          {!showStatus ? null : visit.recordStatus
                         ? <RecordStatusBadge status={visit.recordStatus}/>
                         : <span className={`rounded-md border px-2 py-0.5 font-semibold ${upcoming ? "border-blue-300 bg-blue-50 text-blue-700" : "border-violet-300 bg-violet-50 text-violet-700"}`}>{upcoming ? "Upcoming" : "Completed"}</span>}
                         </div>
