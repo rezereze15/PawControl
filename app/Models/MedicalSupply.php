@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * ERD: MEDICAL_SUPPLIES. Laravel finds the `medical_supplies` table from the class name.
@@ -55,5 +56,13 @@ class MedicalSupply extends Model
     public function isLowStock(): bool
     {
         return $this->is_active && $this->stock_quantity <= $this->reorder_level;
+    }
+
+    /** The services that use this supply. Each one's amount is $service->pivot->quantity. */
+    public function services(): BelongsToMany
+    {
+        return $this->belongsToMany(Service::class, 'services_medical_supplies')
+            ->withPivot('quantity')
+            ->withTimestamps();
     }
 }
