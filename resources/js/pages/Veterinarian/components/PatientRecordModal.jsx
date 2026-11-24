@@ -1,7 +1,7 @@
 import { formatPetAge } from "../../shared/dashboard/petAge";
 import { useEffect } from "react";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
-import { RecordStatusBadge, selectLabel } from "../../shared/dashboard/recordStatus";
+import { LockIcon, RecordStatusBadge, isLocked, selectLabel } from "../../shared/dashboard/recordStatus";
 
 export function formatDate(iso, options = { month: "long", day: "numeric", year: "numeric" }) {
     const date = new Date(iso);
@@ -80,7 +80,8 @@ function Field({ label, value }) {
 /**
  * Pet medical record: animal signalment, owner contact, the appointment being viewed
  * (if any) and every medical record. Read-only unless `onSelect` is given (veterinarians),
- * which adds a "Select (Start Diagnosis)" button per record. `showStatus={false}` hides
+ * which adds an action button per record: Select → Start Diagnosis → Continue Diagnosis.
+ * Completed records are locked and show no action. `showStatus={false}` hides
  * every status badge (used by the veterinarian's read-only Appointments module).
  */
 export default function PatientRecordModal({ patient, appointment, onClose, onSelect, selectingId, showStatus = true }) {
@@ -168,9 +169,13 @@ export default function PatientRecordModal({ patient, appointment, onClose, onSe
                         ? <RecordStatusBadge status={visit.recordStatus}/>
                         : <span className={`rounded-md border px-2 py-0.5 font-semibold ${upcoming ? "border-blue-300 bg-blue-50 text-blue-700" : "border-violet-300 bg-violet-50 text-violet-700"}`}>{upcoming ? "Upcoming" : "Completed"}</span>}
                         </div>
-                        {onSelect && visit.recordNumber && (<button type="button" onClick={() => onSelect(visit)} disabled={selectingId === visit.id} className={`rounded-lg px-3 py-1.5 text-xs font-bold transition disabled:opacity-60 ${visit.recordStatus === "Completed" ? "border border-paw-blue text-paw-blue hover:bg-paw-blue-soft" : "bg-paw-blue text-white hover:bg-paw-blue-dark"}`}>
-                            {selectingId === visit.id ? "Opening…" : selectLabel(visit.recordStatus)}
-                          </button>)}
+                        {onSelect && visit.recordNumber && (isLocked(visit.recordStatus)
+                        ? (<span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-400" title="Completed records are final and can't be changed.">
+                              <LockIcon className="h-3 w-3"/> Locked · view only
+                            </span>)
+                        : (<button type="button" onClick={() => onSelect(visit)} disabled={selectingId === visit.id} className="rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white transition hover:bg-paw-blue-dark disabled:opacity-60">
+                              {selectingId === visit.id ? "Opening…" : selectLabel(visit.recordStatus)}
+                            </button>))}
                       </div>
                     </li>);
             })}

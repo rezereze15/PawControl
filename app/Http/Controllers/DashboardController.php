@@ -492,7 +492,7 @@ class DashboardController extends Controller
 
     /**
      * Every registered pet, with the status of its medical records:
-     * Ongoing (a vet is working on one), Upcoming (one not started yet),
+     * Ongoing (a vet is working on one), Selected (a vet picked one), Upcoming (one not started yet),
      * Completed (all finished), or No Visits.
      *
      * @return array<string, mixed>
@@ -526,13 +526,13 @@ class DashboardController extends Controller
     }
 
     /**
-     * One status for a pet, from its records: Ongoing beats Upcoming beats Completed.
+     * One status for a pet, from its records: Ongoing beats Selected beats Upcoming beats Completed.
      *
      * @param  Collection<int, MedicalRecord>  $records
      */
     private function petStatus(Collection $records): string
     {
-        foreach ([MedicalRecord::STATUS_ONGOING, MedicalRecord::STATUS_UPCOMING, MedicalRecord::STATUS_COMPLETED] as $status) {
+        foreach ([MedicalRecord::STATUS_ONGOING, MedicalRecord::STATUS_SELECTED, MedicalRecord::STATUS_UPCOMING, MedicalRecord::STATUS_COMPLETED] as $status) {
             if ($records->contains('status', $status)) {
                 return $status;
             }

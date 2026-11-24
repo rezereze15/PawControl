@@ -11,6 +11,7 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 /** Status line for a card in "Today's Operation", from the medical record. */
 function operationStatus(appointment) {
     if (appointment.visitStatus === "Ongoing") return { label: "On Going", tone: "text-green-500" };
+    if (appointment.visitStatus === "Selected") return { label: `Selected · ${appointment.time}`, tone: "text-sky-600" };
     if (appointment.visitStatus === "Completed") return { label: "Completed", tone: "text-violet-600" };
     return { label: `Up Coming · ${appointment.time}`, tone: "text-orange-400" };
 }
@@ -62,7 +63,8 @@ export default function VetHomeSection({ username, stats = {}, appointments = []
     const viewingRecord = viewingPatient?.visits.find((v) => v.id === viewing.recordId) ?? null;
     const openAppointment = (a) => a.medicalRecordId && setViewing({ petId: a.petId, recordId: a.medicalRecordId });
     const select = (record) => {
-        setViewing(null);
+        // Selecting asks "Are you sure?" over the modal and keeps it open to show the new status.
+        if (record.recordStatus !== "Upcoming") setViewing(null);
         onSelectRecord?.(record);
     };
 

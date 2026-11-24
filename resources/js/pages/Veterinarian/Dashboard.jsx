@@ -10,17 +10,34 @@ import UserSettings from '../Customer/modules/UserSettings';
 import VetAppointments from './modules/VetAppointments';
 import PatientRecords from './modules/PatientRecords';
 import MedicalRecordEditor from './components/MedicalRecordEditor';
+import ConfirmSelectDialog from './components/ConfirmSelectDialog';
+import { isLocked } from '../shared/dashboard/recordStatus';
 export default function VeterinarianDashboard({ username, onLogout, profile, flash, confirmedAppointments = [], patientRecords = [], recordOptions = {}, vetHome = {} }) {
     const [section, setSection] = useState("home");
     const [editingId, setEditingId] = useState(null);
     const [selectingId, setSelectingId] = useState(null);
     // Looked up on every render so the editor shows fresh data after each save / upload.
     const editingPatient = editingId ? patientRecords.find((p) => p.visits.some((v) => v.id === editingId)) : null;
-    const editingRecord = editingPatient?.visits.find((v) => v.id === editingId) ?? null;
+    // Never shows a Completed (locked) record, e.g. one completed in another tab.
+    const editingRecord = editingPatient?.visits.find((v) => v.id === editingId && !isLocked(v.recordStatus)) ?? null;
 
-    /** "Select (Start Diagnosis)": an Upcoming record becomes Ongoing, then opens in edit mode. */
+    const [confirmingId, setConfirmingId] = useState(null);
+    const confirmingPatient = confirmingId ? patientRecords.find((p) => p.visits.some((v) => v.id === confirmingId)) : null;
+    const confirmingRecord = confirmingPatient?.visits.find((v) => v.id === confirmingId) ?? null;
+
+    /**
+     * The vet's action on a record, opened from the pet record modal:
+     * Upcoming → "Select" (after an "Are you sure?" prompt) → Selected;
+     * Selected → "Start Diagnosis" → Ongoing, opened in edit mode;
+     * Ongoing → opened in edit mode. Completed records are locked: nothing happens.
+     */
     function selectRecord(record) {
-        if (record.recordStatus !== "Upcoming") {
+        if (isLocked(record.recordStatus)) return;
+        if (record.recordStatus === "Upcoming") {
+            setConfirmingId(record.id);
+            return;
+        }
+        if (record.recordStatus !== "Selected") {
             setEditingId(record.id);
             return;
         }
@@ -29,6 +46,17 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => setEditingId(record.id),
+            onFinish: () => setSelectingId(null),
+        });
+    }
+
+    function confirmSelect() {
+        const id = confirmingId;
+        setSelectingId(id);
+        router.post(`/medical-records/${id}/select`, {}, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => setConfirmingId(null),
             onFinish: () => setSelectingId(null),
         });
     }
@@ -68,6 +96,7 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
         {section === "home" && <VetHomeSection username={username} stats={vetHome} appointments={confirmedAppointments} patients={patientRecords} onNavigate={setSection} onSelectRecord={selectRecord} selectingId={selectingId}/>}
           {section === "records" && <PatientRecords patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId}/>}
           {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords}/>}
+          {confirmingRecord && <ConfirmSelectDialog patient={confirmingPatient} record={confirmingRecord} busy={selectingId === confirmingRecord.id} onConfirm={confirmSelect} onCancel={() => setConfirmingId(null)}/>}
           {editingRecord && <MedicalRecordEditor key={editingRecord.id} patient={editingPatient} record={editingRecord} options={recordOptions} onClose={() => setEditingId(null)}/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);

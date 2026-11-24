@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\MedicalRecordLockedException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -22,8 +23,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $suggestions clinical suggestions / advice for the owner
  * @property string|null $lab_results
  * @property string|null $vet_notes
- * @property string $status Upcoming, Ongoing or Completed
- * @property int|null $veterinarian_id the vet who started the diagnosis
+ * @property string $status Upcoming, Selected, Ongoing or Completed
+ * @property int|null $veterinarian_id the vet who selected the record / started the diagnosis
  * @property Carbon|null $started_at
  * @property Carbon|null $completed_at
  * @property int|null $created_by the clerk who accepted the appointment
@@ -33,12 +34,15 @@ class MedicalRecord extends Model
     /** Created when the clerk accepts the appointment; the vet hasn't started yet. */
     public const STATUS_UPCOMING = 'Upcoming';
 
-    /** The vet pressed "Select (Start Diagnosis)": the visit is in progress. */
+    /** A vet viewed the record and confirmed "Select": it's theirs, diagnosis not started yet. */
+    public const STATUS_SELECTED = 'Selected';
+
+    /** The vet pressed "Start Diagnosis": the visit is in progress. */
     public const STATUS_ONGOING = 'Ongoing';
 
     public const STATUS_COMPLETED = 'Completed';
 
-    public const STATUSES = [self::STATUS_UPCOMING, self::STATUS_ONGOING, self::STATUS_COMPLETED];
+    public const STATUSES = [self::STATUS_UPCOMING, self::STATUS_SELECTED, self::STATUS_ONGOING, self::STATUS_COMPLETED];
 
     protected $fillable = [
         'pet_id',
@@ -61,6 +65,19 @@ class MedicalRecord extends Model
     protected $attributes = [
         'status' => self::STATUS_UPCOMING,
     ];
+
+    /**
+     * Completed records are final: any change to one is refused here too, as a last line of
+     * defense behind the controller checks (MedicalRecordController::ensureNotLocked).
+     */
+    protected static function booted(): void
+    {
+        static::updating(function (self $record): void {
+            if ($record->getOriginal('status') === self::STATUS_COMPLETED) {
+                throw new MedicalRecordLockedException;
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -134,6 +151,12 @@ class MedicalRecord extends Model
     public function isUpcoming(): bool
     {
         return $this->status === self::STATUS_UPCOMING;
+    }
+
+    /** Completed records are locked: read-only for everyone. */
+    public function isCompleted(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED;
     }
 
     /** Readable record number, e.g. MR-000042. */

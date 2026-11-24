@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +22,19 @@ class Pet extends Model
         return [
             'dateOfBirth' => 'date',
         ];
+    }
+
+    /**
+     * Species in one spelling ("cat" / "CAT" → "Cat"), so older rows saved in another
+     * case don't show up as a separate option in the species filters.
+     */
+    protected function species(): Attribute
+    {
+        $normalize = fn (?string $value) => $value === null || trim($value) === ''
+            ? $value
+            : ucfirst(mb_strtolower(trim($value)));
+
+        return Attribute::make(get: $normalize, set: $normalize);
     }
 
     public function owner(): BelongsTo

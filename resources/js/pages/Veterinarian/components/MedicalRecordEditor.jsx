@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { router, useForm } from "@inertiajs/react";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import { RecordStatusBadge } from "../../shared/dashboard/recordStatus";
 import { RecordFiles, formatDate, formatTime } from "./PatientRecordModal";
+import ConfirmDialog from "./ConfirmDialog";
 
 const input = "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#3b0f8c] focus:outline-none focus:ring-1 focus:ring-[#3b0f8c]";
 const peso = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" });
@@ -45,7 +46,7 @@ function validate(data, available) {
 export default function MedicalRecordEditor({ patient, record, options = {}, onClose }) {
     const services = options.services ?? [];
     const supplyOptions = options.supplies ?? [];
-    const completed = record.recordStatus === "Completed";
+    // Only Ongoing records open here; Completed ones are locked (the server refuses changes too).
     const form = useForm({
         diagnosis: record.diagnosis ?? "",
         treatment: record.treatment ?? "",
@@ -54,13 +55,15 @@ export default function MedicalRecordEditor({ patient, record, options = {}, onC
         vet_notes: record.vetNotes ?? "",
         services: (record.services ?? []).map((s) => s.id),
         supplies: (record.supplies ?? []).map((s) => ({ id: s.id, quantity: s.quantity })),
-        status: completed ? "Completed" : "Ongoing",
+        status: "Ongoing",
     });
     const upload = useForm({ file: null });
     const fileInput = useRef(null);
     const [addSupplyId, setAddSupplyId] = useState("");
     const [removingFileId, setRemovingFileId] = useState(null);
     const [savingAs, setSavingAs] = useState(null);
+    const [confirmingComplete, setConfirmingComplete] = useState(false);
+    const closeConfirm = useCallback(() => setConfirmingComplete(false), []);
     const busy = form.processing || upload.processing;
 
     useEffect(() => {
@@ -123,6 +126,7 @@ export default function MedicalRecordEditor({ patient, record, options = {}, onC
         form.clearErrors();
     }
 
+    /** Checks the form; completing asks for confirmation first, since it locks the record. */
     function save(status) {
         const data = { ...form.data, status };
         const errors = validate(data, available);
@@ -131,9 +135,25 @@ export default function MedicalRecordEditor({ patient, record, options = {}, onC
             form.setError(errors);
             return;
         }
+        if (status === "Completed") {
+            setConfirmingComplete(true);
+            return;
+        }
+        submit(status);
+    }
+
+    function submit(status) {
+        const data = { ...form.data, status };
         form.transform(() => ({ ...data, supplies: data.supplies.map((row) => ({ id: row.id, quantity: Number(row.quantity) })) }));
         setSavingAs(status);
-        form.put(`/medical-records/${record.id}`, { preserveScroll: true, preserveState: true, onSuccess: onClose, onFinish: () => setSavingAs(null) });
+        form.put(`/medical-records/${record.id}`, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: onClose,
+            // Server-side errors (e.g. stock ran out meanwhile) show in the form, so close the prompt.
+            onError: () => setConfirmingComplete(false),
+            onFinish: () => setSavingAs(null),
+        });
     }
 
     function uploadFile(event) {
@@ -261,17 +281,33 @@ export default function MedicalRecordEditor({ patient, record, options = {}, onC
 
         <footer className="paw-pet-modal-footer">
           <button type="button" onClick={onClose} disabled={busy} className="mr-auto rounded-lg border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
-          {completed ? (<button type="button" onClick={() => save("Completed")} disabled={busy} className="rounded-lg bg-[#3b0f8c] px-6 py-2 text-sm font-bold text-white hover:bg-[#2d0a6e] disabled:opacity-60">
-              {form.processing ? "Saving…" : "Save Changes"}
-            </button>) : (<>
-              <button type="button" onClick={() => save("Ongoing")} disabled={busy} className="rounded-lg border-2 border-[#3b0f8c] px-5 py-2 text-sm font-semibold text-[#3b0f8c] hover:bg-violet-50 disabled:opacity-60">
-                {savingAs === "Ongoing" ? "Saving…" : "Save Progress"}
-              </button>
-              <button type="button" onClick={() => save("Completed")} disabled={busy} className="rounded-lg bg-green-700 px-6 py-2 text-sm font-bold text-white hover:bg-green-800 disabled:opacity-60">
-                {savingAs === "Completed" ? "Saving…" : "Save & Mark Completed"}
-              </button>
-            </>)}
+          <button type="button" onClick={() => save("Ongoing")} disabled={busy} className="rounded-lg border-2 border-[#3b0f8c] px-5 py-2 text-sm font-semibold text-[#3b0f8c] hover:bg-violet-50 disabled:opacity-60">
+            {savingAs === "Ongoing" ? "Saving…" : "Save Progress"}
+          </button>
+          <button type="button" onClick={() => save("Completed")} disabled={busy} className="rounded-lg bg-green-700 px-6 py-2 text-sm font-bold text-white hover:bg-green-800 disabled:opacity-60">
+            {savingAs === "Completed" ? "Saving…" : "Save & Mark Completed"}
+          </button>
         </footer>
       </section>
+
+      {confirmingComplete && (<ConfirmDialog title="Mark this record as completed?" tone="green" icon="lock" confirmLabel="Yes, mark completed" busyLabel="Saving…" busy={savingAs === "Completed"} onConfirm={() => submit("Completed")} onCancel={closeConfirm}>
+          <p>
+            <strong className="text-[#1a0a3c]">{record.recordNumber}</strong> for <strong className="text-[#1a0a3c]">{patient.name}</strong> will be saved and <strong className="text-violet-700">locked</strong>.
+          </p>
+          <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-lg bg-gray-50 px-3 py-2.5 text-xs">
+            <dt className="font-semibold text-[#1a0a3c]">Diagnosis</dt>
+            <dd className="line-clamp-2 whitespace-pre-line text-gray-600">{form.data.diagnosis.trim()}</dd>
+            <dt className="font-semibold text-[#1a0a3c]">Services</dt>
+            <dd className="text-gray-600">{form.data.services.length || "None"}</dd>
+            <dt className="font-semibold text-[#1a0a3c]">Supplies</dt>
+            <dd className="text-gray-600">{form.data.supplies.length ? `${form.data.supplies.length} (taken from stock)` : "None"}</dd>
+            <dt className="font-semibold text-[#1a0a3c]">Files</dt>
+            <dd className="text-gray-600">{(record.files ?? []).length || "None"}</dd>
+          </dl>
+          <p className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <svg className="mt-0.5 h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 9v4M12 17v.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            This can't be undone. After this, the record can only be viewed — no one can edit the diagnosis, services, supplies or files.
+          </p>
+        </ConfirmDialog>)}
     </div>);
 }

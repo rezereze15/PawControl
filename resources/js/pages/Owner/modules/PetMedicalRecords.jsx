@@ -3,11 +3,13 @@ import SearchField from "@/Components/SearchField";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import PatientRecordModal, { formatDate, formatTime } from "../../Veterinarian/components/PatientRecordModal";
 import TablePagination, { paginate } from "@/Components/TablePagination";
+import { RECORD_STATUSES, statusRank } from "../../shared/dashboard/recordStatus";
 
 const PER_PAGE = 10;
-const STATUSES = ["Ongoing", "Upcoming", "Completed", "No Visits"];
+const STATUSES = [...RECORD_STATUSES, "No Visits"];
 const STATUS_STYLES = {
     Ongoing: "border-emerald-400 bg-emerald-50 text-emerald-700",
+    Selected: "border-sky-400 bg-sky-50 text-sky-700",
     Upcoming: "border-amber-300 bg-amber-50 text-amber-600",
     Completed: "border-violet-400 bg-violet-100 text-violet-800",
     "No Visits": "border-gray-300 bg-gray-50 text-gray-500",
@@ -20,7 +22,10 @@ const LAST_VISIT_RANGES = [
     { id: "365", label: "Last year", days: 365 },
     { id: "never", label: "Never visited" },
 ];
+const DEFAULT_SORT = "status";
 const SORTS = {
+    // Selected, Upcoming, Ongoing, Completed, No Visits; newest last visit first within each.
+    status: { label: "Status (Selected first)", fn: (a, b) => statusRank(a.status) - statusRank(b.status) || (b.lastVisitAt ?? "").localeCompare(a.lastVisitAt ?? "") },
     recent: { label: "Last visit (newest)", fn: (a, b) => (b.lastVisitAt ?? "").localeCompare(a.lastVisitAt ?? "") },
     oldest: { label: "Last visit (oldest)", fn: (a, b) => (a.lastVisitAt ?? "￿").localeCompare(b.lastVisitAt ?? "￿") },
     name: { label: "Pet name (A–Z)", fn: (a, b) => a.name.localeCompare(b.name) },
@@ -84,7 +89,7 @@ export default function PetMedicalRecords({ records = [] }) {
     const [status, setStatus] = useState("All");
     const [lastVisit, setLastVisit] = useState("all");
     const [sex, setSex] = useState("All");
-    const [sort, setSort] = useState("recent");
+    const [sort, setSort] = useState(DEFAULT_SORT);
     const [showFilters, setShowFilters] = useState(false);
     const [page, setPage] = useState(1);
     const [selectedId, setSelectedId] = useState(null);
@@ -109,13 +114,13 @@ export default function PetMedicalRecords({ records = [] }) {
 
     const { currentPage, pageCount, rows } = paginate(filtered, page, PER_PAGE);
     const selected = records.find((r) => r.id === selectedId);
-    const isFiltered = search || species !== "All" || status !== "All" || lastVisit !== "all" || sex !== "All" || sort !== "recent";
-    const extraFilterCount = (sex !== "All") + (sort !== "recent");
+    const isFiltered = search || species !== "All" || status !== "All" || lastVisit !== "all" || sex !== "All" || sort !== DEFAULT_SORT;
+    const extraFilterCount = (sex !== "All") + (sort !== DEFAULT_SORT);
 
     // Any filter change goes back to the first page.
     const withReset = (setter) => (value) => { setter(value); setPage(1); };
     const reset = () => {
-        setSearch(""); setSpecies("All"); setStatus("All"); setLastVisit("all"); setSex("All"); setSort("recent"); setPage(1);
+        setSearch(""); setSpecies("All"); setStatus("All"); setLastVisit("all"); setSex("All"); setSort(DEFAULT_SORT); setPage(1);
     };
 
     return (<div className="flex flex-col gap-6">

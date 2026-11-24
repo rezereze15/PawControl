@@ -3,10 +3,9 @@ import SearchField from "@/Components/SearchField";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import PatientRecordModal, { formatDate, formatTime } from "../components/PatientRecordModal";
 import TablePagination, { paginate } from "@/Components/TablePagination";
-import { RecordStatusBadge, currentRecord, selectLabel } from "../../shared/dashboard/recordStatus";
+import { RECORD_STATUSES, RecordStatusBadge, currentRecord, selectLabel, statusRank } from "../../shared/dashboard/recordStatus";
 
 const PAGE_SIZE = 10;
-const STATUSES = ["Upcoming", "Ongoing", "Completed"];
 const control = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-paw-blue focus:outline-none";
 const EMPTY_FILTERS = { search: "", species: "All", status: "All", service: "All", from: "", to: "" };
 
@@ -16,6 +15,10 @@ function localDay(iso) {
     if (Number.isNaN(date.getTime())) return "";
     return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
 }
+
+/** Species compared without case or spaces, so "cat" and "Cat" are one option. */
+const speciesKey = (species) => String(species ?? "").trim().toLowerCase();
+const speciesLabel = (key) => key.charAt(0).toUpperCase() + key.slice(1);
 
 /** Booked service plus every service the vet recorded as given. */
 function recordServices(record) {
@@ -39,7 +42,7 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
     const [page, setPage] = useState(1);
     const [selectedId, setSelectedId] = useState(null);
 
-    const speciesOptions = useMemo(() => [...new Set(patients.map((p) => p.species).filter(Boolean))].sort(), [patients]);
+    const speciesOptions = useMemo(() => [...new Set(patients.map((p) => speciesKey(p.species)).filter(Boolean))].sort(), [patients]);
     const serviceOptions = useMemo(() => [...new Set(patients.flatMap((p) => p.visits.flatMap(recordServices)))].sort((a, b) => a.localeCompare(b)), [patients]);
 
     // Accept the dates in either order.
@@ -58,10 +61,12 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
 
     const query = filters.search.trim().toLowerCase();
     const filtered = patients
-        .filter((p) => filters.species === "All" || p.species === filters.species)
+        .filter((p) => filters.species === "All" || speciesKey(p.species) === filters.species)
         .filter((p) => !query || [p.name, p.owner?.name, `ID-${String(p.id).padStart(4, "0")}`].some((f) => String(f ?? "").toLowerCase().includes(query)))
         .map((p) => ({ patient: p, matching: recordFilterActive ? p.visits.filter(recordMatches) : p.visits }))
-        .filter(({ matching }) => matching.length > 0);
+        .filter(({ matching }) => matching.length > 0)
+        // Default order: Selected, Upcoming, Ongoing, Completed (most recently seen first within each).
+        .sort((a, b) => statusRank(a.patient.status) - statusRank(b.patient.status));
 
     const { currentPage, pageCount, rows } = paginate(filtered, page, PAGE_SIZE);
     const setFilter = (key) => (value) => {
@@ -85,13 +90,13 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
           <Filter label="Species">
             <select value={filters.species} onChange={onChange("species")} className={control}>
               <option value="All">All Species</option>
-              {speciesOptions.map((option) => <option key={option}>{option}</option>)}
+              {speciesOptions.map((option) => <option key={option} value={option}>{speciesLabel(option)}</option>)}
             </select>
           </Filter>
           <Filter label="Status">
             <select value={filters.status} onChange={onChange("status")} className={control}>
               <option value="All">All Statuses</option>
-              {STATUSES.map((option) => <option key={option}>{option}</option>)}
+              {RECORD_STATUSES.map((option) => <option key={option}>{option}</option>)}
             </select>
           </Filter>
           <Filter label="Service" className="min-w-[12rem]">
@@ -125,8 +130,11 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
                 {patients.length === 0 ? "No data: no medical records yet." : "No records match these filters."}
               </td></tr>)}
             {rows.map(({ patient: p, matching }) => {
-                // With record filters on, "Select" opens a record that matches them.
+                // With record filters on, the action button works on a record that matches them.
+                // An Upcoming record has no shortcut here: the vet must View it, then Select it.
+                // Completed records are locked, so a pet with only those has View only.
                 const record = currentRecord(matching);
+                const showAction = onSelectRecord && record && record.recordStatus !== "Upcoming";
                 return (<tr key={p.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
@@ -149,7 +157,7 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
                 <td className="px-5 py-4">
                   <div className="flex flex-wrap gap-2">
                     <button type="button" onClick={() => setSelectedId(p.id)} className="rounded-lg border border-paw-blue px-3 py-1.5 text-xs font-semibold text-paw-blue hover:bg-paw-blue-soft">View record</button>
-                    {onSelectRecord && record && (<button type="button" onClick={() => onSelectRecord(record)} disabled={selectingId === record.id} className="rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
+                    {showAction && (<button type="button" onClick={() => onSelectRecord(record)} disabled={selectingId === record.id} className="rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
                         {selectingId === record.id ? "Opening…" : selectLabel(record.recordStatus)}
                       </button>)}
                   </div>
@@ -161,6 +169,10 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
         </div>
         <TablePagination page={currentPage} pageCount={pageCount} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage}/>
       </div>
-      {selected && <PatientRecordModal patient={selected} onClose={() => setSelectedId(null)} selectingId={selectingId} onSelect={onSelectRecord && ((record) => { setSelectedId(null); onSelectRecord(record); })}/>}
+      {selected && <PatientRecordModal patient={selected} onClose={() => setSelectedId(null)} selectingId={selectingId} onSelect={onSelectRecord && ((record) => {
+            // Selecting asks "Are you sure?" over this modal and keeps it open to show the new status.
+            if (record.recordStatus !== "Upcoming") setSelectedId(null);
+            onSelectRecord(record);
+        })}/>}
     </div>);
 }

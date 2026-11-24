@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Exceptions\MedicalRecordLockedException;
 use App\Models\MedicalRecord;
 use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
@@ -17,7 +18,17 @@ class UpdateMedicalRecordRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()?->role === Role::VETERINARIAN;
+        if ($this->user()?->role !== Role::VETERINARIAN) {
+            return false;
+        }
+
+        // Completed records are locked: refuse before validating anything.
+        $record = $this->route('medicalRecord');
+        if ($record instanceof MedicalRecord && $record->isCompleted()) {
+            throw new MedicalRecordLockedException;
+        }
+
+        return true;
     }
 
     protected function prepareForValidation(): void

@@ -97,6 +97,7 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
     // Medical records: veterinarians encode findings, services, supplies and files.
     Route::prefix('medical-records/{medicalRecord}')->name('medical-records.')->scopeBindings()->group(function (): void {
         Route::middleware('role:veterinarian')->group(function (): void {
+            Route::post('/select', [MedicalRecordController::class, 'select'])->name('select');
             Route::post('/start', [MedicalRecordController::class, 'start'])->name('start');
             Route::put('/', [MedicalRecordController::class, 'update'])->name('update');
             Route::post('/files', [MedicalRecordController::class, 'uploadFile'])

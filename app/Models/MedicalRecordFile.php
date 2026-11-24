@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\MedicalRecordLockedException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -29,6 +30,19 @@ class MedicalRecordFile extends Model
         'size',
         'uploaded_by',
     ];
+
+    /** Files of a Completed (locked) medical record can't be added or removed. */
+    protected static function booted(): void
+    {
+        $guard = function (self $file): void {
+            if (MedicalRecord::query()->whereKey($file->medical_record_id)->value('status') === MedicalRecord::STATUS_COMPLETED) {
+                throw new MedicalRecordLockedException;
+            }
+        };
+
+        static::creating($guard);
+        static::deleting($guard);
+    }
 
     protected function casts(): array
     {

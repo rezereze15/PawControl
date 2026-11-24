@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\MedicalRecordLockedException;
 use App\Http\Requests\UpdateMedicalRecordRequest;
 use App\Models\MedicalRecord;
 use App\Models\MedicalRecordFile;
@@ -30,15 +31,39 @@ class MedicalRecordController extends Controller
 
     public function __construct(private readonly SupabaseStorage $storage) {}
 
-    /** "Select (Start Diagnosis)": an Upcoming record becomes Ongoing, owned by this vet. */
-    public function start(Request $request, MedicalRecord $medicalRecord): RedirectResponse
+    /**
+     * "Select" (confirmed after viewing the record): an Upcoming record becomes Selected,
+     * assigned to this vet. Already selected/started records are left alone.
+     */
+    public function select(Request $request, MedicalRecord $medicalRecord): RedirectResponse
     {
-        MedicalRecord::query()
+        $this->ensureNotLocked($medicalRecord);
+
+        $selected = MedicalRecord::query()
             ->whereKey($medicalRecord->id)
             ->where('status', MedicalRecord::STATUS_UPCOMING)
             ->update([
-                'status' => MedicalRecord::STATUS_ONGOING,
+                'status' => MedicalRecord::STATUS_SELECTED,
                 'veterinarian_id' => $request->user()->getAuthIdentifier(),
+                'updated_at' => now(),
+            ]);
+
+        return $selected
+            ? back()->with('success', 'Medical record '.$medicalRecord->number().' marked as Selected.')
+            : back();
+    }
+
+    /** "Start Diagnosis": a Selected record becomes Ongoing. Upcoming records must be selected first. */
+    public function start(Request $request, MedicalRecord $medicalRecord): RedirectResponse
+    {
+        $this->ensureNotLocked($medicalRecord);
+
+        MedicalRecord::query()
+            ->whereKey($medicalRecord->id)
+            ->where('status', MedicalRecord::STATUS_SELECTED)
+            ->update([
+                'status' => MedicalRecord::STATUS_ONGOING,
+                'veterinarian_id' => $medicalRecord->veterinarian_id ?? $request->user()->getAuthIdentifier(),
                 'started_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -48,11 +73,14 @@ class MedicalRecordController extends Controller
 
     public function update(UpdateMedicalRecordRequest $request, MedicalRecord $medicalRecord): RedirectResponse
     {
+        $this->ensureNotLocked($medicalRecord);
         $validated = $request->validated();
         $vetId = $request->user()->getAuthIdentifier();
 
         DB::transaction(function () use ($validated, $medicalRecord, $vetId): void {
             $record = MedicalRecord::query()->lockForUpdate()->findOrFail($medicalRecord->id);
+            // Checked again under the row lock: it may have been completed in another tab meanwhile.
+            $this->ensureNotLocked($record);
 
             $this->syncServices($record, $validated['services'] ?? []);
             $this->syncSupplies($record, $validated['supplies'] ?? []);
@@ -75,6 +103,7 @@ class MedicalRecordController extends Controller
     public function uploadFile(Request $request, MedicalRecord $medicalRecord): RedirectResponse
     {
         abort_unless($request->user()->role === Role::VETERINARIAN, 403);
+        $this->ensureNotLocked($medicalRecord);
 
         $request->validate([
             'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:'.self::MAX_FILE_KB],
@@ -121,6 +150,7 @@ class MedicalRecordController extends Controller
     public function deleteFile(Request $request, MedicalRecord $medicalRecord, MedicalRecordFile $file): RedirectResponse
     {
         abort_unless($request->user()->role === Role::VETERINARIAN, 403);
+        $this->ensureNotLocked($medicalRecord);
 
         $file->delete();
         rescue(fn () => $this->storage->delete(SupabaseStorage::medicalFilesBucket(), $file->path), report: false);
@@ -147,6 +177,14 @@ class MedicalRecordController extends Controller
         }
 
         return redirect()->away($url)->header('Cache-Control', 'no-store');
+    }
+
+    /** Completed records are final: no edits, selection, services, supplies or files. */
+    private function ensureNotLocked(MedicalRecord $record): void
+    {
+        if ($record->isCompleted()) {
+            throw new MedicalRecordLockedException;
+        }
     }
 
     /** @param  list<int>  $serviceIds */

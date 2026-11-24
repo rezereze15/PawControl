@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\MedicalRecordLockedException;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\MedicalRecordFile;
@@ -94,11 +95,40 @@ class MedicalRecordEncodingTest extends TestCase
         $this->assertSame(MedicalRecord::STATUS_UPCOMING, $this->record()->fresh()->status);
     }
 
-    public function test_select_starts_the_diagnosis(): void
+    public function test_select_marks_the_record_as_selected(): void
     {
         $vet = $this->user('veterinarian');
         $record = $this->record();
 
+        $this->actingAs($vet)->post(route('medical-records.select', $record))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $record->refresh();
+        $this->assertSame(MedicalRecord::STATUS_SELECTED, $record->status);
+        $this->assertSame($vet->id, $record->veterinarian_id);
+        $this->assertNull($record->started_at);
+
+        // Another vet selecting it afterwards doesn't take it over.
+        $this->actingAs($this->user('veterinarian'))->post(route('medical-records.select', $record));
+        $this->assertSame($vet->id, $record->fresh()->veterinarian_id);
+    }
+
+    public function test_an_upcoming_record_must_be_selected_before_the_diagnosis_starts(): void
+    {
+        $record = $this->record();
+
+        $this->actingAs($this->user('veterinarian'))->post(route('medical-records.start', $record))->assertRedirect();
+
+        $this->assertSame(MedicalRecord::STATUS_UPCOMING, $record->fresh()->status);
+    }
+
+    public function test_start_diagnosis_after_selecting(): void
+    {
+        $vet = $this->user('veterinarian');
+        $record = $this->record();
+
+        $this->actingAs($vet)->post(route('medical-records.select', $record));
         $this->actingAs($vet)->post(route('medical-records.start', $record))->assertRedirect();
 
         $record->refresh();
@@ -206,6 +236,41 @@ class MedicalRecordEncodingTest extends TestCase
         $this->assertNotNull($record->started_at);
     }
 
+    public function test_completed_records_are_locked(): void
+    {
+        $vet = $this->user('veterinarian');
+        $record = $this->record();
+        $gauze = $this->supply('Gauze', 10);
+        $file = $record->files()->create([
+            'path' => 'records/x.png', 'disk' => 'supabase', 'original_name' => 'x.png', 'mime_type' => 'image/png', 'size' => 10,
+        ]);
+        $this->actingAs($vet)->put(route('medical-records.update', $record), $this->form([
+            'status' => 'Completed',
+            'supplies' => [['id' => $gauze->id, 'quantity' => 2]],
+        ]))->assertSessionHasNoErrors();
+        $this->assertSame(MedicalRecord::STATUS_COMPLETED, $record->fresh()->status);
+
+        // Every write endpoint refuses, even with otherwise valid input.
+        $this->actingAs($vet)->put(route('medical-records.update', $record), $this->form([
+            'diagnosis' => 'Changed', 'status' => 'Ongoing', 'supplies' => [],
+        ]))->assertForbidden();
+        $this->actingAs($vet)->post(route('medical-records.select', $record))->assertForbidden();
+        $this->actingAs($vet)->post(route('medical-records.start', $record))->assertForbidden();
+        $this->actingAs($vet)->post(route('medical-records.files.store', $record), ['file' => $this->png('new.png')])->assertForbidden();
+        $this->actingAs($vet)->delete(route('medical-records.files.destroy', [$record, $file]))->assertForbidden();
+
+        $record->refresh();
+        $this->assertSame('Kennel cough', $record->diagnosis);
+        $this->assertSame(MedicalRecord::STATUS_COMPLETED, $record->status);
+        $this->assertSame(2, $record->supplies()->sole()->pivot->quantity);
+        $this->assertSame(8, $gauze->fresh()->stock_quantity);
+        $this->assertSame(1, $record->files()->count());
+
+        // The model refuses direct changes too.
+        $this->expectException(MedicalRecordLockedException::class);
+        $record->update(['diagnosis' => 'Tampered']);
+    }
+
     public function test_inactive_services_and_supplies_cannot_be_added_but_existing_ones_are_kept(): void
     {
         $vet = $this->user('veterinarian');
@@ -237,6 +302,7 @@ class MedicalRecordEncodingTest extends TestCase
 
         foreach (['clerk', 'customer', 'owner', 'admin'] as $role) {
             $user = $this->user($role);
+            $this->actingAs($user)->post(route('medical-records.select', $record))->assertForbidden();
             $this->actingAs($user)->post(route('medical-records.start', $record))->assertForbidden();
             $this->actingAs($user)->put(route('medical-records.update', $record), $this->form())->assertForbidden();
             $this->actingAs($user)->post(route('medical-records.files.store', $record), [
@@ -306,6 +372,13 @@ class MedicalRecordEncodingTest extends TestCase
     {
         $vet = $this->user('veterinarian');
         $record = $this->record();
+        $this->actingAs($vet)->post(route('medical-records.select', $record));
+        $this->actingAs($vet)
+            ->get(route('dashboard.role', ['role' => 'veterinarian']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('patientRecords.0.status', 'Selected')
+                ->where('patientRecords.0.visits.0.recordStatus', 'Selected'));
+
         $this->actingAs($vet)->post(route('medical-records.start', $record));
 
         $this->actingAs($vet)
