@@ -628,6 +628,7 @@ class DashboardController extends Controller
             'status' => $record->appointment?->status,
             'isEmergency' => (bool) $record->appointment?->is_emergency,
             'veterinarian' => $record->veterinarian?->name,
+            'veterinarianId' => $record->veterinarian_id,
             'startedAt' => $record->started_at?->toIso8601String(),
             'completedAt' => $record->completed_at?->toIso8601String(),
             'createdBy' => $record->creator?->name,

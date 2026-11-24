@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Exceptions\MedicalRecordLockedException;
+use App\Exceptions\MedicalRecordTakenException;
 use App\Models\MedicalRecord;
 use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,6 +27,9 @@ class UpdateMedicalRecordRequest extends FormRequest
         $record = $this->route('medicalRecord');
         if ($record instanceof MedicalRecord && $record->isCompleted()) {
             throw new MedicalRecordLockedException;
+        }
+        if ($record instanceof MedicalRecord && $record->isHandledByAnotherVet((int) $this->user()->getAuthIdentifier())) {
+            throw new MedicalRecordTakenException($record);
         }
 
         return true;

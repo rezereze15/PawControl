@@ -159,6 +159,15 @@ class MedicalRecord extends Model
         return $this->status === self::STATUS_COMPLETED;
     }
 
+    /**
+     * The vet who selected a record is the one who handles it. True when another vet
+     * selected it; a record nobody selected yet belongs to whoever starts on it.
+     */
+    public function isHandledByAnotherVet(int $userId): bool
+    {
+        return $this->veterinarian_id !== null && (int) $this->veterinarian_id !== $userId;
+    }
+
     /** Readable record number, e.g. MR-000042. */
     public function number(): string
     {

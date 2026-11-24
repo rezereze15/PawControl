@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MedicalRecordLockedException;
+use App\Exceptions\MedicalRecordTakenException;
 use App\Http\Requests\UpdateMedicalRecordRequest;
 use App\Models\MedicalRecord;
 use App\Models\MedicalRecordFile;
@@ -38,6 +39,7 @@ class MedicalRecordController extends Controller
     public function select(Request $request, MedicalRecord $medicalRecord): RedirectResponse
     {
         $this->ensureNotLocked($medicalRecord);
+        $this->ensureHandledBy($medicalRecord, (int) $request->user()->getAuthIdentifier());
 
         $selected = MedicalRecord::query()
             ->whereKey($medicalRecord->id)
@@ -57,6 +59,7 @@ class MedicalRecordController extends Controller
     public function start(Request $request, MedicalRecord $medicalRecord): RedirectResponse
     {
         $this->ensureNotLocked($medicalRecord);
+        $this->ensureHandledBy($medicalRecord, (int) $request->user()->getAuthIdentifier());
 
         MedicalRecord::query()
             ->whereKey($medicalRecord->id)
@@ -75,12 +78,14 @@ class MedicalRecordController extends Controller
     {
         $this->ensureNotLocked($medicalRecord);
         $validated = $request->validated();
-        $vetId = $request->user()->getAuthIdentifier();
+        $vetId = (int) $request->user()->getAuthIdentifier();
 
         DB::transaction(function () use ($validated, $medicalRecord, $vetId): void {
             $record = MedicalRecord::query()->lockForUpdate()->findOrFail($medicalRecord->id);
-            // Checked again under the row lock: it may have been completed in another tab meanwhile.
+            // Checked again under the row lock: it may have been completed in another tab meanwhile,
+            // or selected by another vet while this form was open.
             $this->ensureNotLocked($record);
+            $this->ensureHandledBy($record, $vetId);
 
             $this->syncServices($record, $validated['services'] ?? []);
             $this->syncSupplies($record, $validated['supplies'] ?? []);
@@ -104,6 +109,7 @@ class MedicalRecordController extends Controller
     {
         abort_unless($request->user()->role === Role::VETERINARIAN, 403);
         $this->ensureNotLocked($medicalRecord);
+        $this->ensureHandledBy($medicalRecord, (int) $request->user()->getAuthIdentifier());
 
         $request->validate([
             'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:'.self::MAX_FILE_KB],
@@ -151,6 +157,7 @@ class MedicalRecordController extends Controller
     {
         abort_unless($request->user()->role === Role::VETERINARIAN, 403);
         $this->ensureNotLocked($medicalRecord);
+        $this->ensureHandledBy($medicalRecord, (int) $request->user()->getAuthIdentifier());
 
         $file->delete();
         rescue(fn () => $this->storage->delete(SupabaseStorage::medicalFilesBucket(), $file->path), report: false);
@@ -184,6 +191,14 @@ class MedicalRecordController extends Controller
     {
         if ($record->isCompleted()) {
             throw new MedicalRecordLockedException;
+        }
+    }
+
+    /** Only the vet who selected a record can work on it; other vets can still view it. */
+    private function ensureHandledBy(MedicalRecord $record, int $userId): void
+    {
+        if ($record->isHandledByAnotherVet($userId)) {
+            throw new MedicalRecordTakenException($record);
         }
     }
 
