@@ -95,18 +95,30 @@ export default function MedicalRecordEditor({ patient, record, options = {}, onC
         form.clearErrors(field);
     };
 
+    /**
+     * Ticking a service adds the supplies it normally uses. A supply that's already listed
+     * (e.g. two services both use gauze) gets the amounts added together.
+     * Unticking takes that service's amounts back off; a supply that reaches 0 is removed.
+     */
     function toggleService(service) {
-        const selected = form.data.services.includes(service.id);
-        if (selected) {
-            form.setData("services", form.data.services.filter((id) => id !== service.id));
-            return;
+        const removing = form.data.services.includes(service.id);
+        // This service's supplies and amounts (skipping inactive ones not on this record).
+        const amounts = new Map((service.supplies ?? []).filter((s) => supplyInfo.has(s.id)).map((s) => [s.id, s.quantity]));
+        const supplies = form.data.supplies
+            .map((row) => amounts.has(row.id)
+                ? { ...row, quantity: (Number(row.quantity) || 0) + (removing ? -amounts.get(row.id) : amounts.get(row.id)) }
+                : row)
+            .filter((row) => !(removing && amounts.has(row.id) && row.quantity <= 0));
+        if (!removing) {
+            amounts.forEach((quantity, id) => supplies.some((row) => row.id === id) || supplies.push({ id, quantity }));
         }
-        // Add the supplies this service normally uses (keeping any amounts already entered).
-        const supplies = [...form.data.supplies];
-        (service.supplies ?? []).forEach((s) => {
-            if (supplyInfo.has(s.id) && !supplies.some((row) => row.id === s.id)) supplies.push({ id: s.id, quantity: s.quantity });
-        });
-        form.setData((data) => ({ ...data, services: [...data.services, service.id], supplies }));
+        form.setData((data) => ({
+            ...data,
+            services: removing ? data.services.filter((id) => id !== service.id) : [...data.services, service.id],
+            supplies,
+        }));
+        // Rows can move or disappear, so old "row 2" errors may now point at the wrong row.
+        form.clearErrors();
     }
 
     function addSupply() {
@@ -219,7 +231,7 @@ export default function MedicalRecordEditor({ patient, record, options = {}, onC
             </div>
           </Section>
 
-          <Section title="Services Given" hint="Selecting a service adds the supplies it normally uses below.">
+          <Section title="Services Given" hint="Ticking a service adds the supplies it normally uses below. Shared supplies add up; unticking takes them back off.">
             {serviceInfo.size === 0 ? <p className="text-sm text-gray-400">No active services. The admin can add them in Manage Services.</p> : (<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[...serviceInfo.values()].map((service) => {
                     const checked = form.data.services.includes(service.id);
