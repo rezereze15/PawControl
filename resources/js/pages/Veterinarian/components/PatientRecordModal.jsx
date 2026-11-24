@@ -1,6 +1,7 @@
 import { formatPetAge } from "../../shared/dashboard/petAge";
 import { useEffect } from "react";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
+import { RecordStatusBadge, selectLabel } from "../../shared/dashboard/recordStatus";
 
 export function formatDate(iso, options = { month: "long", day: "numeric", year: "numeric" }) {
     const date = new Date(iso);
@@ -12,15 +13,59 @@ export function formatTime(iso) {
     return Number.isNaN(date.getTime()) ? "—" : new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(date);
 }
 
-/** Clinical findings of one medical record; empty until the veterinarian fills them in. */
+const peso = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" });
+
+export function formatBytes(bytes) {
+    if (!bytes) return "";
+    return bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+/** Attached images / documents. Links go through the app's authorized file route. */
+export function RecordFiles({ files = [], onRemove, removingId }) {
+    if (files.length === 0) return null;
+    return (<ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+      {files.map((file) => (<li key={file.id} className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-2.5 py-2">
+          <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md ${file.isImage ? "bg-sky-50 text-sky-600" : "bg-violet-50 text-violet-700"}`} aria-hidden="true">
+            {file.isImage
+                ? <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21" strokeLinejoin="round"/></svg>
+                : <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5" /></svg>}
+          </span>
+          <a href={file.url} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 text-xs hover:underline">
+            <span className="block truncate font-semibold text-[#1a0a3c]">{file.name}</span>
+            <span className="text-gray-400">{formatBytes(file.size)}</span>
+          </a>
+          {onRemove && (<button type="button" onClick={() => onRemove(file)} disabled={removingId === file.id} aria-label={`Remove ${file.name}`} className="rounded-md p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>)}
+        </li>))}
+    </ul>);
+}
+
+/** Clinical findings, services, supplies and files of one medical record. */
 function RecordFindings({ visit }) {
-    const findings = [["Diagnosis", visit.diagnosis], ["Treatment", visit.treatment], ["Vet notes", visit.vetNotes]].filter(([, value]) => value);
+    const findings = [
+        ["Diagnosis", visit.diagnosis],
+        ["Treatment", visit.treatment],
+        ["Clinical suggestions", visit.suggestions],
+        ["Lab results", visit.labResults],
+        ["Vet notes", visit.vetNotes],
+    ].filter(([, value]) => value);
+    const services = visit.services ?? [];
+    const supplies = visit.supplies ?? [];
+    const files = visit.files ?? [];
+    const empty = findings.length === 0 && services.length === 0 && supplies.length === 0 && files.length === 0;
+
     return (<div className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">
-      {findings.length === 0
-            ? <p className="text-gray-400">No findings recorded yet.</p>
-            : findings.map(([label, value]) => <p key={label}><span className="font-semibold text-[#1a0a3c]">{label}:</span> {value}</p>)}
+      {empty && <p className="text-gray-400">No findings recorded yet.</p>}
+      {findings.map(([label, value]) => <p key={label} className="whitespace-pre-line"><span className="font-semibold text-[#1a0a3c]">{label}:</span> {value}</p>)}
+      {services.length > 0 && (<p className="mt-1"><span className="font-semibold text-[#1a0a3c]">Services given:</span> {services.map((s) => `${s.name} (${peso.format(Number(s.price))})`).join(", ")}</p>)}
+      {supplies.length > 0 && (<p className="mt-1"><span className="font-semibold text-[#1a0a3c]">Supplies used:</span> {supplies.map((s) => `${s.name} × ${s.quantity}${s.unit ? ` ${s.unit}` : ""}`).join(", ")}</p>)}
+      <RecordFiles files={files}/>
       <p className="mt-1 text-[11px] text-gray-400">
-        {visit.recordNumber}{visit.createdBy ? ` · created by ${visit.createdBy}` : ""}{visit.createdAt ? ` on ${formatDate(visit.createdAt, { month: "short", day: "numeric", year: "numeric" })}` : ""}
+        {visit.recordNumber}
+        {visit.veterinarian ? ` · Dr. ${visit.veterinarian}` : ""}
+        {visit.createdBy ? ` · created by ${visit.createdBy}` : ""}
+        {visit.completedAt ? ` · completed ${formatDate(visit.completedAt, { month: "short", day: "numeric", year: "numeric" })}` : ""}
       </p>
     </div>);
 }
@@ -33,10 +78,11 @@ function Field({ label, value }) {
 }
 
 /**
- * Read-only pet medical record for veterinarians: animal signalment,
- * owner contact, the appointment being viewed (if any) and visit history.
+ * Pet medical record: animal signalment, owner contact, the appointment being viewed
+ * (if any) and every medical record. Read-only unless `onSelect` is given (veterinarians),
+ * which adds a "Select (Start Diagnosis)" button per record.
  */
-export default function PatientRecordModal({ patient, appointment, onClose }) {
+export default function PatientRecordModal({ patient, appointment, onClose, onSelect, selectingId }) {
     useEffect(() => {
         const onKeyDown = (event) => event.key === "Escape" && onClose();
         window.addEventListener("keydown", onKeyDown);
@@ -71,6 +117,7 @@ export default function PatientRecordModal({ patient, appointment, onClose }) {
                 {formatDate(appointment.startsAt)} at {formatTime(appointment.startsAt)}
               </span>
               <span><span className="text-violet-400">Service:</span> <strong>{appointment.type}</strong></span>
+              <RecordStatusBadge status={appointment.recordStatus}/>
               {appointment.notes && <span className="w-full text-gray-700"><span className={`font-semibold ${appointment.isEmergency ? "text-red-500" : "text-violet-400"}`}>{appointment.isEmergency ? "Symptoms:" : "Owner's concern:"}</span> {appointment.notes}</span>}
             </div>)}
 
@@ -113,9 +160,16 @@ export default function PatientRecordModal({ patient, appointment, onClose }) {
                         {visit.notes && <p className="text-xs text-gray-500">{visit.notes}</p>}
                         {visit.recordNumber && <RecordFindings visit={visit}/>}
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-600">
-                        <span>{formatDate(visit.startsAt, { month: "short", day: "numeric", year: "numeric" })} · {formatTime(visit.startsAt)}</span>
-                        <span className={`rounded-md border px-2 py-0.5 font-semibold ${upcoming ? "border-blue-300 bg-blue-50 text-blue-700" : "border-violet-300 bg-violet-50 text-violet-700"}`}>{upcoming ? "Upcoming" : "Completed"}</span>
+                      <div className="flex flex-col items-end gap-2 text-xs text-gray-600">
+                        <div className="flex items-center gap-3">
+                          <span>{formatDate(visit.startsAt, { month: "short", day: "numeric", year: "numeric" })} · {formatTime(visit.startsAt)}</span>
+                          {visit.recordStatus
+                        ? <RecordStatusBadge status={visit.recordStatus}/>
+                        : <span className={`rounded-md border px-2 py-0.5 font-semibold ${upcoming ? "border-blue-300 bg-blue-50 text-blue-700" : "border-violet-300 bg-violet-50 text-violet-700"}`}>{upcoming ? "Upcoming" : "Completed"}</span>}
+                        </div>
+                        {onSelect && visit.recordNumber && (<button type="button" onClick={() => onSelect(visit)} disabled={selectingId === visit.id} className={`rounded-lg px-3 py-1.5 text-xs font-bold transition disabled:opacity-60 ${visit.recordStatus === "Completed" ? "border border-paw-blue text-paw-blue hover:bg-paw-blue-soft" : "bg-paw-blue text-white hover:bg-paw-blue-dark"}`}>
+                            {selectingId === visit.id ? "Opening…" : selectLabel(visit.recordStatus)}
+                          </button>)}
                       </div>
                     </li>);
             })}

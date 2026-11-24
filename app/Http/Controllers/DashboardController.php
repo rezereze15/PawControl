@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
+use App\Models\MedicalRecordFile;
 use App\Models\MedicalSupply;
 use App\Models\Pet;
 use App\Models\Role;
@@ -20,6 +21,9 @@ use RuntimeException;
 
 class DashboardController extends Controller
 {
+    /** Relations a medical record needs for recordVisit(), loaded up front (no N+1 queries). */
+    private const RECORD_RELATIONS = ['appointment', 'creator:id,name', 'veterinarian:id,name', 'services', 'supplies', 'files'];
+
     public function redirect(Request $request): RedirectResponse
     {
         $user = $request->user();
@@ -159,7 +163,7 @@ class DashboardController extends Controller
     private function clerkProps(): array
     {
         $appointments = Appointment::query()
-            ->with(['pet', 'user', 'reviewer:id,name', 'creator:id,name'])
+            ->with(['pet', 'user', 'reviewer:id,name', 'creator:id,name', 'medicalRecord:id,appointment_id,status'])
             ->where('app_date_time', '>=', now()->startOfDay())
             ->where('status', '!=', Appointment::STATUS_CANCELLED)
             ->orderBy('app_date_time')
@@ -194,6 +198,7 @@ class DashboardController extends Controller
                 'proofUrl' => $appointment->proofUrl(),
                 'proofIsPdf' => $appointment->proofIsPdf(),
                 ...$this->emergencyFields($appointment),
+                ...$this->visitFields($appointment),
                 'createdBy' => $appointment->creator?->name,
             ]);
 
@@ -244,21 +249,26 @@ class DashboardController extends Controller
     private function veterinarianProps(): array
     {
         $confirmed = Appointment::query()
-            ->with(['pet.owner', 'user'])
+            ->with(['pet.owner', 'user', 'medicalRecord:id,appointment_id,status'])
             ->where('status', Appointment::STATUS_CONFIRMED)
+            ->where('app_date_time', '>=', now()->startOfDay())
             ->orderBy('app_date_time')
             ->get();
 
-        $startOfToday = now()->startOfDay();
-
         return [
+            'vetHome' => $this->vetHomeStats($confirmed),
             'confirmedAppointments' => $confirmed
-                ->filter(fn (Appointment $appointment) => $appointment->app_date_time->greaterThanOrEqualTo($startOfToday))
                 ->map(fn (Appointment $appointment) => [
                     'id' => $appointment->id,
                     'petId' => $appointment->pet_id,
                     'pet' => $appointment->pet?->petName ?? 'Unknown pet',
+                    'species' => $appointment->pet?->species,
+                    'breed' => $appointment->pet?->breed,
+                    'petAge' => $appointment->pet?->age,
+                    'petDateOfBirth' => $appointment->pet?->dateOfBirth?->toDateString(),
                     'photo' => $this->petPhotoUrl($appointment->pet),
+                    // Server-side day so "today"/"tomorrow" match the app clock.
+                    'day' => $appointment->app_date_time->toDateString(),
                     'owner' => $appointment->ownerName(),
                     'phone' => $appointment->ownerPhone() ?? '',
                     'date' => $appointment->app_date_time->format('M j, Y'),
@@ -268,10 +278,84 @@ class DashboardController extends Controller
                     'notes' => $appointment->notes,
                     'status' => $appointment->status,
                     ...$this->emergencyFields($appointment),
+                    ...$this->visitFields($appointment),
                 ])
                 ->values(),
             // Every medical record (one per accepted appointment), grouped by pet.
             'patientRecords' => $this->medicalRecordsByPet(MedicalRecord::query()),
+            'recordOptions' => $this->recordOptions(),
+        ];
+    }
+
+    /**
+     * Numbers for the veterinarian home cards, all from the database.
+     *
+     * @param  Collection<int, Appointment>  $confirmed  confirmed appointments from today on
+     * @return array<string, mixed>
+     */
+    private function vetHomeStats(Collection $confirmed): array
+    {
+        $today = MedicalRecord::query()
+            ->whereBetween('visit_date', [now()->startOfDay(), now()->endOfDay()])
+            ->pluck('status');
+
+        return [
+            'today' => now()->toDateString(),
+            'tomorrow' => now()->addDay()->toDateString(),
+            // Patients = pets with at least one medical record; "new" = first record this month.
+            'totalPatients' => MedicalRecord::query()->distinct()->count('pet_id'),
+            'newPatientsThisMonth' => MedicalRecord::query()
+                ->select('pet_id')
+                ->groupBy('pet_id')
+                ->havingRaw('MIN(created_at) >= ?', [now()->startOfMonth()])
+                ->get()
+                ->count(),
+            'upcomingAppointments' => $confirmed->count(),
+            'appointmentsToday' => $confirmed->filter(fn (Appointment $appointment) => $appointment->app_date_time->isToday())->count(),
+            'operationsToday' => $today->count(),
+            'ongoingToday' => $today->filter(fn (string $status) => $status === MedicalRecord::STATUS_ONGOING)->count(),
+            'completedToday' => $today->filter(fn (string $status) => $status === MedicalRecord::STATUS_COMPLETED)->count(),
+            // Diagnoses in progress on any day (e.g. started yesterday and not completed).
+            'activeDiagnoses' => MedicalRecord::query()->where('status', MedicalRecord::STATUS_ONGOING)->count(),
+        ];
+    }
+
+    /**
+     * Choices for the vet's diagnosis form: active services (with the supplies each one
+     * normally uses, to pre-fill) and active supplies with their current stock.
+     *
+     * @return array<string, mixed>
+     */
+    private function recordOptions(): array
+    {
+        return [
+            'services' => Service::query()
+                ->where('is_active', true)
+                ->with('supplies:id')
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Service $service) => [
+                    'id' => $service->id,
+                    'name' => $service->name,
+                    'price' => $service->price,
+                    'supplies' => $service->supplies->map(fn (MedicalSupply $supply) => [
+                        'id' => $supply->id,
+                        'quantity' => (int) $supply->pivot->quantity,
+                    ])->values(),
+                ]),
+            'supplies' => MedicalSupply::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'category', 'unit_of_measure', 'stock_quantity', 'unit_price'])
+                ->map(fn (MedicalSupply $supply) => [
+                    'id' => $supply->id,
+                    'name' => $supply->name,
+                    'category' => $supply->category,
+                    'unit' => $supply->unit_of_measure,
+                    'stock' => $supply->stock_quantity,
+                    'unitPrice' => $supply->unit_price,
+                ]),
+            'maxFileKb' => MedicalRecordController::MAX_FILE_KB,
         ];
     }
 
@@ -281,9 +365,9 @@ class DashboardController extends Controller
         $pets = Pet::query()
             ->with([
                 'owner:id,name,email,phone',
-                'appointments' => fn ($query) => $query
-                    ->where('status', Appointment::STATUS_CONFIRMED)
-                    ->orderByDesc('app_date_time'),
+                'medicalRecords' => fn ($query) => $query
+                    ->with(self::RECORD_RELATIONS)
+                    ->orderByDesc('visit_date'),
             ])
             ->orderBy('petID')
             ->get();
@@ -407,24 +491,16 @@ class DashboardController extends Controller
     }
 
     /**
-     * Every registered pet, with a status derived from its confirmed appointments:
-     * Ongoing (one today), Upcoming (one in the future), Completed (only past ones),
-     * or No Visits.
+     * Every registered pet, with the status of its medical records:
+     * Ongoing (a vet is working on one), Upcoming (one not started yet),
+     * Completed (all finished), or No Visits.
      *
      * @return array<string, mixed>
      */
     private function petRecord(Pet $pet): array
     {
-        $now = now();
-        $visits = $pet->appointments;
-        $lastVisit = $visits->first(fn (Appointment $appointment) => $appointment->app_date_time->lessThanOrEqualTo($now));
-
-        $status = match (true) {
-            $visits->contains(fn (Appointment $appointment) => $appointment->app_date_time->isToday()) => 'Ongoing',
-            $visits->contains(fn (Appointment $appointment) => $appointment->app_date_time->greaterThan($now)) => 'Upcoming',
-            $visits->isNotEmpty() => 'Completed',
-            default => 'No Visits',
-        };
+        $records = $pet->medicalRecords;
+        $lastVisit = $records->first(fn (MedicalRecord $record) => $record->visit_date->lessThanOrEqualTo(now()));
 
         return [
             'id' => $pet->petID,
@@ -442,18 +518,37 @@ class DashboardController extends Controller
                 'phone' => $pet->ownerPhone(),
             ],
             'isWalkIn' => $pet->isUnlinkedWalkIn(),
-            'status' => $status,
-            'lastVisitAt' => $lastVisit?->app_date_time->toIso8601String(),
-            'veterinarian' => null, // appointments don't record an assigned vet yet
-            'visits' => $visits->map(fn (Appointment $appointment) => [
-                'id' => $appointment->id,
-                'startsAt' => $appointment->app_date_time->toIso8601String(),
-                'type' => $appointment->service_type ?? 'Appointment',
-                'notes' => $appointment->notes,
-                'status' => $appointment->status,
-                'isEmergency' => $appointment->is_emergency,
-            ])->values(),
+            'status' => $this->petStatus($records),
+            'lastVisitAt' => $lastVisit?->visit_date->toIso8601String(),
+            'veterinarian' => $this->latestVeterinarian($records),
+            'visits' => $records->map(fn (MedicalRecord $record) => $this->recordVisit($record))->values(),
         ];
+    }
+
+    /**
+     * One status for a pet, from its records: Ongoing beats Upcoming beats Completed.
+     *
+     * @param  Collection<int, MedicalRecord>  $records
+     */
+    private function petStatus(Collection $records): string
+    {
+        foreach ([MedicalRecord::STATUS_ONGOING, MedicalRecord::STATUS_UPCOMING, MedicalRecord::STATUS_COMPLETED] as $status) {
+            if ($records->contains('status', $status)) {
+                return $status;
+            }
+        }
+
+        return 'No Visits';
+    }
+
+    /**
+     * The vet on the pet's most recent record that has one.
+     *
+     * @param  Collection<int, MedicalRecord>  $records  newest first
+     */
+    private function latestVeterinarian(Collection $records): ?string
+    {
+        return $records->first(fn (MedicalRecord $record) => $record->veterinarian !== null)?->veterinarian->name;
     }
 
     /**
@@ -465,7 +560,7 @@ class DashboardController extends Controller
     private function medicalRecordsByPet(Builder $query): Collection
     {
         return $query
-            ->with(['pet.owner', 'appointment.user', 'creator:id,name'])
+            ->with(['pet.owner', 'appointment.user', ...self::RECORD_RELATIONS])
             ->orderByDesc('visit_date')
             ->get()
             ->groupBy('pet_id')
@@ -504,23 +599,70 @@ class DashboardController extends Controller
             ],
             'isWalkIn' => (bool) $pet?->isUnlinkedWalkIn(),
             'lastVisitAt' => $lastVisit->visit_date->toIso8601String(),
-            'visits' => $records
-                ->map(fn (MedicalRecord $record) => [
-                    'id' => $record->id,
-                    'recordNumber' => $record->number(),
-                    'appointmentId' => $record->appointment_id,
-                    'startsAt' => $record->visit_date->toIso8601String(),
-                    'type' => $record->service_type ?? 'Appointment',
-                    'notes' => $record->chief_complaint,
-                    'diagnosis' => $record->diagnosis,
-                    'treatment' => $record->treatment,
-                    'vetNotes' => $record->vet_notes,
-                    'status' => $record->appointment?->status,
-                    'isEmergency' => (bool) $record->appointment?->is_emergency,
-                    'createdBy' => $record->creator?->name,
-                    'createdAt' => $record->created_at?->toIso8601String(),
-                ])
-                ->values(),
+            'status' => $this->petStatus($records),
+            'veterinarian' => $this->latestVeterinarian($records),
+            'visits' => $records->map(fn (MedicalRecord $record) => $this->recordVisit($record))->values(),
+        ];
+    }
+
+    /**
+     * One medical record as the record screens show it (vet, clerk, clinic owner, pet owner).
+     *
+     * @return array<string, mixed>
+     */
+    private function recordVisit(MedicalRecord $record): array
+    {
+        return [
+            'id' => $record->id,
+            'recordNumber' => $record->number(),
+            'appointmentId' => $record->appointment_id,
+            'startsAt' => $record->visit_date->toIso8601String(),
+            'type' => $record->service_type ?? 'Appointment',
+            'notes' => $record->chief_complaint,
+            'diagnosis' => $record->diagnosis,
+            'treatment' => $record->treatment,
+            'suggestions' => $record->suggestions,
+            'labResults' => $record->lab_results,
+            'vetNotes' => $record->vet_notes,
+            'recordStatus' => $record->status,
+            'status' => $record->appointment?->status,
+            'isEmergency' => (bool) $record->appointment?->is_emergency,
+            'veterinarian' => $record->veterinarian?->name,
+            'startedAt' => $record->started_at?->toIso8601String(),
+            'completedAt' => $record->completed_at?->toIso8601String(),
+            'createdBy' => $record->creator?->name,
+            'createdAt' => $record->created_at?->toIso8601String(),
+            'services' => $record->services->map(fn (Service $service) => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'price' => $service->pivot->price,
+            ])->values(),
+            'supplies' => $record->supplies->map(fn (MedicalSupply $supply) => [
+                'id' => $supply->id,
+                'name' => $supply->name,
+                'unit' => $supply->unit_of_measure,
+                'quantity' => (int) $supply->pivot->quantity,
+            ])->values(),
+            'files' => $record->files->map(fn (MedicalRecordFile $file) => [
+                'id' => $file->id,
+                'name' => $file->original_name,
+                'url' => $file->url(),
+                'isImage' => $file->isImage(),
+                'size' => $file->size,
+            ])->values(),
+        ];
+    }
+
+    /**
+     * The medical record behind a confirmed appointment, for the status column.
+     *
+     * @return array{medicalRecordId: int|null, visitStatus: string|null}
+     */
+    private function visitFields(Appointment $appointment): array
+    {
+        return [
+            'medicalRecordId' => $appointment->medicalRecord?->id,
+            'visitStatus' => $appointment->medicalRecord?->status,
         ];
     }
 

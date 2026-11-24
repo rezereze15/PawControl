@@ -17,7 +17,6 @@ import StaffDashboardLayout from '../Layouts/StaffDashboardLayout';
 import CustomerHomeSection from './Customer/components/CustomerHomeSection';
 import CustomerAppointments from './Customer/modules/Appointments';
 import CustomerPetMedicalRecords from './Customer/modules/PetMedicalRecords';
-import StaffHomeSection from './Clerk/components/StaffHomeSection';
 import OwnerHomeSection from './Owner/components/OwnerHomeSection';
 import bigpawLogo from '../imports/Bigpaw_logoname-removebg-preview.png';
 import '../../css/Dashboard.css';
@@ -127,7 +126,7 @@ export default function Dashboard({ profileCompletion = null, ...props }) {
       <CompleteProfileModal email={profileCompletion.email} firstName={profileCompletion.first_name} middleName={profileCompletion.middle_name} lastName={profileCompletion.last_name} photoUrl={props.profile?.photoUrl}/>
     </>);
 }
-function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], medicalRecords = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], clerkHome = {}, flash }) {
+function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], recordOptions = {}, vetHome = {}, petRecords = [], customerAppointments = [], medicalRecords = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], clerkHome = {}, flash }) {
     const { errors = {} } = usePage().props;
     const profiles = {
         customer: 'Karina',
@@ -143,7 +142,7 @@ function RoleDashboard({ role = 'customer', username: authenticatedUsername, own
     if (role === 'clerk')
         return <ClerkDashboard username={username} onLogout={logout} profile={profile} upcomingAppointments={upcomingAppointments} clerkHome={clerkHome} patientRecords={patientRecords} flash={flash} errors={errors}/>;
     if (role === 'veterinarian')
-        return <VeterinarianDashboard username={username} onLogout={logout} profile={profile} confirmedAppointments={confirmedAppointments} patientRecords={patientRecords} flash={flash}/>;
+        return <VeterinarianDashboard username={username} onLogout={logout} profile={profile} confirmedAppointments={confirmedAppointments} patientRecords={patientRecords} recordOptions={recordOptions} vetHome={vetHome} flash={flash}/>;
     if (role === 'owner')
         return <OwnerDashboard username={username} onLogout={logout} profile={profile} petRecords={petRecords} flash={flash}/>;
     return <DashboardHome username={username} onLogout={logout} owner={owner} profile={profile} pets={pets} customerAppointments={customerAppointments} medicalRecords={medicalRecords} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;

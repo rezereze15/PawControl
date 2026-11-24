@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClerkEmergencyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\ProfileCompletionController;
@@ -91,6 +92,20 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
             ->middleware('throttle:60,1')
             ->name('owners');
         Route::post('/', [ClerkEmergencyController::class, 'store'])->name('store');
+    });
+
+    // Medical records: veterinarians encode findings, services, supplies and files.
+    Route::prefix('medical-records/{medicalRecord}')->name('medical-records.')->scopeBindings()->group(function (): void {
+        Route::middleware('role:veterinarian')->group(function (): void {
+            Route::post('/start', [MedicalRecordController::class, 'start'])->name('start');
+            Route::put('/', [MedicalRecordController::class, 'update'])->name('update');
+            Route::post('/files', [MedicalRecordController::class, 'uploadFile'])
+                ->middleware('throttle:30,1')
+                ->name('files.store');
+            Route::delete('/files/{file}', [MedicalRecordController::class, 'deleteFile'])->name('files.destroy');
+        });
+        // Vets, clerks, the clinic owner, and the pet's own owner (checked in the controller).
+        Route::get('/files/{file}', [MedicalRecordController::class, 'showFile'])->name('files.show');
     });
 
     // Pets

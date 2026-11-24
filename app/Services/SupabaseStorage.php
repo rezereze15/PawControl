@@ -131,6 +131,12 @@ class SupabaseStorage
         return (string) config('services.supabase.pet_photos_bucket', 'pet-profiles');
     }
 
+    /** Medical images and documents attached to pet medical records. */
+    public static function medicalFilesBucket(): string
+    {
+        return (string) config('services.supabase.medical_files_bucket', 'medical-files');
+    }
+
     public static function profilePhotosBucket(): string
     {
         return (string) config('services.supabase.profile_photos_bucket', 'profile-photos');

@@ -12,7 +12,9 @@ const peso = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP"
 function operationStatus(appointment) {
     if (appointment.isEmergency) return { label: "Emergency walk-in", tone: "text-red-600" };
     if (appointment.status === "Pending") return { label: "Pending approval", tone: "text-amber-500" };
-    if (appointment.hasStarted) return { label: "On Going", tone: "text-green-500" };
+    // Medical record status set by the vet ("Select" → Ongoing, then Completed).
+    if (appointment.visitStatus === "Completed") return { label: "Completed", tone: "text-violet-600" };
+    if (appointment.visitStatus === "Ongoing") return { label: "On Going · with the vet", tone: "text-green-500" };
     return { label: `Up Next · ${appointment.time}`, tone: "text-orange-400" };
 }
 

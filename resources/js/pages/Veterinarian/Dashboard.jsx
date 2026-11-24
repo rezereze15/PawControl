@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { router } from '@inertiajs/react';
 import StaffDashboardLayout from '@/Layouts/StaffDashboardLayout';
-import StaffHomeSection from '../Clerk/components/StaffHomeSection';
+import VetHomeSection from './components/VetHomeSection';
 import { PersonIcon } from '../shared/dashboard/Icons';
 import { bigpawLogo } from '../shared/dashboard/assets';
 import FlashToast from '@/Components/FlashToast';
@@ -8,8 +9,29 @@ import { veterinarianNotifications } from '../shared/dashboard/notifications';
 import UserSettings from '../Customer/modules/UserSettings';
 import VetAppointments from './modules/VetAppointments';
 import PatientRecords from './modules/PatientRecords';
-export default function VeterinarianDashboard({ username, onLogout, profile, flash, confirmedAppointments = [], patientRecords = [] }) {
+import MedicalRecordEditor from './components/MedicalRecordEditor';
+export default function VeterinarianDashboard({ username, onLogout, profile, flash, confirmedAppointments = [], patientRecords = [], recordOptions = {}, vetHome = {} }) {
     const [section, setSection] = useState("home");
+    const [editingId, setEditingId] = useState(null);
+    const [selectingId, setSelectingId] = useState(null);
+    // Looked up on every render so the editor shows fresh data after each save / upload.
+    const editingPatient = editingId ? patientRecords.find((p) => p.visits.some((v) => v.id === editingId)) : null;
+    const editingRecord = editingPatient?.visits.find((v) => v.id === editingId) ?? null;
+
+    /** "Select (Start Diagnosis)": an Upcoming record becomes Ongoing, then opens in edit mode. */
+    function selectRecord(record) {
+        if (record.recordStatus !== "Upcoming") {
+            setEditingId(record.id);
+            return;
+        }
+        setSelectingId(record.id);
+        router.post(`/medical-records/${record.id}/start`, {}, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => setEditingId(record.id),
+            onFinish: () => setSelectingId(null),
+        });
+    }
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
         {
@@ -43,9 +65,10 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
     ];
     return (<StaffDashboardLayout username={username} roleLabel="Veterinarian" dashboardClassName="paw-vet-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout} notifications={veterinarianNotifications(confirmedAppointments)} notificationKey={`paw-notifications-read:${profile?.id ?? username}`}>
         <FlashToast message={flash?.success}/>
-        {section === "home" && (<StaffHomeSection username={username} role="Veterinarian"/>)}
-          {section === "records" && <PatientRecords patients={patientRecords}/>}
-          {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords}/>}
+        {section === "home" && <VetHomeSection username={username} stats={vetHome} appointments={confirmedAppointments} patients={patientRecords} onNavigate={setSection} onSelectRecord={selectRecord} selectingId={selectingId}/>}
+          {section === "records" && <PatientRecords patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId}/>}
+          {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId}/>}
+          {editingRecord && <MedicalRecordEditor key={editingRecord.id} patient={editingPatient} record={editingRecord} options={recordOptions} onClose={() => setEditingId(null)}/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }

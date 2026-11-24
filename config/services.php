@@ -35,6 +35,7 @@ return [
         'payment_proofs_bucket' => env('SUPABASE_PAYMENT_PROOFS_BUCKET', 'payment-proofs'),
         'profile_photos_bucket' => env('SUPABASE_PROFILE_PHOTOS_BUCKET', 'profile-photos'),
         'pet_photos_bucket' => env('SUPABASE_PET_PHOTOS_BUCKET', 'pet-profiles'),
+        'medical_files_bucket' => env('SUPABASE_MEDICAL_FILES_BUCKET', 'medical-files'),
         'ca_bundle' => env('SUPABASE_CA_BUNDLE'),
     ],
 

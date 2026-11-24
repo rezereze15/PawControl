@@ -17,14 +17,18 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Artisan::command('supabase:buckets', function (SupabaseStorage $storage) {
+    $fiveMb = 5 * 1024 * 1024;
+    // bucket => [allowed types, size limit]
     $buckets = [
-        SupabaseStorage::paymentProofsBucket() => ['image/jpeg', 'image/png', 'application/pdf'],
-        SupabaseStorage::profilePhotosBucket() => ['image/jpeg', 'image/png', 'image/webp'],
-        SupabaseStorage::petPhotosBucket() => ['image/jpeg', 'image/png', 'image/webp'],
+        SupabaseStorage::paymentProofsBucket() => [['image/jpeg', 'image/png', 'application/pdf'], $fiveMb],
+        SupabaseStorage::profilePhotosBucket() => [['image/jpeg', 'image/png', 'image/webp'], $fiveMb],
+        SupabaseStorage::petPhotosBucket() => [['image/jpeg', 'image/png', 'image/webp'], $fiveMb],
+        // X-rays, ultrasound stills, lab reports: same limit as MedicalRecordController::MAX_FILE_KB.
+        SupabaseStorage::medicalFilesBucket() => [['image/jpeg', 'image/png', 'image/webp', 'application/pdf'], 10 * 1024 * 1024],
     ];
 
-    foreach ($buckets as $bucket => $mimeTypes) {
-        $created = $storage->ensurePrivateBucket($bucket, $mimeTypes, 5 * 1024 * 1024);
+    foreach ($buckets as $bucket => [$mimeTypes, $maxBytes]) {
+        $created = $storage->ensurePrivateBucket($bucket, $mimeTypes, $maxBytes);
         $this->info(($created ? 'Created' : 'Updated')." private bucket [{$bucket}].");
     }
 })->purpose('Create or update the private Supabase Storage buckets used by PawControl');

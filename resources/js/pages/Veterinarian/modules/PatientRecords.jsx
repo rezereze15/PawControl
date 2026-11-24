@@ -3,11 +3,12 @@ import SearchField from "@/Components/SearchField";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import PatientRecordModal, { formatDate, formatTime } from "../components/PatientRecordModal";
 import TablePagination, { paginate } from "@/Components/TablePagination";
+import { RecordStatusBadge, currentRecord, selectLabel } from "../../shared/dashboard/recordStatus";
 
 const PAGE_SIZE = 10;
 
 /** Every pet with at least one medical record (created when the clerk accepts an appointment). Used by vets and clerks. */
-export default function PatientRecords({ patients = [] }) {
+export default function PatientRecords({ patients = [], onSelectRecord, selectingId }) {
     const [search, setSearch] = useState("");
     const [species, setSpecies] = useState("All");
     const [page, setPage] = useState(1);
@@ -44,14 +45,14 @@ export default function PatientRecords({ patients = [] }) {
 
       <div className="paw-list-card bg-white rounded-xl shadow-sm">
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="w-full min-w-[860px] text-sm">
           <thead>
             <tr className="border-b border-gray-100">
-              {["Pet Info", "Owner", "Species/Breed", "Last Visit", "Visits", "Actions"].map((h) => <th key={h} className="px-5 py-4 text-left font-bold text-[#1a0a3c]">{h}</th>)}
+              {["Pet Info", "Owner", "Species/Breed", "Last Visit", "Records", "Status", "Actions"].map((h) => <th key={h} className="px-5 py-4 text-left font-bold text-[#1a0a3c]">{h}</th>)}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {rows.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-400">No pet records found.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-400">No pet records found.</td></tr>}
             {rows.map((p) => (<tr key={p.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
@@ -70,8 +71,17 @@ export default function PatientRecords({ patients = [] }) {
                 <td className="px-5 py-4 text-gray-600"><p>{p.species}</p><p className="text-gray-400 text-xs">{p.breed}</p></td>
                 <td className="px-5 py-4 text-gray-600"><p>{formatDate(p.lastVisitAt, { month: "long", day: "numeric", year: "numeric" })}</p><p className="text-gray-400 text-xs">{formatTime(p.lastVisitAt)}</p></td>
                 <td className="px-5 py-4 text-gray-600">{p.visits.length}</td>
+                <td className="px-5 py-4"><RecordStatusBadge status={p.status}/></td>
                 <td className="px-5 py-4">
-                  <button type="button" onClick={() => setSelectedId(p.id)} className="rounded-lg border border-paw-blue px-3 py-1.5 text-xs font-semibold text-paw-blue hover:bg-paw-blue-soft">View record</button>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => setSelectedId(p.id)} className="rounded-lg border border-paw-blue px-3 py-1.5 text-xs font-semibold text-paw-blue hover:bg-paw-blue-soft">View record</button>
+                    {onSelectRecord && (() => {
+                const record = currentRecord(p.visits);
+                return record && (<button type="button" onClick={() => onSelectRecord(record)} disabled={selectingId === record.id} className="rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
+                          {selectingId === record.id ? "Opening…" : selectLabel(record.recordStatus)}
+                        </button>);
+            })()}
+                  </div>
                 </td>
               </tr>))}
           </tbody>
@@ -79,6 +89,6 @@ export default function PatientRecords({ patients = [] }) {
         </div>
         <TablePagination page={currentPage} pageCount={pageCount} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage}/>
       </div>
-      {selected && <PatientRecordModal patient={selected} onClose={() => setSelectedId(null)}/>}
+      {selected && <PatientRecordModal patient={selected} onClose={() => setSelectedId(null)} selectingId={selectingId} onSelect={onSelectRecord && ((record) => { setSelectedId(null); onSelectRecord(record); })}/>}
     </div>);
 }

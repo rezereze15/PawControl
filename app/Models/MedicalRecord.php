@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -17,11 +19,27 @@ use Illuminate\Support\Carbon;
  * @property string|null $chief_complaint the owner's concern, or the emergency symptoms
  * @property string|null $diagnosis
  * @property string|null $treatment
+ * @property string|null $suggestions clinical suggestions / advice for the owner
+ * @property string|null $lab_results
  * @property string|null $vet_notes
+ * @property string $status Upcoming, Ongoing or Completed
+ * @property int|null $veterinarian_id the vet who started the diagnosis
+ * @property Carbon|null $started_at
+ * @property Carbon|null $completed_at
  * @property int|null $created_by the clerk who accepted the appointment
  */
 class MedicalRecord extends Model
 {
+    /** Created when the clerk accepts the appointment; the vet hasn't started yet. */
+    public const STATUS_UPCOMING = 'Upcoming';
+
+    /** The vet pressed "Select (Start Diagnosis)": the visit is in progress. */
+    public const STATUS_ONGOING = 'Ongoing';
+
+    public const STATUS_COMPLETED = 'Completed';
+
+    public const STATUSES = [self::STATUS_UPCOMING, self::STATUS_ONGOING, self::STATUS_COMPLETED];
+
     protected $fillable = [
         'pet_id',
         'appointment_id',
@@ -30,14 +48,26 @@ class MedicalRecord extends Model
         'chief_complaint',
         'diagnosis',
         'treatment',
+        'suggestions',
+        'lab_results',
         'vet_notes',
+        'status',
+        'veterinarian_id',
+        'started_at',
+        'completed_at',
         'created_by',
+    ];
+
+    protected $attributes = [
+        'status' => self::STATUS_UPCOMING,
     ];
 
     protected function casts(): array
     {
         return [
             'visit_date' => 'datetime',
+            'started_at' => 'datetime',
+            'completed_at' => 'datetime',
         ];
     }
 
@@ -54,6 +84,7 @@ class MedicalRecord extends Model
                 'visit_date' => $appointment->app_date_time,
                 'service_type' => $appointment->service_type,
                 'chief_complaint' => $appointment->notes,
+                'status' => self::STATUS_UPCOMING,
                 'created_by' => $createdBy,
             ],
         );
@@ -72,6 +103,37 @@ class MedicalRecord extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function veterinarian(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'veterinarian_id');
+    }
+
+    /** Services given during the visit; the price charged is $service->pivot->price. */
+    public function services(): BelongsToMany
+    {
+        return $this->belongsToMany(Service::class, 'medical_record_services')
+            ->withPivot('price')
+            ->withTimestamps();
+    }
+
+    /** Supplies used during the visit; amounts are $supply->pivot->quantity. */
+    public function supplies(): BelongsToMany
+    {
+        return $this->belongsToMany(MedicalSupply::class, 'medical_record_supplies')
+            ->withPivot(['quantity', 'unit_price'])
+            ->withTimestamps();
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(MedicalRecordFile::class)->orderBy('created_at');
+    }
+
+    public function isUpcoming(): bool
+    {
+        return $this->status === self::STATUS_UPCOMING;
     }
 
     /** Readable record number, e.g. MR-000042. */
