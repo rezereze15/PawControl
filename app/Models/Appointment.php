@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -76,6 +77,12 @@ class Appointment extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /** Created when the clerk accepts the appointment. */
+    public function medicalRecord(): HasOne
+    {
+        return $this->hasOne(MedicalRecord::class);
     }
 
     public function creator(): BelongsTo

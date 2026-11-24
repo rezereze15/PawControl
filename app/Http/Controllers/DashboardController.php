@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\MedicalRecord;
 use App\Models\MedicalSupply;
 use App\Models\Pet;
 use App\Models\Role;
 use App\Models\Service;
 use App\Models\User;
 use App\Support\RegistrationRules;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -125,6 +127,10 @@ class DashboardController extends Controller
         return [
             'owner' => $user->only(['name', 'phone', 'email', 'address']),
             'customerAppointments' => $appointments->map($toArray)->values(),
+            // Only records of pets this user owns (not every visit they booked).
+            'medicalRecords' => $this->medicalRecordsByPet(
+                MedicalRecord::query()->whereHas('pet', fn ($query) => $query->where('petOwnerID', $user->getAuthIdentifier())),
+            ),
             'incomingAppointment' => $incoming ? $toArray($incoming) : null,
             'upcomingAppointmentCount' => $appointments->filter($isUpcoming)->count(),
             'pets' => $user->pets()
@@ -194,6 +200,8 @@ class DashboardController extends Controller
         return [
             'upcomingAppointments' => $appointments,
             'clerkHome' => $this->clerkHomeStats($appointments),
+            // The records the clerk's accepted appointments created (same list the vets see).
+            'patientRecords' => $this->medicalRecordsByPet(MedicalRecord::query()),
         ];
     }
 
@@ -241,12 +249,6 @@ class DashboardController extends Controller
             ->orderBy('app_date_time')
             ->get();
 
-        $patients = $confirmed
-            ->groupBy('pet_id')
-            ->map(fn (Collection $visits) => $this->patientRecord($visits))
-            ->sortByDesc('lastVisitAt')
-            ->values();
-
         $startOfToday = now()->startOfDay();
 
         return [
@@ -268,7 +270,8 @@ class DashboardController extends Controller
                     ...$this->emergencyFields($appointment),
                 ])
                 ->values(),
-            'patientRecords' => $patients,
+            // Every medical record (one per accepted appointment), grouped by pet.
+            'patientRecords' => $this->medicalRecordsByPet(MedicalRecord::query()),
         ];
     }
 
@@ -454,19 +457,37 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param  Collection<int, Appointment>  $visits  confirmed appointments for one pet
+     * Medical records grouped into one entry per pet, most recently seen pet first.
+     *
+     * @param  Builder<MedicalRecord>  $query
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function medicalRecordsByPet(Builder $query): Collection
+    {
+        return $query
+            ->with(['pet.owner', 'appointment.user', 'creator:id,name'])
+            ->orderByDesc('visit_date')
+            ->get()
+            ->groupBy('pet_id')
+            ->map(fn (Collection $records) => $this->patientRecord($records))
+            ->sortByDesc('lastVisitAt')
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, MedicalRecord>  $records  one pet's records, newest first
      * @return array<string, mixed>
      */
-    private function patientRecord(Collection $visits): array
+    private function patientRecord(Collection $records): array
     {
-        /** @var Appointment $first */
-        $first = $visits->first();
-        $pet = $first->pet;
-        $past = $visits->filter(fn (Appointment $appointment) => $appointment->app_date_time->lessThan(now()));
-        $lastVisit = $past->last() ?? $visits->first();
+        /** @var MedicalRecord $latest */
+        $latest = $records->first();
+        $pet = $latest->pet;
+        $appointment = $latest->appointment;
+        $lastVisit = $records->first(fn (MedicalRecord $record) => $record->visit_date->lessThan(now())) ?? $records->last();
 
         return [
-            'id' => $first->pet_id,
+            'id' => $latest->pet_id,
             'name' => $pet?->petName ?? 'Unknown pet',
             'species' => $pet?->species,
             'breed' => $pet?->breed,
@@ -477,21 +498,27 @@ class DashboardController extends Controller
             'photo' => $this->petPhotoUrl($pet),
             // The pet's owner (account or walk-in), falling back to whoever booked.
             'owner' => [
-                'name' => $pet?->owner?->name ?? $pet?->walk_in_owner_name ?? $first->ownerName(),
-                'email' => $pet?->owner?->email ?? $first->ownerEmail(),
-                'phone' => $pet?->ownerPhone() ?? $first->ownerPhone(),
+                'name' => $pet?->owner?->name ?? $pet?->walk_in_owner_name ?? $appointment?->ownerName() ?? 'Unknown owner',
+                'email' => $pet?->owner?->email ?? $appointment?->ownerEmail(),
+                'phone' => $pet?->ownerPhone() ?? $appointment?->ownerPhone(),
             ],
             'isWalkIn' => (bool) $pet?->isUnlinkedWalkIn(),
-            'lastVisitAt' => $lastVisit->app_date_time->toIso8601String(),
-            'visits' => $visits
-                ->sortByDesc('app_date_time')
-                ->map(fn (Appointment $appointment) => [
-                    'id' => $appointment->id,
-                    'startsAt' => $appointment->app_date_time->toIso8601String(),
-                    'type' => $appointment->service_type ?? 'Appointment',
-                    'notes' => $appointment->notes,
-                    'status' => $appointment->status,
-                    'isEmergency' => $appointment->is_emergency,
+            'lastVisitAt' => $lastVisit->visit_date->toIso8601String(),
+            'visits' => $records
+                ->map(fn (MedicalRecord $record) => [
+                    'id' => $record->id,
+                    'recordNumber' => $record->number(),
+                    'appointmentId' => $record->appointment_id,
+                    'startsAt' => $record->visit_date->toIso8601String(),
+                    'type' => $record->service_type ?? 'Appointment',
+                    'notes' => $record->chief_complaint,
+                    'diagnosis' => $record->diagnosis,
+                    'treatment' => $record->treatment,
+                    'vetNotes' => $record->vet_notes,
+                    'status' => $record->appointment?->status,
+                    'isEmergency' => (bool) $record->appointment?->is_emergency,
+                    'createdBy' => $record->creator?->name,
+                    'createdAt' => $record->created_at?->toIso8601String(),
                 ])
                 ->values(),
         ];

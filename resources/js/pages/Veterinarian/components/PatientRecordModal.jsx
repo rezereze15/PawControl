@@ -12,6 +12,19 @@ export function formatTime(iso) {
     return Number.isNaN(date.getTime()) ? "—" : new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(date);
 }
 
+/** Clinical findings of one medical record; empty until the veterinarian fills them in. */
+function RecordFindings({ visit }) {
+    const findings = [["Diagnosis", visit.diagnosis], ["Treatment", visit.treatment], ["Vet notes", visit.vetNotes]].filter(([, value]) => value);
+    return (<div className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">
+      {findings.length === 0
+            ? <p className="text-gray-400">No findings recorded yet.</p>
+            : findings.map(([label, value]) => <p key={label}><span className="font-semibold text-[#1a0a3c]">{label}:</span> {value}</p>)}
+      <p className="mt-1 text-[11px] text-gray-400">
+        {visit.recordNumber}{visit.createdBy ? ` · created by ${visit.createdBy}` : ""}{visit.createdAt ? ` on ${formatDate(visit.createdAt, { month: "short", day: "numeric", year: "numeric" })}` : ""}
+      </p>
+    </div>);
+}
+
 function Field({ label, value }) {
     return (<div className="min-w-0">
       <dt className="text-xs font-bold text-[#1a0a3c]">{label}</dt>
@@ -87,17 +100,18 @@ export default function PatientRecordModal({ patient, appointment, onClose }) {
           </div>
 
           <div className="rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <h3 className="mb-3 text-base font-extrabold text-[#1a0a3c]">Visit History</h3>
+            <h3 className="mb-3 text-base font-extrabold text-[#1a0a3c]">{patient.visits.some((v) => v.recordNumber) ? "Medical Records" : "Visit History"}</h3>
             {patient.visits.length === 0 ? <p className="text-sm text-gray-400">No confirmed visits yet.</p> : (<ul className="divide-y divide-gray-100">
                 {patient.visits.map((visit) => {
                 const upcoming = new Date(visit.startsAt).getTime() >= now;
-                return (<li key={visit.id} className={`flex flex-wrap items-center justify-between gap-2 py-3 ${appointment?.id === visit.id ? "rounded-lg bg-violet-50/60 px-2" : ""}`}>
-                      <div className="min-w-0">
+                return (<li key={visit.id} className={`flex flex-wrap items-start justify-between gap-2 py-3 ${appointment?.id === visit.id ? "rounded-lg bg-violet-50/60 px-2" : ""}`}>
+                      <div className="min-w-0 flex-1">
                         <p className="flex items-center gap-2 text-sm font-semibold text-[#1a0a3c]">
                           {visit.type}
                           {visit.isEmergency && <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">Emergency</span>}
                         </p>
                         {visit.notes && <p className="text-xs text-gray-500">{visit.notes}</p>}
+                        {visit.recordNumber && <RecordFindings visit={visit}/>}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-gray-600">
                         <span>{formatDate(visit.startsAt, { month: "short", day: "numeric", year: "numeric" })} · {formatTime(visit.startsAt)}</span>

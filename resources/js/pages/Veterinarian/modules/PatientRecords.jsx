@@ -6,7 +6,7 @@ import TablePagination, { paginate } from "@/Components/TablePagination";
 
 const PAGE_SIZE = 10;
 
-/** Every pet that has at least one clerk-confirmed appointment. */
+/** Every pet with at least one medical record (created when the clerk accepts an appointment). Used by vets and clerks. */
 export default function PatientRecords({ patients = [] }) {
     const [search, setSearch] = useState("");
     const [species, setSpecies] = useState("All");
@@ -24,7 +24,7 @@ export default function PatientRecords({ patients = [] }) {
     return (<div className="flex flex-col gap-6">
       <div>
         <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Pet Medical Records</h1>
-        <p className="mt-1 text-sm text-gray-500">Pets with confirmed appointments at the clinic.</p>
+        <p className="mt-1 text-sm text-gray-500">A record is created each time the clinic accepts an appointment.</p>
       </div>
 
       <div className="flex flex-wrap items-end gap-4 rounded-xl bg-white px-6 py-4 shadow-sm">

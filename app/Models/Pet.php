@@ -53,6 +53,11 @@ class Pet extends Model
             : null;
     }
 
+    public function medicalRecords(): HasMany
+    {
+        return $this->hasMany(MedicalRecord::class, 'pet_id', 'petID');
+    }
+
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'pet_id', 'petID');

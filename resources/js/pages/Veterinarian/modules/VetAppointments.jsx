@@ -22,6 +22,6 @@ export default function VetAppointments({ appointments = [], patients = [] }) {
         <AppointmentTable appointments={rows} veterinarianView onView={setSelected}/>
         <TablePagination page={currentPage} pageCount={pageCount} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} label="confirmed appointments"/>
       </div>
-      {selected && patient && <PatientRecordModal patient={patient} appointment={patient.visits.find((v) => v.id === selected.id)} onClose={() => setSelected(null)}/>}
+      {selected && patient && <PatientRecordModal patient={patient} appointment={patient.visits.find((v) => v.appointmentId === selected.id)} onClose={() => setSelected(null)}/>}
     </div>);
 }

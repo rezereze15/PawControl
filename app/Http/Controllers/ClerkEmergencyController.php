@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEmergencyWalkInRequest;
 use App\Models\Appointment;
+use App\Models\MedicalRecord;
 use App\Models\Pet;
 use App\Models\Role;
 use App\Models\User;
@@ -84,7 +85,7 @@ class ClerkEmergencyController extends Controller
 
             $now = now();
 
-            return Appointment::create([
+            $appointment = Appointment::create([
                 'ar_first_name' => Str::limit($name['first_name'] ?: $ownerName, 50, ''),
                 'ar_last_name' => Str::limit($name['last_name'], 50, ''),
                 'pet_id' => $pet->petID,
@@ -100,6 +101,11 @@ class ClerkEmergencyController extends Controller
                 'is_emergency' => true,
                 'created_by' => $clerkId,
             ]);
+
+            // Accepted on creation, so it gets its medical record right away.
+            MedicalRecord::forAcceptedAppointment($appointment, $clerkId);
+
+            return $appointment;
         });
 
         return back()

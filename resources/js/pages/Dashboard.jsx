@@ -16,12 +16,12 @@ import CustomerDashboardLayout from '../Layouts/CustomerDashboardLayout';
 import StaffDashboardLayout from '../Layouts/StaffDashboardLayout';
 import CustomerHomeSection from './Customer/components/CustomerHomeSection';
 import CustomerAppointments from './Customer/modules/Appointments';
+import CustomerPetMedicalRecords from './Customer/modules/PetMedicalRecords';
 import StaffHomeSection from './Clerk/components/StaffHomeSection';
 import OwnerHomeSection from './Owner/components/OwnerHomeSection';
-import DashboardPlaceholder from './shared/dashboard/Placeholder';
 import bigpawLogo from '../imports/Bigpaw_logoname-removebg-preview.png';
 import '../../css/Dashboard.css';
-function CustomerDashboard({ username, onLogout, owner, profile, pets, customerAppointments = [], incomingAppointment, upcomingAppointmentCount, flash }) {
+function CustomerDashboard({ username, onLogout, owner, profile, pets, customerAppointments = [], medicalRecords = [], incomingAppointment, upcomingAppointmentCount, flash }) {
     const [section, setSection] = useState("home");
     const userId = usePage().props.auth?.user?.id;
     // Reopen the booking wizard if this tab was in the middle of a booking before a reload.
@@ -68,7 +68,7 @@ function CustomerDashboard({ username, onLogout, owner, profile, pets, customerA
         {booking ? (<AppointmentWizard owner={owner} pets={pets} onBack={() => setBooking(false)} onSuccess={() => setBooking(false)}/>) : (<>
               <FlashToast message={success}/>
               {section === "home" && (<CustomerHomeSection username={username} pets={pets} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} onBookAppointment={() => setBooking(true)} onViewRecords={() => setSection("records")} onViewAppointments={() => setSection("appointments")}/>)}
-              {section === "records" && (<DashboardPlaceholder title="Pet Medical Records"/>)}
+              {section === "records" && <CustomerPetMedicalRecords records={medicalRecords} onBookAppointment={() => setBooking(true)}/>}
               {section === "appointments" && <CustomerAppointments appointments={customerAppointments} onBookAppointment={() => setBooking(true)}/>}
               {section === "settings" && <UserSettings profile={profile}/>}
             </>)}
@@ -127,7 +127,7 @@ export default function Dashboard({ profileCompletion = null, ...props }) {
       <CompleteProfileModal email={profileCompletion.email} firstName={profileCompletion.first_name} middleName={profileCompletion.middle_name} lastName={profileCompletion.last_name} photoUrl={props.profile?.photoUrl}/>
     </>);
 }
-function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], clerkHome = {}, flash }) {
+function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], patientRecords = [], petRecords = [], customerAppointments = [], medicalRecords = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], clerkHome = {}, flash }) {
     const { errors = {} } = usePage().props;
     const profiles = {
         customer: 'Karina',
@@ -141,13 +141,13 @@ function RoleDashboard({ role = 'customer', username: authenticatedUsername, own
     if (role === 'admin')
         return <AdminDashboard username={username} onLogout={logout} profile={profile} stats={adminStats} usersByRole={usersByRole} recentUsers={recentUsers} lowStockSupplies={lowStockSupplies} services={services} supplies={supplies} supplyOptions={supplyOptions} managedUsers={managedUsers} roles={roles} flash={flash}/>;
     if (role === 'clerk')
-        return <ClerkDashboard username={username} onLogout={logout} profile={profile} upcomingAppointments={upcomingAppointments} clerkHome={clerkHome} flash={flash} errors={errors}/>;
+        return <ClerkDashboard username={username} onLogout={logout} profile={profile} upcomingAppointments={upcomingAppointments} clerkHome={clerkHome} patientRecords={patientRecords} flash={flash} errors={errors}/>;
     if (role === 'veterinarian')
         return <VeterinarianDashboard username={username} onLogout={logout} profile={profile} confirmedAppointments={confirmedAppointments} patientRecords={patientRecords} flash={flash}/>;
     if (role === 'owner')
         return <OwnerDashboard username={username} onLogout={logout} profile={profile} petRecords={petRecords} flash={flash}/>;
-    return <DashboardHome username={username} onLogout={logout} owner={owner} profile={profile} pets={pets} customerAppointments={customerAppointments} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
+    return <DashboardHome username={username} onLogout={logout} owner={owner} profile={profile} pets={pets} customerAppointments={customerAppointments} medicalRecords={medicalRecords} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
 }
-function DashboardHome({ username, onLogout, owner, profile, pets, customerAppointments, incomingAppointment, upcomingAppointmentCount, flash }) {
-    return <CustomerDashboard username={username} onLogout={onLogout} owner={owner} profile={profile} pets={pets} customerAppointments={customerAppointments} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
+function DashboardHome({ username, onLogout, owner, profile, pets, customerAppointments, medicalRecords, incomingAppointment, upcomingAppointmentCount, flash }) {
+    return <CustomerDashboard username={username} onLogout={onLogout} owner={owner} profile={profile} pets={pets} customerAppointments={customerAppointments} medicalRecords={medicalRecords} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
 }

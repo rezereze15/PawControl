@@ -6,6 +6,7 @@ use App\Http\Requests\RejectAppointmentRequest;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Mail\AppointmentStatusMail;
 use App\Models\Appointment;
+use App\Models\MedicalRecord;
 use App\Services\SupabaseStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -153,6 +154,9 @@ class AppointmentController extends Controller
                 'reviewed_at' => now(),
             ]);
 
+            // Same transaction: an accepted appointment always has its medical record.
+            MedicalRecord::forAcceptedAppointment($appointment, $request->user()->getAuthIdentifier());
+
             return null;
         });
 
@@ -163,7 +167,7 @@ class AppointmentController extends Controller
         // Sent after the transaction so a slow or failed email never blocks the decision.
         $this->emailOwner($appointment->id);
 
-        return back()->with('success', 'Appointment accepted. It is now visible to the veterinarians.');
+        return back()->with('success', 'Appointment accepted. Its medical record was created and is now visible to the veterinarians.');
     }
 
     public function reject(RejectAppointmentRequest $request, Appointment $appointment): RedirectResponse
