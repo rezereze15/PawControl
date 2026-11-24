@@ -30,7 +30,7 @@ class VetHomeTest extends TestCase
         return User::factory()->create(['role' => 'veterinarian', 'status' => 'Active']);
     }
 
-    private function visit(string $petName, CarbonInterface $at, string $appointmentStatus = 'Confirmed', ?string $recordStatus = 'Upcoming', ?CarbonInterface $recordCreatedAt = null): Appointment
+    private function visit(string $petName, CarbonInterface $at, string $appointmentStatus = 'Confirmed', ?string $recordStatus = 'Upcoming', ?CarbonInterface $recordCreatedAt = null, ?User $handledBy = null): Appointment
     {
         $owner = User::factory()->create(['role' => 'customer', 'status' => 'Active']);
         $pet = Pet::create(['petName' => $petName, 'species' => 'Dog', 'breed' => 'Aspin', 'age' => 2, 'petOwnerID' => $owner->id]);
@@ -42,7 +42,11 @@ class VetHomeTest extends TestCase
 
         if ($recordStatus) {
             $record = MedicalRecord::forAcceptedAppointment($appointment, null);
-            $record->forceFill(['status' => $recordStatus, 'created_at' => $recordCreatedAt ?? now()])->save();
+            $record->forceFill([
+                'status' => $recordStatus,
+                'created_at' => $recordCreatedAt ?? now(),
+                'veterinarian_id' => $handledBy?->id,
+            ])->save();
         }
 
         return $appointment;
@@ -50,14 +54,16 @@ class VetHomeTest extends TestCase
 
     public function test_home_numbers_and_lists_come_from_the_database(): void
     {
-        $this->visit('Milo', now()->setTime(8, 0), recordStatus: 'Ongoing');          // today, in progress
+        $vet = $this->vet();
+        $otherVet = $this->vet();
+        $this->visit('Milo', now()->setTime(8, 0), recordStatus: 'Ongoing', handledBy: $vet);        // today, in progress, mine
         $this->visit('Luna', now()->setTime(10, 0));                                     // today, not started
-        $this->visit('Rex', now()->setTime(7, 0), recordStatus: 'Completed');          // today, done
+        $this->visit('Rex', now()->setTime(7, 0), recordStatus: 'Completed', handledBy: $otherVet); // today, done, another vet's
         $this->visit('Bantay', now()->addDay()->setTime(11, 0));                         // tomorrow
-        $this->visit('Old', now()->subMonth(), recordStatus: 'Ongoing', recordCreatedAt: now()->subMonth()); // left open last month
+        $this->visit('Old', now()->subMonth(), recordStatus: 'Ongoing', recordCreatedAt: now()->subMonth(), handledBy: $vet); // left open last month, mine
         $this->visit('Waiting', now()->addDays(2), 'Pending', recordStatus: null);      // not accepted: no record
 
-        $this->actingAs($this->vet())
+        $this->actingAs($vet)
             ->get(route('dashboard.role', ['role' => 'veterinarian']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
@@ -70,6 +76,7 @@ class VetHomeTest extends TestCase
                 ->where('vetHome.operationsToday', 3)
                 ->where('vetHome.ongoingToday', 1)
                 ->where('vetHome.completedToday', 1)
+                ->where('vetHome.myOperationsToday', 1)        // Milo only: Rex is another vet's, Old isn't today
                 ->where('vetHome.activeDiagnoses', 2)          // Milo + Old
                 ->has('confirmedAppointments', 4)
                 ->where('confirmedAppointments.0.pet', 'Rex')
@@ -90,6 +97,7 @@ class VetHomeTest extends TestCase
                 ->where('vetHome.newPatientsThisMonth', 0)
                 ->where('vetHome.upcomingAppointments', 0)
                 ->where('vetHome.operationsToday', 0)
+                ->where('vetHome.myOperationsToday', 0)
                 ->where('vetHome.activeDiagnoses', 0)
                 ->where('confirmedAppointments', [])
                 ->where('patientRecords', []));
