@@ -11,7 +11,7 @@ import VetAppointments from './modules/VetAppointments';
 import PatientRecords from './modules/PatientRecords';
 import MedicalRecordEditor from './components/MedicalRecordEditor';
 import ConfirmSelectDialog from './components/ConfirmSelectDialog';
-import { isLocked } from '../shared/dashboard/recordStatus';
+import { isLocked, isTakenByOtherVet } from '../shared/dashboard/recordStatus';
 export default function VeterinarianDashboard({ username, onLogout, profile, flash, confirmedAppointments = [], patientRecords = [], recordOptions = {}, vetHome = {} }) {
     const [section, setSection] = useState("home");
     const [editingId, setEditingId] = useState(null);
@@ -32,7 +32,7 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
      * Ongoing → opened in edit mode. Completed records are locked: nothing happens.
      */
     function selectRecord(record) {
-        if (isLocked(record.recordStatus)) return;
+        if (isLocked(record.recordStatus) || isTakenByOtherVet(record, profile?.id)) return;
         if (record.recordStatus === "Upcoming") {
             setConfirmingId(record.id);
             return;
@@ -93,8 +93,8 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
     ];
     return (<StaffDashboardLayout username={username} roleLabel="Veterinarian" dashboardClassName="paw-vet-dashboard" logoSrc={bigpawLogo} logoAlt="BigPaw" avatarSrc={profile?.photoUrl} navItems={navItems} section={section} onSectionChange={setSection} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((open) => !open)} onLogout={onLogout} notifications={veterinarianNotifications(confirmedAppointments)} notificationKey={`paw-notifications-read:${profile?.id ?? username}`}>
         <FlashToast message={flash?.success}/>
-        {section === "home" && <VetHomeSection username={username} stats={vetHome} appointments={confirmedAppointments} patients={patientRecords} onNavigate={setSection} onSelectRecord={selectRecord} selectingId={selectingId}/>}
-          {section === "records" && <PatientRecords patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId}/>}
+        {section === "home" && <VetHomeSection username={username} stats={vetHome} appointments={confirmedAppointments} patients={patientRecords} onNavigate={setSection} onSelectRecord={selectRecord} selectingId={selectingId} currentVetId={profile?.id}/>}
+          {section === "records" && <PatientRecords patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId} currentVetId={profile?.id}/>}
           {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords}/>}
           {confirmingRecord && <ConfirmSelectDialog patient={confirmingPatient} record={confirmingRecord} busy={selectingId === confirmingRecord.id} onConfirm={confirmSelect} onCancel={() => setConfirmingId(null)}/>}
           {editingRecord && <MedicalRecordEditor key={editingRecord.id} patient={editingPatient} record={editingRecord} options={recordOptions} onClose={() => setEditingId(null)}/>}

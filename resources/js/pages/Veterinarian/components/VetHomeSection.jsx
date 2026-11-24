@@ -3,7 +3,7 @@ import { CalendarIcon } from "../../shared/dashboard/Icons";
 import { pawLogo } from "../../shared/dashboard/assets";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import { formatPetAge } from "../../shared/dashboard/petAge";
-import { RecordStatusBadge, selectLabel } from "../../shared/dashboard/recordStatus";
+import { RecordStatusBadge, isTakenByOtherVet, selectLabel } from "../../shared/dashboard/recordStatus";
 import PatientRecordModal, { formatDate } from "./PatientRecordModal";
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
@@ -52,7 +52,7 @@ function DateTimeLines({ date, time }) {
  * Veterinarian home: live numbers and lists from the database
  * (DashboardController::veterinarianProps / vetHomeStats). Every section has an empty state.
  */
-export default function VetHomeSection({ username, stats = {}, appointments = [], patients = [], onNavigate, onSelectRecord, selectingId }) {
+export default function VetHomeSection({ username, stats = {}, appointments = [], patients = [], onNavigate, onSelectRecord, selectingId, currentVetId }) {
     const [viewing, setViewing] = useState(null); // { petId, recordId }
     const today = appointments.filter((a) => a.day === stats.today);
     const tomorrow = appointments.filter((a) => a.day === stats.tomorrow);
@@ -72,7 +72,7 @@ export default function VetHomeSection({ username, stats = {}, appointments = []
     const operations = stats.operationsToday ?? 0;
 
     return (<div className="flex flex-col gap-6">
-      {viewingPatient && <PatientRecordModal patient={viewingPatient} appointment={viewingRecord} onClose={() => setViewing(null)} onSelect={onSelectRecord && select} selectingId={selectingId}/>}
+      {viewingPatient && <PatientRecordModal patient={viewingPatient} appointment={viewingRecord} onClose={() => setViewing(null)} onSelect={onSelectRecord && select} selectingId={selectingId} currentVetId={currentVetId}/>}
 
       <h1 className="text-3xl font-extrabold text-[#1a0a3c]">Hi, Doc {username}!</h1>
 
@@ -173,7 +173,7 @@ export default function VetHomeSection({ username, stats = {}, appointments = []
                       {record.veterinarian ? ` · Dr. ${record.veterinarian}` : ""}
                     </p>
                   </div>
-                  {onSelectRecord && (<button type="button" onClick={() => onSelectRecord(record)} disabled={selectingId === record.id} className="rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
+                  {onSelectRecord && !isTakenByOtherVet(record, currentVetId) && (<button type="button" onClick={() => onSelectRecord(record)} disabled={selectingId === record.id} className="rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
                       {selectLabel(record.recordStatus)}
                     </button>)}
                 </li>))}

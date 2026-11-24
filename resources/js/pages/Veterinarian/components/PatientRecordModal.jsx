@@ -1,7 +1,7 @@
 import { formatPetAge } from "../../shared/dashboard/petAge";
 import { useEffect } from "react";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
-import { LockIcon, RecordStatusBadge, isLocked, selectLabel } from "../../shared/dashboard/recordStatus";
+import { LockIcon, RecordStatusBadge, isLocked, isTakenByOtherVet, selectLabel } from "../../shared/dashboard/recordStatus";
 
 export function formatDate(iso, options = { month: "long", day: "numeric", year: "numeric" }) {
     const date = new Date(iso);
@@ -63,7 +63,6 @@ function RecordFindings({ visit }) {
       <RecordFiles files={files}/>
       <p className="mt-1 text-[11px] text-gray-400">
         {visit.recordNumber}
-        {visit.veterinarian ? ` · Dr. ${visit.veterinarian}` : ""}
         {visit.createdBy ? ` · created by ${visit.createdBy}` : ""}
         {visit.completedAt ? ` · completed ${formatDate(visit.completedAt, { month: "short", day: "numeric", year: "numeric" })}` : ""}
       </p>
@@ -81,10 +80,11 @@ function Field({ label, value }) {
  * Pet medical record: animal signalment, owner contact, the appointment being viewed
  * (if any) and every medical record. Read-only unless `onSelect` is given (veterinarians),
  * which adds an action button per record: Select → Start Diagnosis → Continue Diagnosis.
- * Completed records are locked and show no action. `showStatus={false}` hides
+ * Completed records are locked, and records another vet selected are theirs: both show
+ * no action (`currentVetId` tells whose they are). `showStatus={false}` hides
  * every status badge (used by the veterinarian's read-only Appointments module).
  */
-export default function PatientRecordModal({ patient, appointment, onClose, onSelect, selectingId, showStatus = true }) {
+export default function PatientRecordModal({ patient, appointment, onClose, onSelect, selectingId, currentVetId, showStatus = true }) {
     useEffect(() => {
         const onKeyDown = (event) => event.key === "Escape" && onClose();
         window.addEventListener("keydown", onKeyDown);
@@ -160,6 +160,7 @@ export default function PatientRecordModal({ patient, appointment, onClose, onSe
                           {visit.isEmergency && <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">Emergency</span>}
                         </p>
                         {visit.notes && <p className="text-xs text-gray-500">{visit.notes}</p>}
+                        {visit.veterinarian && <p className="text-xs font-semibold text-[#3b0f8c]">Handled by Dr. {visit.veterinarian}</p>}
                         {visit.recordNumber && <RecordFindings visit={visit}/>}
                       </div>
                       <div className="flex flex-col items-end gap-2 text-xs text-gray-600">
@@ -169,7 +170,11 @@ export default function PatientRecordModal({ patient, appointment, onClose, onSe
                         ? <RecordStatusBadge status={visit.recordStatus}/>
                         : <span className={`rounded-md border px-2 py-0.5 font-semibold ${upcoming ? "border-blue-300 bg-blue-50 text-blue-700" : "border-violet-300 bg-violet-50 text-violet-700"}`}>{upcoming ? "Upcoming" : "Completed"}</span>}
                         </div>
-                        {onSelect && visit.recordNumber && (isLocked(visit.recordStatus)
+                        {onSelect && visit.recordNumber && (isTakenByOtherVet(visit, currentVetId)
+                        ? (<span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-400" title="Only the vet who selected this record can work on it.">
+                              <LockIcon className="h-3 w-3"/> Dr. {visit.veterinarian}&apos;s record · view only
+                            </span>)
+                        : isLocked(visit.recordStatus)
                         ? (<span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-400" title="Completed records are final and can't be changed.">
                               <LockIcon className="h-3 w-3"/> Locked · view only
                             </span>)

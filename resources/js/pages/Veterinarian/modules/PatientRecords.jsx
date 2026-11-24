@@ -3,7 +3,7 @@ import SearchField from "@/Components/SearchField";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import PatientRecordModal, { formatDate, formatTime } from "../components/PatientRecordModal";
 import TablePagination, { paginate } from "@/Components/TablePagination";
-import { RECORD_STATUSES, RecordStatusBadge, currentRecord, selectLabel, statusRank } from "../../shared/dashboard/recordStatus";
+import { RECORD_STATUSES, RecordStatusBadge, currentRecord, isTakenByOtherVet, selectLabel, statusRank } from "../../shared/dashboard/recordStatus";
 
 const PAGE_SIZE = 10;
 const control = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-paw-blue focus:outline-none";
@@ -37,7 +37,7 @@ function Filter({ label, children, className = "" }) {
  * Used by vets and clerks. Status, service and date filters apply to individual records:
  * a pet is listed when at least one of its records matches.
  */
-export default function PatientRecords({ patients = [], onSelectRecord, selectingId }) {
+export default function PatientRecords({ patients = [], onSelectRecord, selectingId, currentVetId }) {
     const [filters, setFilters] = useState(EMPTY_FILTERS);
     const [page, setPage] = useState(1);
     const [selectedId, setSelectedId] = useState(null);
@@ -119,14 +119,14 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
 
       <div className="paw-list-card bg-white rounded-xl shadow-sm">
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px] text-sm">
+        <table className="w-full min-w-[960px] text-sm">
           <thead>
             <tr className="border-b border-gray-100">
-              {["Pet Info", "Owner", "Species/Breed", "Last Visit", "Records", "Status", "Actions"].map((h) => <th key={h} className="px-5 py-4 text-left font-bold text-[#1a0a3c]">{h}</th>)}
+              {["Pet Info", "Owner", "Species/Breed", "Last Visit", "Records", "Status", "Veterinarian", "Actions"].map((h) => <th key={h} className="px-5 py-4 text-left font-bold text-[#1a0a3c]">{h}</th>)}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {rows.length === 0 && (<tr><td colSpan={7} className="px-5 py-12 text-center text-gray-400">
+            {rows.length === 0 && (<tr><td colSpan={8} className="px-5 py-12 text-center text-gray-400">
                 {patients.length === 0 ? "No data: no medical records yet." : "No records match these filters."}
               </td></tr>)}
             {rows.map(({ patient: p, matching }) => {
@@ -134,7 +134,9 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
                 // An Upcoming record has no shortcut here: the vet must View it, then Select it.
                 // Completed records are locked, so a pet with only those has View only.
                 const record = currentRecord(matching);
-                const showAction = onSelectRecord && record && record.recordStatus !== "Upcoming";
+                // Another vet's record: only they can work on it, so this vet just views it.
+                const taken = record && isTakenByOtherVet(record, currentVetId);
+                const showAction = onSelectRecord && record && record.recordStatus !== "Upcoming" && !taken;
                 return (<tr key={p.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
@@ -154,12 +156,14 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
                 <td className="px-5 py-4 text-gray-600"><p>{formatDate(p.lastVisitAt, { month: "long", day: "numeric", year: "numeric" })}</p><p className="text-gray-400 text-xs">{formatTime(p.lastVisitAt)}</p></td>
                 <td className="px-5 py-4 text-gray-600">{recordFilterActive ? <span title="Records matching the filters, out of all this pet's records">{matching.length} of {p.visits.length}</span> : p.visits.length}</td>
                 <td className="px-5 py-4"><RecordStatusBadge status={p.status}/></td>
+                <td className="px-5 py-4 text-gray-600">{p.veterinarian ? `Dr. ${p.veterinarian}` : <span className="text-gray-400">—</span>}</td>
                 <td className="px-5 py-4">
                   <div className="flex flex-wrap gap-2">
                     <button type="button" onClick={() => setSelectedId(p.id)} className="rounded-lg border border-paw-blue px-3 py-1.5 text-xs font-semibold text-paw-blue hover:bg-paw-blue-soft">View record</button>
                     {showAction && (<button type="button" onClick={() => onSelectRecord(record)} disabled={selectingId === record.id} className="rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
                         {selectingId === record.id ? "Opening…" : selectLabel(record.recordStatus)}
                       </button>)}
+                    {onSelectRecord && taken && <span className="self-center text-[11px] font-semibold text-gray-400">Dr. {record.veterinarian}&apos;s record · view only</span>}
                   </div>
                 </td>
               </tr>);
@@ -169,7 +173,7 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
         </div>
         <TablePagination page={currentPage} pageCount={pageCount} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage}/>
       </div>
-      {selected && <PatientRecordModal patient={selected} onClose={() => setSelectedId(null)} selectingId={selectingId} onSelect={onSelectRecord && ((record) => {
+      {selected && <PatientRecordModal patient={selected} onClose={() => setSelectedId(null)} selectingId={selectingId} currentVetId={currentVetId} onSelect={onSelectRecord && ((record) => {
             // Selecting asks "Are you sure?" over this modal and keeps it open to show the new status.
             if (record.recordStatus !== "Upcoming") setSelectedId(null);
             onSelectRecord(record);

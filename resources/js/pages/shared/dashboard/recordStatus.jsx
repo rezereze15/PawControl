@@ -39,6 +39,9 @@ export function LockIcon({ className = "h-3.5 w-3.5" }) {
 /** Completed records are locked: viewable only, no edit / select / diagnosis controls. */
 export const isLocked = (status) => status === "Completed";
 
+/** Another vet selected this record: only they can work on it, so this vet can only view it. */
+export const isTakenByOtherVet = (record, vetId) => record?.veterinarianId != null && record.veterinarianId !== vetId;
+
 /** Label of the vet's button for a record in this status, or null when there is none (locked). */
 export function selectLabel(status) {
     if (status === "Upcoming") return "Select";
