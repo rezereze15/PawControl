@@ -38,6 +38,8 @@ export default function ServiceFormModal({ service, services = [], onClose }) {
         name: service?.name ?? "",
         description: service?.description ?? "",
         price: service?.price ?? "",
+        // The supplies this service uses. Picking them comes in Step 11e; for now they are sent back unchanged.
+        supplies: (service?.supplies ?? []).map(({ id, quantity }) => ({ id, quantity })),
     });
     // Names already used by OTHER services (lower-case), for the instant duplicate check.
     const otherNames = services.filter((s) => s.id !== service?.id).map((s) => s.name.toLowerCase());

@@ -318,7 +318,9 @@ class DashboardController extends Controller
                     'unitOfMeasure' => $supply->unit_of_measure,
                 ]),
             // Full list for the Manage Services page: active first, then A-Z.
+            // with() loads every service's supplies in ONE extra query, instead of one query per service.
             'services' => Service::query()
+                ->with(['supplies' => fn ($query) => $query->orderBy('name')])
                 ->orderByDesc('is_active')
                 ->orderBy('name')
                 ->get()
@@ -328,6 +330,14 @@ class DashboardController extends Controller
                     'description' => $service->description,
                     'price' => $service->price,
                     'isActive' => $service->is_active,
+                    // What it uses each time, e.g. 2 pcs of Absorbable Suture 3-0.
+                    'supplies' => $service->supplies->map(fn (MedicalSupply $supply) => [
+                        'id' => $supply->id,
+                        'name' => $supply->name,
+                        'unitOfMeasure' => $supply->unit_of_measure,
+                        'quantity' => $supply->pivot->quantity,
+                        'isActive' => $supply->is_active,
+                    ]),
                 ]),
             // Full list for the Manage Medical Supplies page: active first, then A-Z.
             'supplies' => MedicalSupply::query()

@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\MedicalSupply;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -175,9 +177,107 @@ class AdminServiceManagementTest extends TestCase
         $this->assertSame(6, Service::query()->count());
     }
 
+    public function test_admin_can_set_the_supplies_a_service_uses(): void
+    {
+        $admin = $this->makeUser('admin');
+        $suture = $this->supply('Absorbable Suture 3-0');
+        $gloves = $this->supply('Surgical Gloves');
+        $gauze = $this->supply('Gauze Pads');
+
+        // Add: a new service that uses 2 sutures and 1 box of gloves.
+        $this->actingAs($admin)
+            ->post(route('admin.services.store'), $this->serviceData(['supplies' => [
+                ['id' => $suture->id, 'quantity' => 2],
+                ['id' => $gloves->id, 'quantity' => 1],
+            ]]))
+            ->assertSessionHasNoErrors();
+
+        $dental = $this->service('Dental Cleaning');
+        $this->assertSame([$suture->id => 2, $gloves->id => 1], $this->amounts($dental));
+
+        // Edit: change an amount, remove the gloves, add gauze.
+        $this->actingAs($admin)
+            ->put(route('admin.services.update', $dental), $this->serviceData(['supplies' => [
+                ['id' => $suture->id, 'quantity' => 3],
+                ['id' => $gauze->id, 'quantity' => 4],
+            ]]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame([$suture->id => 3, $gauze->id => 4], $this->amounts($dental));
+
+        // An empty list removes them all.
+        $this->actingAs($admin)
+            ->put(route('admin.services.update', $dental), $this->serviceData(['supplies' => []]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame([], $this->amounts($dental));
+    }
+
+    public function test_services_list_shows_the_supplies_each_one_uses(): void
+    {
+        $admin = $this->makeUser('admin');
+        $this->service('ICU')->supplies()->attach($this->supply("Lactated Ringer's Solution 1L"), ['quantity' => 2]);
+
+        $this->actingAs($admin)
+            ->get(route('dashboard.role', ['role' => 'admin']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('services.0.supplies', 0)
+                ->where('services.4.name', 'ICU')
+                ->has('services.4.supplies', 1)
+                ->where('services.4.supplies.0.name', "Lactated Ringer's Solution 1L")
+                ->where('services.4.supplies.0.unitOfMeasure', 'bag')
+                ->where('services.4.supplies.0.quantity', 2));
+    }
+
+    public function test_service_supplies_are_validated(): void
+    {
+        $admin = $this->makeUser('admin');
+        $suture = $this->supply('Absorbable Suture 3-0')->id;
+
+        $badLists = [
+            'supplies.0.id' => [['id' => 99999, 'quantity' => 1]],               // supply doesn't exist
+            'supplies.0.quantity' => [['id' => $suture, 'quantity' => 0]],       // less than 1
+            'supplies.1.id' => [['id' => $suture, 'quantity' => 1], ['id' => $suture, 'quantity' => 2]], // listed twice
+            'supplies' => 'abc',                                                  // not a list
+        ];
+        foreach ($badLists as $errorField => $supplies) {
+            $this->actingAs($admin)
+                ->post(route('admin.services.store'), $this->serviceData(['supplies' => $supplies]))
+                ->assertSessionHasErrors($errorField);
+        }
+
+        foreach (['2.5', '10001'] as $badAmount) {
+            $this->actingAs($admin)
+                ->post(route('admin.services.store'), $this->serviceData(['supplies' => [['id' => $suture, 'quantity' => $badAmount]]]))
+                ->assertSessionHasErrors('supplies.0.quantity');
+        }
+
+        // A missing list is an error, not "remove everything".
+        $this->actingAs($admin)
+            ->post(route('admin.services.store'), Arr::except($this->serviceData(), 'supplies'))
+            ->assertSessionHasErrors('supplies');
+
+        $this->assertSame(6, Service::query()->count());
+        $this->assertDatabaseCount('services_medical_supplies', 0);
+    }
+
     private function service(string $name): Service
     {
         return Service::query()->where('name', $name)->firstOrFail();
+    }
+
+    private function supply(string $name): MedicalSupply
+    {
+        return MedicalSupply::query()->where('name', $name)->firstOrFail();
+    }
+
+    /** @return array<int, int> supply id => amount, sorted by id */
+    private function amounts(Service $service): array
+    {
+        return $service->supplies()->get()
+            ->mapWithKeys(fn (MedicalSupply $supply) => [$supply->id => $supply->pivot->quantity])
+            ->sortKeys()
+            ->all();
     }
 
     /** @param array<string, mixed> $attributes */
@@ -195,7 +295,7 @@ class AdminServiceManagementTest extends TestCase
     /**
      * A valid "Add / Edit Service" form; each test overrides only what it checks.
      *
-     * @param array<string, mixed> $overrides
+     * @param  array<string, mixed>  $overrides
      */
     private function serviceData(array $overrides = []): array
     {
@@ -203,6 +303,7 @@ class AdminServiceManagementTest extends TestCase
             'name' => 'Dental Cleaning',
             'description' => 'Scaling and polishing to remove plaque and tartar.',
             'price' => '1200.50',
+            'supplies' => [],
             ...$overrides,
         ];
     }
