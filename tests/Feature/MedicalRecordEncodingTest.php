@@ -420,6 +420,27 @@ class MedicalRecordEncodingTest extends TestCase
                 ->where('medicalRecords.0.visits.0.recordStatus', 'Completed'));
     }
 
+    public function test_vet_notes_are_never_sent_to_the_pet_owner(): void
+    {
+        $owner = $this->user('customer');
+        $record = $this->record($owner);
+        $this->actingAs($this->user('veterinarian'))->put(route('medical-records.update', $record), $this->form(['status' => 'Completed']));
+
+        // The pet's owner gets the findings, but not the clinic's internal notes.
+        $this->actingAs($owner)
+            ->get(route('dashboard.role', ['role' => 'customer']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('medicalRecords.0.visits.0.diagnosis', 'Kennel cough')
+                ->missing('medicalRecords.0.visits.0.vetNotes'));
+
+        // Clinic staff still see them.
+        foreach (['veterinarian' => 'patientRecords', 'clerk' => 'patientRecords', 'owner' => 'petRecords'] as $role => $prop) {
+            $this->actingAs($this->user($role))
+                ->get(route('dashboard.role', ['role' => $role]))
+                ->assertInertia(fn (Assert $page) => $page->where("{$prop}.0.visits.0.vetNotes", 'Recheck if fever'));
+        }
+    }
+
     public function test_clinic_owner_status_comes_from_records(): void
     {
         $record = $this->record(at: '2026-11-20 10:00:00'); // a past visit, never completed

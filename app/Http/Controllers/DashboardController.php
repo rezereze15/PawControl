@@ -137,6 +137,7 @@ class DashboardController extends Controller
             // Only records of pets this user owns (not every visit they booked).
             'medicalRecords' => $this->medicalRecordsByPet(
                 MedicalRecord::query()->whereHas('pet', fn ($query) => $query->where('petOwnerID', $user->getAuthIdentifier())),
+                forPetOwner: true,
             ),
             'incomingAppointment' => $incoming ? $toArray($incoming) : null,
             'upcomingAppointmentCount' => $appointments->filter($isUpcoming)->count(),
@@ -635,16 +636,17 @@ class DashboardController extends Controller
      * Medical records grouped into one entry per pet, most recently seen pet first.
      *
      * @param  Builder<MedicalRecord>  $query
+     * @param  bool  $forPetOwner  the pet's owner is viewing: leave out the clinic's internal notes
      * @return Collection<int, array<string, mixed>>
      */
-    private function medicalRecordsByPet(Builder $query): Collection
+    private function medicalRecordsByPet(Builder $query, bool $forPetOwner = false): Collection
     {
         return $query
             ->with(['pet.owner', 'appointment.user', ...self::RECORD_RELATIONS])
             ->orderByDesc('visit_date')
             ->get()
             ->groupBy('pet_id')
-            ->map(fn (Collection $records) => $this->patientRecord($records))
+            ->map(fn (Collection $records) => $this->patientRecord($records, $forPetOwner))
             ->sortByDesc('lastVisitAt')
             ->values();
     }
@@ -653,7 +655,7 @@ class DashboardController extends Controller
      * @param  Collection<int, MedicalRecord>  $records  one pet's records, newest first
      * @return array<string, mixed>
      */
-    private function patientRecord(Collection $records): array
+    private function patientRecord(Collection $records, bool $forPetOwner = false): array
     {
         /** @var MedicalRecord $latest */
         $latest = $records->first();
@@ -681,7 +683,7 @@ class DashboardController extends Controller
             'lastVisitAt' => $lastVisit->visit_date->toIso8601String(),
             'status' => $this->petStatus($records),
             'veterinarian' => $this->latestVeterinarian($records),
-            'visits' => $records->map(fn (MedicalRecord $record) => $this->recordVisit($record))->values(),
+            'visits' => $records->map(fn (MedicalRecord $record) => $this->recordVisit($record, $forPetOwner))->values(),
         ];
     }
 
@@ -690,7 +692,7 @@ class DashboardController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function recordVisit(MedicalRecord $record): array
+    private function recordVisit(MedicalRecord $record, bool $forPetOwner = false): array
     {
         return [
             'id' => $record->id,
@@ -703,7 +705,8 @@ class DashboardController extends Controller
             'treatment' => $record->treatment,
             'suggestions' => $record->suggestions,
             'labResults' => $record->lab_results,
-            'vetNotes' => $record->vet_notes,
+            // The clinic's internal notes: never sent to the pet's owner.
+            ...($forPetOwner ? [] : ['vetNotes' => $record->vet_notes]),
             'recordStatus' => $record->status,
             'status' => $record->appointment?->status,
             'isEmergency' => (bool) $record->appointment?->is_emergency,
