@@ -24,10 +24,13 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
     const [confirmingId, setConfirmingId] = useState(null);
     const confirmingPatient = confirmingId ? patientRecords.find((p) => p.visits.some((v) => v.id === confirmingId)) : null;
     const confirmingRecord = confirmingPatient?.visits.find((v) => v.id === confirmingId) ?? null;
+    // Which answer the vet gave in "Select this record?" (for the button's busy text).
+    const [startingNow, setStartingNow] = useState(false);
 
     /**
      * The vet's action on a record, opened from the pet record modal:
-     * Upcoming → "Select" (after an "Are you sure?" prompt) → Selected;
+     * Upcoming → "Select this record?" → "Select & start diagnosis" (Ongoing, form opens)
+     *   or "Just select for later" (Selected, waits in My Selected Records);
      * Selected → "Start Diagnosis" → Ongoing, opened in edit mode;
      * Ongoing → opened in edit mode. Completed records are locked: nothing happens.
      */
@@ -41,23 +44,35 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
             setEditingId(record.id);
             return;
         }
-        setSelectingId(record.id);
-        router.post(`/medical-records/${record.id}/start`, {}, {
+        startDiagnosis(record.id);
+    }
+
+    /** "Start Diagnosis": the record becomes Ongoing and the diagnosis form opens. */
+    function startDiagnosis(id) {
+        setSelectingId(id);
+        router.post(`/medical-records/${id}/start`, {}, {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: () => setEditingId(record.id),
+            onSuccess: () => setEditingId(id),
             onFinish: () => setSelectingId(null),
         });
     }
 
-    function confirmSelect() {
+    /** "Select this record?" answered: select it, then (for "Select & start") start the diagnosis. */
+    function confirmSelect(startNow) {
         const id = confirmingId;
+        let selected = false;
+        setStartingNow(startNow);
         setSelectingId(id);
         router.post(`/medical-records/${id}/select`, {}, {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: () => setConfirmingId(null),
-            onFinish: () => setSelectingId(null),
+            onSuccess: () => {
+                selected = true;
+                setConfirmingId(null);
+            },
+            // Start only once the select request has fully finished, and only if it worked.
+            onFinish: () => (startNow && selected ? startDiagnosis(id) : setSelectingId(null)),
         });
     }
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -96,7 +111,7 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
         {section === "home" && <VetHomeSection username={username} stats={vetHome} patients={patientRecords} onNavigate={setSection} onSelectRecord={selectRecord} selectingId={selectingId} currentVetId={profile?.id}/>}
           {section === "records" && <PatientRecords patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId} currentVetId={profile?.id}/>}
           {section === "appointments" && <VetAppointments appointments={todaysAppointments} today={clinicToday} patients={patientRecords}/>}
-          {confirmingRecord && <ConfirmSelectDialog patient={confirmingPatient} record={confirmingRecord} busy={selectingId === confirmingRecord.id} onConfirm={confirmSelect} onCancel={() => setConfirmingId(null)}/>}
+          {confirmingRecord && <ConfirmSelectDialog patient={confirmingPatient} record={confirmingRecord} busy={selectingId === confirmingRecord.id} startingNow={startingNow} onStart={() => confirmSelect(true)} onSelectOnly={() => confirmSelect(false)} onCancel={() => setConfirmingId(null)}/>}
           {editingRecord && <MedicalRecordEditor key={editingRecord.id} patient={editingPatient} record={editingRecord} options={recordOptions} onClose={() => setEditingId(null)}/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
