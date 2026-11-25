@@ -56,6 +56,6 @@ export default function CustomerPetMedicalRecords({ records = [], onBookAppointm
             })}
         </div>)}
 
-      {selected && <PatientRecordModal patient={selected} onClose={() => setSelectedId(null)}/>}
+      {selected && <PatientRecordModal patient={selected} onClose={() => setSelectedId(null)} forPetOwner/>}
     </div>);
 }

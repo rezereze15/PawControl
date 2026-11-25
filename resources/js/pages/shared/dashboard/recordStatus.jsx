@@ -20,12 +20,13 @@ export const RECORD_STATUS_STYLES = {
     Completed: "border-violet-400 bg-violet-100 text-violet-800",
 };
 
-export function RecordStatusBadge({ status, className = "" }) {
+/** Status pill. `label` replaces the text (e.g. plain words for pet owners); the colour still follows `status`. */
+export function RecordStatusBadge({ status, label, className = "" }) {
     if (!status) return null;
     return (<span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${RECORD_STATUS_STYLES[status] ?? "border-gray-300 bg-gray-50 text-gray-500"} ${className}`}>
       {status === "Ongoing" && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" aria-hidden="true"/>}
       {status === "Completed" && <LockIcon className="h-3 w-3"/>}
-      {status}
+      {label ?? status}
     </span>);
 }
 
