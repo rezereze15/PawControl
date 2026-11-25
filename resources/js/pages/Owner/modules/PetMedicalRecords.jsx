@@ -1,19 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import SearchField from "@/Components/SearchField";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import PatientRecordModal, { formatDate, formatTime } from "../../Veterinarian/components/PatientRecordModal";
 import TablePagination, { paginate } from "@/Components/TablePagination";
-import { RECORD_STATUSES, statusRank } from "../../shared/dashboard/recordStatus";
+import { RECORD_STATUSES, RecordStatusBadge, statusRank } from "../../shared/dashboard/recordStatus";
 
 const PER_PAGE = 10;
 const STATUSES = [...RECORD_STATUSES, "No Visits"];
-const STATUS_STYLES = {
-    Ongoing: "border-emerald-400 bg-emerald-50 text-emerald-700",
-    Selected: "border-sky-400 bg-sky-50 text-sky-700",
-    Upcoming: "border-amber-300 bg-amber-50 text-amber-600",
-    Completed: "border-violet-400 bg-violet-100 text-violet-800",
-    "No Visits": "border-gray-300 bg-gray-50 text-gray-500",
-};
 const LAST_VISIT_RANGES = [
     { id: "all", label: "All Time" },
     { id: "7", label: "Last 7 days", days: 7 },
@@ -46,40 +39,6 @@ const toLabel = (value) => normalize(value).replace(/\b\w/g, (c) => c.toUpperCas
 function uniqueOptions(values) {
     const keys = [...new Set(values.map(normalize).filter(Boolean))].sort();
     return keys.map((value) => ({ value, label: toLabel(value) }));
-}
-
-function ActionsMenu({ onView }) {
-    const [position, setPosition] = useState(null);
-    const buttonRef = useRef(null);
-
-    useEffect(() => {
-        if (!position) return;
-        const close = (event) => !buttonRef.current?.parentElement.contains(event.target) && setPosition(null);
-        const closeNow = () => setPosition(null);
-        document.addEventListener("mousedown", close);
-        window.addEventListener("scroll", closeNow, true);
-        window.addEventListener("resize", closeNow);
-        return () => {
-            document.removeEventListener("mousedown", close);
-            window.removeEventListener("scroll", closeNow, true);
-            window.removeEventListener("resize", closeNow);
-        };
-    }, [position]);
-
-    const toggle = () => {
-        if (position) return setPosition(null);
-        const rect = buttonRef.current.getBoundingClientRect();
-        setPosition({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
-    };
-
-    return (<div className="inline-block">
-      <button ref={buttonRef} type="button" onClick={toggle} aria-label="Record actions" aria-expanded={Boolean(position)} className="rounded-lg p-2! text-[#1a0a3c] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500">
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-      </button>
-      {position && (<div role="menu" style={{ position: "fixed", top: position.top, right: position.right }} className="paw-pop z-50 w-40 overflow-hidden rounded-lg border border-gray-100 bg-white py-1! text-left shadow-lg">
-          <button type="button" role="menuitem" onClick={() => { setPosition(null); onView(); }} className="block w-full px-4! py-2! text-left text-sm text-gray-700 hover:bg-paw-blue-soft hover:text-paw-blue">View record</button>
-        </div>)}
-    </div>);
 }
 
 /** Owner view: every registered pet, filterable, with its medical record on demand. */
@@ -215,13 +174,12 @@ export default function PetMedicalRecords({ records = [] }) {
                     </>) : <span className="whitespace-nowrap text-gray-400">No visits yet</span>}
                 </td>
                 <td className="px-5 py-4">
-                  <span className={`inline-block whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold ${STATUS_STYLES[r.status] ?? STATUS_STYLES["No Visits"]}`}>
-                    {r.status === "Ongoing" ? "On Going" : r.status === "Upcoming" ? "Up Coming" : r.status}
-                  </span>
+                  {/* Same words and colours as every other screen; "No Visits" falls back to grey. */}
+                  <RecordStatusBadge status={r.status}/>
                 </td>
-                <td className="px-5 py-4 text-gray-600">{r.veterinarian || <span className="text-gray-400">—</span>}</td>
+                <td className="px-5 py-4 text-gray-600">{r.veterinarian ? `Dr. ${r.veterinarian}` : <span className="text-gray-400">—</span>}</td>
                 <td className="px-5 py-4 text-center">
-                  <ActionsMenu onView={() => setSelectedId(r.id)}/>
+                  <button type="button" onClick={() => setSelectedId(r.id)} className="rounded-lg border border-paw-blue px-3 py-1.5 text-xs font-semibold text-paw-blue hover:bg-paw-blue-soft">View record</button>
                 </td>
               </tr>))}
           </tbody>
