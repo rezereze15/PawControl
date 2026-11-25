@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { router } from '@inertiajs/react';
 import clinicLogo from '../../../imports/BIGPAW_LOGO-removebg-preview.png';
 import { CLINIC_INFO } from '../../shared/dashboard/data';
@@ -66,6 +67,24 @@ export default function BillingReceiptModal({ bill, onClose }) {
 
     const closeConfirm = useCallback(() => setConfirming(false), []);
 
+    /**
+     * Print / Save as PDF. Leaves edit mode first so the paper shows values, not input
+     * boxes, and names the document after the receipt so the PDF is saved as e.g.
+     * "BILL-2026-000002.pdf". The page layout is in Dashboard.css (@media print).
+     */
+    const print = () => {
+        flushSync(() => setEditing(false));
+        const title = document.title;
+        const restore = () => {
+            document.title = title;
+            window.removeEventListener('afterprint', restore);
+        };
+        window.addEventListener('afterprint', restore);
+        document.title = shown.receiptNo || title;
+        window.print();
+    };
+    const otherIsEmpty = lineAmount(other) === 0 && !String(other.description ?? '').trim();
+
     const markPaid = () => {
         router.post(`/billings/${bill.id}/pay`, {
             items: draft.items.map(({ id, description, qty, unitPrice }) => ({ id, description, qty: Number(qty) || 0, unitPrice: Number(unitPrice) || 0 })),
@@ -100,9 +119,9 @@ export default function BillingReceiptModal({ bill, onClose }) {
             {!paid && (<button type="button" onClick={() => setEditing((on) => !on)} aria-pressed={isEditing} className={`${headerButton} ${isEditing ? 'bg-paw-blue-soft' : ''}`}>
                 {isEditing ? 'Done' : 'Edit'}
               </button>)}
-            <button type="button" onClick={() => window.print()} className={headerButton}>Print</button>
+            <button type="button" onClick={print} className={headerButton}>Print</button>
             {/* No PDF library yet: the browser print dialog's "Save as PDF" produces the file. */}
-            <button type="button" onClick={() => window.print()} title="Choose “Save as PDF” in the print dialog" className={headerButton}>Export PDF</button>
+            <button type="button" onClick={print} title="Choose “Save as PDF” in the print dialog" className={headerButton}>Export PDF</button>
             <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600">
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round"/>
@@ -121,6 +140,7 @@ export default function BillingReceiptModal({ bill, onClose }) {
             </div>
           </div>
           <div className="text-right">
+            <p className="paw-receipt-printonly mb-2 text-lg font-extrabold uppercase tracking-wide text-[#1a0a3c]">Billing Receipt</p>
             <p className="text-sm text-gray-500">Receipt No.</p>
             <p className="text-sm font-bold text-[#1a0a3c]">{shown.receiptNo}</p>
             <p className="mt-2 text-sm text-gray-500">Date Issued</p>
@@ -174,7 +194,7 @@ export default function BillingReceiptModal({ bill, onClose }) {
                     </tr>))}
                   {/* A paid receipt's "Others" (if any) was saved as a normal line above. */}
                   {!paid && (<>
-                  <tr>
+                  <tr className={otherIsEmpty ? 'paw-receipt-noprint' : undefined}>
                     <td className="px-3 py-2.5">Others</td>
                     <td className="px-3 py-2.5 text-center">
                       <NumberCell value={other.qty} editing={isEditing} onChange={(qty) => updateOther({ qty })}/>
@@ -184,7 +204,7 @@ export default function BillingReceiptModal({ bill, onClose }) {
                     </td>
                     <td className="px-3 py-2.5 text-right">{peso.format(lineAmount(other))}</td>
                   </tr>
-                  <tr>
+                  <tr className={otherIsEmpty ? 'paw-receipt-noprint' : undefined}>
                     <td colSpan={4} className="px-3 py-2.5">
                       {isEditing
                     ? <input type="text" value={other.description} onChange={(event) => updateOther({ description: event.target.value })} placeholder="Input Other" className={cellInput}/>

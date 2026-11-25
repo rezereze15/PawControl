@@ -593,13 +593,46 @@
 }
 
 /* Billing receipt: print (and "Save as PDF") only the receipt, without the page behind it or its buttons. */
+/* Billing receipt print: one clean A4 page with only the receipt on it.
+   The receipt stays inside the dashboard (it keeps the dashboard font and spacing), so:
+   - everything that isn't the receipt or one of its ancestors is removed (display: none,
+     so it takes no space: no blank pages),
+   - the ancestors (app shell, main area, overlay) are flattened to plain blocks,
+   - the receipt fills the page. Margin 0 on @page drops the browser's URL/date header;
+     the receipt's own padding is the page margin. */
+.paw-receipt-printonly { display: none; }
 @media print {
-  body:has(.paw-billing-receipt) * { visibility: hidden; }
-  .paw-billing-receipt,
-  .paw-billing-receipt * { visibility: visible; }
-  .paw-billing-receipt-overlay { position: static; background: none; padding: 0; }
-  .paw-billing-receipt { position: absolute; inset: 0 auto auto 0; width: 100%; max-width: none; max-height: none; overflow: visible; border-radius: 0; box-shadow: none; }
-  .paw-billing-receipt .paw-receipt-noprint { display: none; }
+  @page { size: A4 portrait; margin: 0; }
+
+  html:has(.paw-billing-receipt),
+  body:has(.paw-billing-receipt) { background: #fff !important; }
+  body:has(.paw-billing-receipt) *:not(:has(.paw-billing-receipt)):not(.paw-billing-receipt):not(.paw-billing-receipt *) { display: none !important; }
+  body:has(.paw-billing-receipt) *:has(.paw-billing-receipt) {
+    display: block !important; position: static !important; inset: auto !important;
+    width: auto !important; min-width: 0 !important; max-width: none !important;
+    height: auto !important; min-height: 0 !important; max-height: none !important;
+    margin: 0 !important; padding: 0 !important; overflow: visible !important;
+    background: none !important; box-shadow: none !important; border: 0 !important;
+    transform: none !important; animation: none !important; backdrop-filter: none !important;
+  }
+
+  .paw-billing-receipt {
+    display: block !important; position: static !important; width: 100% !important; max-width: none !important;
+    max-height: none !important; overflow: visible !important; border-radius: 0 !important;
+    box-shadow: none !important; animation: none !important; padding: 10mm 8mm !important;
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+  }
+  /* Keep the violet Total band and the green PAID stamp. */
+  .paw-billing-receipt, .paw-billing-receipt * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .paw-billing-receipt * { box-shadow: none !important; }
+  .paw-billing-receipt .overflow-x-auto { overflow: visible !important; }
+  /* The staff dashboards' 18px grid gap would space the Pet Information rows apart. */
+  .paw-billing-receipt dl.grid { row-gap: 4px !important; }
+  .paw-billing-receipt table { min-width: 0 !important; }
+  .paw-billing-receipt tr,
+  .paw-billing-receipt dl > div { break-inside: avoid; }
+  .paw-billing-receipt .paw-receipt-noprint { display: none !important; }
+  .paw-billing-receipt .paw-receipt-printonly { display: block; }
 }
 
 /* ── Shared motion (all dashboards) ──────────────────────────────────────────────
