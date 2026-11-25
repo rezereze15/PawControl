@@ -3,11 +3,12 @@ import SearchField from "@/Components/SearchField";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
 import PatientRecordModal, { formatDate, formatTime } from "../components/PatientRecordModal";
 import TablePagination, { paginate } from "@/Components/TablePagination";
-import { RECORD_STATUSES, RecordStatusBadge, currentRecord, isTakenByOtherVet, selectLabel, statusRank } from "../../shared/dashboard/recordStatus";
+import { LockIcon, RECORD_STATUSES, RecordStatusBadge, currentRecord, isTakenByOtherVet, lastVisit, nextVisit, selectLabel, statusRank } from "../../shared/dashboard/recordStatus";
 
 const PAGE_SIZE = 10;
 const control = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-paw-blue focus:outline-none";
-const EMPTY_FILTERS = { search: "", species: "All", status: "All", service: "All", from: "", to: "" };
+// `mine`: vets only, keep the records this vet selected or handles.
+const EMPTY_FILTERS = { search: "", species: "All", status: "All", service: "All", from: "", to: "", mine: false };
 
 /** YYYY-MM-DD in the viewer's time zone, to compare with <input type="date"> values. */
 function localDay(iso) {
@@ -47,12 +48,13 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
 
     // Accept the dates in either order.
     const [from, to] = filters.from && filters.to && filters.from > filters.to ? [filters.to, filters.from] : [filters.from, filters.to];
-    const recordFilterActive = filters.status !== "All" || filters.service !== "All" || Boolean(from || to);
+    const recordFilterActive = filters.status !== "All" || filters.service !== "All" || Boolean(from || to) || filters.mine;
     const isFiltered = recordFilterActive || filters.search.trim() !== "" || filters.species !== "All";
 
     const recordMatches = (record) => {
         if (filters.status !== "All" && record.recordStatus !== filters.status) return false;
         if (filters.service !== "All" && !recordServices(record).includes(filters.service)) return false;
+        if (filters.mine && record.veterinarianId !== currentVetId) return false;
         const day = localDay(record.startsAt);
         if (from && day < from) return false;
         if (to && day > to) return false;
@@ -111,6 +113,12 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
           <Filter label="to">
             <input type="date" value={filters.to} onChange={onChange("to")} className={control}/>
           </Filter>
+          {onSelectRecord && (<div className="flex flex-col gap-1 text-xs text-gray-500">
+              Show
+              <button type="button" aria-pressed={filters.mine} onClick={() => setFilter("mine")(!filters.mine)} className={`min-h-10 rounded-full border px-4 text-sm font-semibold transition ${filters.mine ? "border-paw-blue bg-paw-blue text-white" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"}`}>
+                My records
+              </button>
+            </div>)}
           {isFiltered && (<button type="button" onClick={() => { setFilters(EMPTY_FILTERS); setPage(1); }} className="pb-2 text-sm font-medium text-paw-blue hover:text-paw-blue-dark">
               Reset filters
             </button>)}
@@ -119,14 +127,14 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
 
       <div className="paw-list-card bg-white rounded-xl shadow-sm">
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[960px] text-sm">
+        <table className="w-full min-w-[760px] text-sm">
           <thead>
             <tr className="border-b border-gray-100">
-              {["Pet Info", "Owner", "Species/Breed", "Last Visit", "Records", "Status", "Veterinarian", "Actions"].map((h) => <th key={h} className="px-5 py-4 text-left font-bold text-[#1a0a3c]">{h}</th>)}
+              {["Pet", "Owner", "Visit", "Status", "Actions"].map((h) => <th key={h} className="px-5 py-4 text-left font-bold text-[#1a0a3c]">{h}</th>)}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {rows.length === 0 && (<tr><td colSpan={8} className="px-5 py-12 text-center text-gray-400">
+            {rows.length === 0 && (<tr><td colSpan={5} className="px-5 py-12 text-center text-gray-400">
                 {patients.length === 0 ? "No data: no medical records yet." : "No records match these filters."}
               </td></tr>)}
             {rows.map(({ patient: p, matching }) => {
@@ -137,33 +145,52 @@ export default function PatientRecords({ patients = [], onSelectRecord, selectin
                 // Another vet's record: only they can work on it, so this vet just views it.
                 const taken = record && isTakenByOtherVet(record, currentVetId);
                 const showAction = onSelectRecord && record && record.recordStatus !== "Upcoming" && !taken;
+                const next = nextVisit(p.visits);
+                const last = lastVisit(p.visits);
+                // Who handles it: the vet on the record this row acts on, else the latest one with a vet.
+                const handled = record?.veterinarian ? record : p.visits.find((v) => v.veterinarian);
+                const handler = !handled ? "Not assigned" : currentVetId != null && handled.veterinarianId === currentVetId ? "You" : `Dr. ${handled.veterinarian}`;
+                const recordCount = `${p.visits.length} ${p.visits.length === 1 ? "record" : "records"}`;
                 return (<tr key={p.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
                     <PetAvatar name={p.name} photo={p.photo} size="sm"/>
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-bold text-[#1a0a3c]">{p.name}</p>
-                      <p className="text-xs text-gray-400">ID-{String(p.id).padStart(4, "0")}</p>
+                      <p className="text-xs text-gray-500">{[p.species, p.breed].filter(Boolean).join(" · ") || "—"}</p>
+                      <p className="text-xs text-gray-500">
+                        ID-{String(p.id).padStart(4, "0")} · {recordFilterActive ? <span title="Records matching the filters, out of all this pet's records">{matching.length} of {recordCount}</span> : recordCount}
+                      </p>
                     </div>
                   </div>
                 </td>
                 <td className="px-5 py-4">
                   <p className="font-semibold text-[#1a0a3c] text-sm">{p.owner?.name}</p>
-                  <p className="text-gray-400 text-xs">{p.owner?.email}</p>
-                  <p className="text-gray-400 text-xs">{p.owner?.phone}</p>
+                  {p.owner?.phone && <p className="text-gray-500 text-xs">{p.owner.phone}</p>}
                 </td>
-                <td className="px-5 py-4 text-gray-600"><p>{p.species}</p><p className="text-gray-400 text-xs">{p.breed}</p></td>
-                <td className="px-5 py-4 text-gray-600"><p>{formatDate(p.lastVisitAt, { month: "long", day: "numeric", year: "numeric" })}</p><p className="text-gray-400 text-xs">{formatTime(p.lastVisitAt)}</p></td>
-                <td className="px-5 py-4 text-gray-600">{recordFilterActive ? <span title="Records matching the filters, out of all this pet's records">{matching.length} of {p.visits.length}</span> : p.visits.length}</td>
-                <td className="px-5 py-4"><RecordStatusBadge status={p.status}/></td>
-                <td className="px-5 py-4 text-gray-600">{p.veterinarian ? `Dr. ${p.veterinarian}` : <span className="text-gray-400">—</span>}</td>
+                <td className="px-5 py-4">
+                  {!next && !last && <span className="text-gray-400">—</span>}
+                  {next && (<p className="whitespace-nowrap">
+                      <span className="font-semibold text-amber-700">Next</span>{" "}
+                      <span className="text-gray-700">{formatDate(next.startsAt, { month: "short", day: "numeric" })}, {formatTime(next.startsAt)}</span>
+                    </p>)}
+                  {last && <p className="whitespace-nowrap text-xs text-gray-500">Last {formatDate(last.startsAt, { month: "short", day: "numeric", year: "numeric" })}</p>}
+                </td>
+                <td className="px-5 py-4">
+                  <div className="flex flex-col items-start gap-1">
+                    <RecordStatusBadge status={p.status}/>
+                    <span className={`text-xs ${handler === "You" ? "font-semibold text-paw-blue" : "text-gray-500"}`}>{handler}</span>
+                  </div>
+                </td>
                 <td className="px-5 py-4">
                   <div className="flex flex-wrap gap-2">
                     <button type="button" onClick={() => setSelectedId(p.id)} className="rounded-lg border border-paw-blue px-3 py-1.5 text-xs font-semibold text-paw-blue hover:bg-paw-blue-soft">View record</button>
                     {showAction && (<button type="button" onClick={() => onSelectRecord(record)} disabled={selectingId === record.id} className="rounded-lg bg-paw-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-paw-blue-dark disabled:opacity-60">
                         {selectingId === record.id ? "Opening…" : selectLabel(record.recordStatus)}
                       </button>)}
-                    {onSelectRecord && taken && <span className="self-center text-[11px] font-semibold text-gray-400">Dr. {record.veterinarian}&apos;s record · view only</span>}
+                    {onSelectRecord && taken && (<span className="inline-flex items-center gap-1 self-center text-[11px] font-semibold text-gray-500" title={`Dr. ${record.veterinarian}'s record. Only they can work on it.`}>
+                        <LockIcon className="h-3 w-3"/>View only
+                      </span>)}
                   </div>
                 </td>
               </tr>);
