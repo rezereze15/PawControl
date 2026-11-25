@@ -134,4 +134,28 @@ class VetHomeTest extends TestCase
             ->get(route('dashboard.role', ['role' => 'veterinarian']))
             ->assertInertia(fn (Assert $page) => $page->has('todaysAppointments', 0));
     }
+
+    public function test_home_cards_use_the_clinic_date_early_in_the_morning(): void
+    {
+        // 8 PM UTC on Nov 25 is already 4 AM on Nov 26 at the clinic: the cards must count Nov 26,
+        // the same day the Appointments module shows.
+        config(['app.clinic_timezone' => 'Asia/Manila']);
+        $this->travelTo('2026-11-25 20:00:00');
+        $vet = $this->vet();
+
+        $this->visit('Milo', now()->setDate(2026, 11, 26)->setTime(10, 0), recordStatus: 'Selected', handledBy: $vet);  // clinic today, mine
+        $this->visit('Luna', now()->setDate(2026, 11, 26)->setTime(15, 0));                                            // clinic today, not started
+        $this->visit('Rex', now()->setDate(2026, 11, 25)->setTime(15, 0), recordStatus: 'Completed', handledBy: $vet); // clinic yesterday, mine
+
+        $this->actingAs($vet)
+            ->get(route('dashboard.role', ['role' => 'veterinarian']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('vetHome.today', '2026-11-26')
+                ->where('vetHome.tomorrow', '2026-11-27')
+                ->where('vetHome.upcomingAppointments', 2)   // Milo + Luna: yesterday's Rex is over
+                ->where('vetHome.appointmentsToday', 2)
+                ->where('vetHome.operationsToday', 2)
+                ->where('vetHome.completedToday', 0)         // Rex was completed yesterday
+                ->where('vetHome.myOperationsToday', 1));    // Milo only
+    }
 }

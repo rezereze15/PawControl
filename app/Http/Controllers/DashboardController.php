@@ -16,6 +16,7 @@ use App\Support\RegistrationRules;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -305,16 +306,18 @@ class DashboardController extends Controller
     /** @return array<string, mixed> */
     private function veterinarianProps(User $user): array
     {
+        // "Today" is the clinic's date (Asia/Manila), not the server's (UTC). Booked times are
+        // stored as clinic wall-clock time, so compare dates directly.
+        $clinicToday = now(config('app.clinic_timezone'))->toDateString();
+
         $confirmed = Appointment::query()
             ->with(['pet.owner', 'user', 'medicalRecord:id,appointment_id,status'])
             ->where('status', Appointment::STATUS_CONFIRMED)
-            ->where('app_date_time', '>=', now()->startOfDay())
+            ->whereDate('app_date_time', '>=', $clinicToday)
             ->orderBy('app_date_time')
             ->get();
 
-        // Veterinarian Appointments module: only today's accepted appointments, by the clinic's
-        // date. Booked times are stored as clinic wall-clock time, so compare dates directly.
-        $clinicToday = now(config('app.clinic_timezone'))->toDateString();
+        // Veterinarian Appointments module: only today's accepted appointments.
         $todays = Appointment::query()
             ->with(['pet.owner', 'user', 'medicalRecord:id,appointment_id,status'])
             ->where('status', Appointment::STATUS_CONFIRMED)
@@ -346,7 +349,7 @@ class DashboardController extends Controller
         ];
 
         return [
-            'vetHome' => $this->vetHomeStats($confirmed, $user->id),
+            'vetHome' => $this->vetHomeStats($confirmed, $user->id, $clinicToday),
             'confirmedAppointments' => $confirmed->map($row)->values(),
             'todaysAppointments' => $todays->map($row)->values(),
             'clinicToday' => $clinicToday,
@@ -361,17 +364,18 @@ class DashboardController extends Controller
      *
      * @param  Collection<int, Appointment>  $confirmed  confirmed appointments from today on
      * @param  int  $vetId  the logged-in vet, for "Mine today"
+     * @param  string  $clinicToday  the clinic's date (Y-m-d), so the cards match the Appointments module
      * @return array<string, mixed>
      */
-    private function vetHomeStats(Collection $confirmed, int $vetId): array
+    private function vetHomeStats(Collection $confirmed, int $vetId, string $clinicToday): array
     {
         $today = MedicalRecord::query()
-            ->whereBetween('visit_date', [now()->startOfDay(), now()->endOfDay()])
+            ->whereDate('visit_date', $clinicToday)
             ->pluck('status');
 
         return [
-            'today' => now()->toDateString(),
-            'tomorrow' => now()->addDay()->toDateString(),
+            'today' => $clinicToday,
+            'tomorrow' => Carbon::parse($clinicToday)->addDay()->toDateString(),
             // Patients = pets with at least one medical record; "new" = first record this month.
             'totalPatients' => MedicalRecord::query()->distinct()->count('pet_id'),
             'newPatientsThisMonth' => MedicalRecord::query()
@@ -381,14 +385,14 @@ class DashboardController extends Controller
                 ->get()
                 ->count(),
             'upcomingAppointments' => $confirmed->count(),
-            'appointmentsToday' => $confirmed->filter(fn (Appointment $appointment) => $appointment->app_date_time->isToday())->count(),
+            'appointmentsToday' => $confirmed->filter(fn (Appointment $appointment) => $appointment->app_date_time->toDateString() === $clinicToday)->count(),
             'operationsToday' => $today->count(),
             'ongoingToday' => $today->filter(fn (string $status) => $status === MedicalRecord::STATUS_ONGOING)->count(),
             'completedToday' => $today->filter(fn (string $status) => $status === MedicalRecord::STATUS_COMPLETED)->count(),
             // This vet's share of today's operations: today's visits they selected
             // (Selected, Ongoing or Completed). Counted by visit date, like operationsToday.
             'myOperationsToday' => MedicalRecord::query()
-                ->whereBetween('visit_date', [now()->startOfDay(), now()->endOfDay()])
+                ->whereDate('visit_date', $clinicToday)
                 ->where('veterinarian_id', $vetId)
                 ->count(),
             // Diagnoses in progress on any day (e.g. started yesterday and not completed).
