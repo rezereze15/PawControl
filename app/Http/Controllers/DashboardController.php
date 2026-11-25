@@ -198,6 +198,8 @@ class DashboardController extends Controller
                 'rejectionReason' => $appointment->rejection_reason,
                 'reviewedBy' => $appointment->reviewer?->name,
                 'reviewedAt' => $appointment->reviewed_at?->toIso8601String(),
+                // Saved as the real moment it was sent; shown on the clinic's (Philippine) clock.
+                'reminderSentAt' => $appointment->reminder_sent_at?->timezone('Asia/Manila')->format('M j, Y, g:i A'),
                 'paymentAmount' => $appointment->is_emergency ? 0 : Appointment::DOWN_PAYMENT,
                 'proofUrl' => $appointment->proofUrl(),
                 'proofIsPdf' => $appointment->proofIsPdf(),

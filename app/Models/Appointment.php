@@ -61,6 +61,7 @@ class Appointment extends Model
             'app_date_time' => 'datetime',
             'reviewed_at' => 'datetime',
             'is_emergency' => 'boolean',
+            'reminder_sent_at' => 'datetime',
         ];
     }
 

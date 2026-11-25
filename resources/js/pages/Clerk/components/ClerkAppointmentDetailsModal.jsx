@@ -141,6 +141,9 @@ export default function ClerkAppointmentDetailsModal({ appointment, onClose }) {
           {!isPending && !appointment.isEmergency && (<div className={`mt-5 rounded-xl border p-4 text-sm ${appointment.status === "Rejected" ? "border-red-100 bg-red-50 text-red-800" : "border-blue-100 bg-blue-50 text-blue-800"}`}>
               <p className="font-bold">{appointment.status}{appointment.reviewedBy ? ` by ${appointment.reviewedBy}` : ""}</p>
               {appointment.rejectionReason && <p className="mt-1">Reason: {appointment.rejectionReason}</p>}
+              {appointment.status === "Confirmed" && (<p className="mt-1">
+                  {appointment.reminderSentAt ? `🔔 Reminder emailed: ${appointment.reminderSentAt}` : "Reminder: not sent yet"}
+                </p>)}
             </div>)}
 
           {isPending && (<div className="mt-5">

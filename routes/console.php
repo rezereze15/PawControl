@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Storage;
 // Deletes stale pending registrations (see PendingRegistration::prunable()).
 Schedule::command('model:prune')->daily();
 
+// Emails owners about confirmed visits in the next 24 hours (see SendAppointmentReminders).
+Schedule::command('appointments:send-reminders')->hourly()->withoutOverlapping();
+
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
