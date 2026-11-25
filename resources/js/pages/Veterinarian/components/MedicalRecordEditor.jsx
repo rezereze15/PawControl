@@ -12,7 +12,7 @@ const ACCEPT = ".jpg,.jpeg,.png,.webp,.pdf";
 const TEXT_FIELDS = [
     { key: "diagnosis", label: "Diagnosis", placeholder: "Findings and diagnosis" },
     { key: "treatment", label: "Treatment", placeholder: "Medication, dosage, procedures done" },
-    { key: "suggestions", label: "Clinical suggestions", placeholder: "Home care, diet, follow-up schedule" },
+    { key: "suggestions", label: "Home care & suggestions", placeholder: "Home care, diet, follow-up schedule" },
     { key: "lab_results", label: "Lab results", placeholder: "CBC, urinalysis, X-ray findings…" },
     { key: "vet_notes", label: "Vet notes", placeholder: "Internal notes" },
 ];

@@ -205,7 +205,7 @@ function RecordCard({ visit, open, onToggle, highlighted, isLast, forPetOwner, s
 
             {(visit.treatment || visit.labResults || (staff && visit.suggestions) || vetNotes) && (<div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
                 {visit.treatment && <Finding title="Treatment">{visit.treatment}</Finding>}
-                {staff && visit.suggestions && <Finding title="Home care">{visit.suggestions}</Finding>}
+                {staff && visit.suggestions && <Finding title="Home care & suggestions">{visit.suggestions}</Finding>}
                 {visit.labResults && <Finding title="Lab results">{visit.labResults}</Finding>}
                 {vetNotes && <Finding title="Vet notes" tag={<span className="rounded-full bg-amber-50 px-2 py-px text-[11px] font-semibold normal-case tracking-normal text-amber-800">Clinic only</span>}>{vetNotes}</Finding>}
               </div>)}

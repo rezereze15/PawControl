@@ -99,7 +99,7 @@ class UpdateMedicalRecordRequest extends FormRequest
         return [
             'lab_results' => 'lab results',
             'vet_notes' => 'vet notes',
-            'suggestions' => 'clinical suggestions',
+            'suggestions' => 'home care & suggestions',
         ];
     }
 }
