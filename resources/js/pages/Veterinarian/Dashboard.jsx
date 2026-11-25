@@ -12,7 +12,7 @@ import PatientRecords from './modules/PatientRecords';
 import MedicalRecordEditor from './components/MedicalRecordEditor';
 import ConfirmSelectDialog from './components/ConfirmSelectDialog';
 import { isLocked, isTakenByOtherVet } from '../shared/dashboard/recordStatus';
-export default function VeterinarianDashboard({ username, onLogout, profile, flash, confirmedAppointments = [], patientRecords = [], recordOptions = {}, vetHome = {} }) {
+export default function VeterinarianDashboard({ username, onLogout, profile, flash, confirmedAppointments = [], todaysAppointments = [], clinicToday, patientRecords = [], recordOptions = {}, vetHome = {} }) {
     const [section, setSection] = useState("home");
     const [editingId, setEditingId] = useState(null);
     const [selectingId, setSelectingId] = useState(null);
@@ -95,7 +95,7 @@ export default function VeterinarianDashboard({ username, onLogout, profile, fla
         <FlashToast message={flash?.success}/>
         {section === "home" && <VetHomeSection username={username} stats={vetHome} patients={patientRecords} onNavigate={setSection} onSelectRecord={selectRecord} selectingId={selectingId} currentVetId={profile?.id}/>}
           {section === "records" && <PatientRecords patients={patientRecords} onSelectRecord={selectRecord} selectingId={selectingId} currentVetId={profile?.id}/>}
-          {section === "appointments" && <VetAppointments appointments={confirmedAppointments} patients={patientRecords}/>}
+          {section === "appointments" && <VetAppointments appointments={todaysAppointments} today={clinicToday} patients={patientRecords}/>}
           {confirmingRecord && <ConfirmSelectDialog patient={confirmingPatient} record={confirmingRecord} busy={selectingId === confirmingRecord.id} onConfirm={confirmSelect} onCancel={() => setConfirmingId(null)}/>}
           {editingRecord && <MedicalRecordEditor key={editingRecord.id} patient={editingPatient} record={editingRecord} options={recordOptions} onClose={() => setEditingId(null)}/>}
           {section === "settings" && <UserSettings profile={profile}/>}

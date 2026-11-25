@@ -312,32 +312,44 @@ class DashboardController extends Controller
             ->orderBy('app_date_time')
             ->get();
 
+        // Veterinarian Appointments module: only today's accepted appointments, by the clinic's
+        // date. Booked times are stored as clinic wall-clock time, so compare dates directly.
+        $clinicToday = now(config('app.clinic_timezone'))->toDateString();
+        $todays = Appointment::query()
+            ->with(['pet.owner', 'user', 'medicalRecord:id,appointment_id,status'])
+            ->where('status', Appointment::STATUS_CONFIRMED)
+            ->whereDate('app_date_time', $clinicToday)
+            ->orderBy('app_date_time')
+            ->get();
+
+        $row = fn (Appointment $appointment) => [
+            'id' => $appointment->id,
+            'petId' => $appointment->pet_id,
+            'pet' => $appointment->pet?->petName ?? 'Unknown pet',
+            'species' => $appointment->pet?->species,
+            'breed' => $appointment->pet?->breed,
+            'petAge' => $appointment->pet?->age,
+            'petDateOfBirth' => $appointment->pet?->dateOfBirth?->toDateString(),
+            'photo' => $this->petPhotoUrl($appointment->pet),
+            // Server-side day so "today"/"tomorrow" match the app clock.
+            'day' => $appointment->app_date_time->toDateString(),
+            'owner' => $appointment->ownerName(),
+            'phone' => $appointment->ownerPhone() ?? '',
+            'date' => $appointment->app_date_time->format('M j, Y'),
+            'time' => $appointment->app_date_time->format('g:i A'),
+            'startsAt' => $appointment->app_date_time->toIso8601String(),
+            'type' => $appointment->service_type ?? 'Appointment',
+            'notes' => $appointment->notes,
+            'status' => $appointment->status,
+            ...$this->emergencyFields($appointment),
+            ...$this->visitFields($appointment),
+        ];
+
         return [
             'vetHome' => $this->vetHomeStats($confirmed, $user->id),
-            'confirmedAppointments' => $confirmed
-                ->map(fn (Appointment $appointment) => [
-                    'id' => $appointment->id,
-                    'petId' => $appointment->pet_id,
-                    'pet' => $appointment->pet?->petName ?? 'Unknown pet',
-                    'species' => $appointment->pet?->species,
-                    'breed' => $appointment->pet?->breed,
-                    'petAge' => $appointment->pet?->age,
-                    'petDateOfBirth' => $appointment->pet?->dateOfBirth?->toDateString(),
-                    'photo' => $this->petPhotoUrl($appointment->pet),
-                    // Server-side day so "today"/"tomorrow" match the app clock.
-                    'day' => $appointment->app_date_time->toDateString(),
-                    'owner' => $appointment->ownerName(),
-                    'phone' => $appointment->ownerPhone() ?? '',
-                    'date' => $appointment->app_date_time->format('M j, Y'),
-                    'time' => $appointment->app_date_time->format('g:i A'),
-                    'startsAt' => $appointment->app_date_time->toIso8601String(),
-                    'type' => $appointment->service_type ?? 'Appointment',
-                    'notes' => $appointment->notes,
-                    'status' => $appointment->status,
-                    ...$this->emergencyFields($appointment),
-                    ...$this->visitFields($appointment),
-                ])
-                ->values(),
+            'confirmedAppointments' => $confirmed->map($row)->values(),
+            'todaysAppointments' => $todays->map($row)->values(),
+            'clinicToday' => $clinicToday,
             // Every medical record (one per accepted appointment), grouped by pet.
             'patientRecords' => $this->medicalRecordsByPet(MedicalRecord::query()),
             'recordOptions' => $this->recordOptions(),

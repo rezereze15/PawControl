@@ -67,6 +67,11 @@ return [
 
     'timezone' => 'UTC',
 
+    // The clinic's local time zone: decides what "today" is for clinic schedules
+    // (e.g. the veterinarian's Appointments module). Appointment times are stored
+    // as clinic wall-clock time.
+    'clinic_timezone' => env('CLINIC_TIMEZONE', 'Asia/Manila'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

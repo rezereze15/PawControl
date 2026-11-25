@@ -102,4 +102,36 @@ class VetHomeTest extends TestCase
                 ->where('confirmedAppointments', [])
                 ->where('patientRecords', []));
     }
+
+    public function test_appointments_module_lists_only_todays_accepted_appointments_by_clinic_date(): void
+    {
+        // 8 PM UTC on Nov 25 is already 4 AM on Nov 26 at the clinic (Asia/Manila).
+        config(['app.clinic_timezone' => 'Asia/Manila']);
+        $this->travelTo('2026-11-25 20:00:00');
+        $vet = $this->vet();
+
+        $this->visit('Today', now()->setDate(2026, 11, 26)->setTime(10, 0));                       // clinic today, accepted
+        $this->visit('Later', now()->setDate(2026, 11, 26)->setTime(15, 0));                       // clinic today, accepted
+        $this->visit('UtcToday', now()->setDate(2026, 11, 25)->setTime(15, 0));                    // clinic yesterday
+        $this->visit('Tomorrow', now()->setDate(2026, 11, 27)->setTime(9, 0));                     // clinic tomorrow
+        $this->visit('Pending', now()->setDate(2026, 11, 26)->setTime(11, 0), 'Pending', recordStatus: null); // not accepted
+
+        $this->actingAs($vet)
+            ->get(route('dashboard.role', ['role' => 'veterinarian']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('clinicToday', '2026-11-26')
+                ->has('todaysAppointments', 2)
+                ->where('todaysAppointments.0.pet', 'Today')
+                ->where('todaysAppointments.1.pet', 'Later'));
+    }
+
+    public function test_appointments_module_is_empty_when_nothing_is_accepted_for_today(): void
+    {
+        $this->visit('Tomorrow', now()->addDay()->setTime(10, 0));
+        $this->visit('Waiting', now()->setTime(11, 0), 'Pending', recordStatus: null);
+
+        $this->actingAs($this->vet())
+            ->get(route('dashboard.role', ['role' => 'veterinarian']))
+            ->assertInertia(fn (Assert $page) => $page->has('todaysAppointments', 0));
+    }
 }

@@ -20,7 +20,7 @@ export function EmergencyTag({ walkIn, className = "" }) {
  * Appointment list. Clerk view: appointment status + visit status, and a Review action.
  * Veterinarian view: read-only list of accepted appointments, with no status UI.
  */
-export default function AppointmentTable({ appointments, veterinarianView, onView }) {
+export default function AppointmentTable({ appointments, veterinarianView, onView, emptyMessage = "No appointments match these filters." }) {
     return (<DataTable className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
@@ -39,7 +39,7 @@ export default function AppointmentTable({ appointments, veterinarianView, onVie
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {appointments.length === 0 && (<tr>
-                    <td colSpan={veterinarianView ? 6 : 7} className="px-5 py-12 text-center text-sm text-gray-400">No appointments match these filters.</td>
+                    <td colSpan={veterinarianView ? 6 : 7} className="px-5 py-12 text-center text-sm text-gray-400">{emptyMessage}</td>
                   </tr>)}
                 {appointments.map((a) => (<tr key={a.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-4">
