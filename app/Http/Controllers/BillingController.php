@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\MarkBillingPaidRequest;
+use App\Mail\BillingReceiptMail;
 use App\Models\Billing;
 use App\Models\BillingItem;
+use App\Support\EmailMask;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 /** The clerk settling a bill from the receipt popup. */
 class BillingController extends Controller
@@ -64,6 +69,30 @@ class BillingController extends Controller
             return $billing;
         });
 
-        return back()->with('success', 'Bill '.$billing->receiptNumber().' marked as paid.');
+        return back()->with('success', 'Bill '.$billing->receiptNumber().' marked as paid. '.$this->emailReceipt($billing));
+    }
+
+    /**
+     * Emails the owner the paid receipt (PDF attached), after the payment is saved: a mail
+     * problem never undoes the payment. Returns a sentence for the clerk's confirmation.
+     */
+    private function emailReceipt(Billing $billing): string
+    {
+        $billing = $billing->fresh(['medicalRecord.appointment.user']);
+        $email = $billing->medicalRecord->appointment?->ownerEmail();
+
+        if (! $email) {
+            return 'No receipt was emailed: the owner has no email on file.';
+        }
+
+        try {
+            Mail::to($email)->send(new BillingReceiptMail($billing));
+        } catch (Throwable $exception) {
+            Log::error('Failed to email billing receipt.', ['billing' => $billing->id, 'exception' => $exception]);
+
+            return 'The receipt could not be emailed; please print it for the owner.';
+        }
+
+        return 'Receipt emailed to '.EmailMask::mask($email).'.';
     }
 }

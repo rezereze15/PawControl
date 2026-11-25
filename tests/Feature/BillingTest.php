@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\BillingReceiptMail;
 use App\Models\Appointment;
 use App\Models\Billing;
 use App\Models\MedicalRecord;
@@ -9,8 +10,12 @@ use App\Models\MedicalSupply;
 use App\Models\Pet;
 use App\Models\Service;
 use App\Models\User;
+use App\Support\BillingReceipt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Mail\Mailables\Attachment;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Testing\AssertableInertia as Assert;
+use RuntimeException;
 use Tests\TestCase;
 
 /** Completing a diagnosis sends the visit to the clerk's Upcoming Billings with the attending vet. */
@@ -253,6 +258,66 @@ class BillingTest extends TestCase
         $this->assertSame('0.00', $billing->fresh()->amount_paid);
         $this->assertSame('Consultation', $other->items()->sole()->description);
         $this->assertSame(Billing::STATUS_UNPAID, $other->fresh()->status);
+    }
+
+    public function test_marking_paid_emails_the_owner_the_receipt_pdf(): void
+    {
+        Mail::fake();
+        $billing = $this->bill();
+
+        $this->actingAs($this->user('clerk'))
+            ->post(route('billings.pay', $billing), $this->receipt($billing, ['referenceNumber' => 'OR-2002']))
+            ->assertSessionHas('success', fn (string $message) => str_contains($message, 'Receipt emailed to'));
+
+        $owner = $billing->medicalRecord->appointment->user;
+        $fileName = $billing->receiptNumber().'.pdf';
+
+        Mail::assertSent(BillingReceiptMail::class, function (BillingReceiptMail $mail) use ($owner, $fileName) {
+            $mail->assertHasSubject('Your receipt '.$mail->billing->receiptNumber()." from Bigpaw's Animal Clinic");
+            $mail->assertSeeInHtml('Payment received');
+            $mail->assertSeeInHtml('OR-2002');
+            $mail->assertSeeInText('Total paid: ₱400.00');
+
+            return $mail->hasTo($owner->email)
+                && collect($mail->attachments())->contains(fn (Attachment $file) => $file->as === $fileName && $file->mime === 'application/pdf');
+        });
+    }
+
+    public function test_the_receipt_pdf_renders(): void
+    {
+        $billing = $this->bill();
+        $this->actingAs($this->user('clerk'))->post(route('billings.pay', $billing), $this->receipt($billing));
+
+        $pdf = BillingReceipt::pdf($billing->fresh());
+
+        $this->assertStringStartsWith('%PDF', $pdf);
+        $this->assertGreaterThan(1000, strlen($pdf));
+    }
+
+    public function test_walk_in_owners_without_an_email_get_no_receipt_email(): void
+    {
+        Mail::fake();
+        $billing = $this->bill();
+        Appointment::query()->whereKey($billing->medicalRecord->appointment_id)->update(['user_id' => null]);
+
+        $this->actingAs($this->user('clerk'))
+            ->post(route('billings.pay', $billing), $this->receipt($billing))
+            ->assertSessionHas('success', fn (string $message) => str_contains($message, 'no email on file'));
+
+        Mail::assertNothingSent();
+        $this->assertSame(Billing::STATUS_PAID, $billing->fresh()->status);
+    }
+
+    public function test_a_failed_email_does_not_undo_the_payment(): void
+    {
+        $billing = $this->bill();
+        Mail::shouldReceive('to')->andThrow(new RuntimeException('SMTP down'));
+
+        $this->actingAs($this->user('clerk'))
+            ->post(route('billings.pay', $billing), $this->receipt($billing))
+            ->assertSessionHas('success', fn (string $message) => str_contains($message, 'could not be emailed'));
+
+        $this->assertSame(Billing::STATUS_PAID, $billing->fresh()->status);
     }
 
     public function test_only_clerks_can_mark_bills_as_paid(): void
