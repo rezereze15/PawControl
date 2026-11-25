@@ -62,3 +62,13 @@ export function currentRecord(visits = []) {
         ?? [...visits].reverse().find((v) => v.recordStatus === "Upcoming")
         ?? null;
 }
+
+/** The pet's next booked visit: the soonest one not completed and not yet past. `visits` newest first. */
+export function nextVisit(visits = [], now = Date.now()) {
+    return [...visits].reverse().find((v) => !isLocked(v.recordStatus) && new Date(v.startsAt).getTime() >= now) ?? null;
+}
+
+/** The pet's most recent visit that already happened (completed, or its time has passed). */
+export function lastVisit(visits = [], now = Date.now()) {
+    return visits.find((v) => isLocked(v.recordStatus) || new Date(v.startsAt).getTime() < now) ?? null;
+}

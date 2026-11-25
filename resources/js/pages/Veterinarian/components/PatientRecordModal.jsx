@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatPetAge } from "../../shared/dashboard/petAge";
 import { PetAvatar } from "../../shared/dashboard/PetAvatar";
-import { LockIcon, RecordStatusBadge, currentRecord, isLocked, isTakenByOtherVet, selectLabel } from "../../shared/dashboard/recordStatus";
+import { LockIcon, RecordStatusBadge, currentRecord, isLocked, isTakenByOtherVet, nextVisit, selectLabel } from "../../shared/dashboard/recordStatus";
 
 export function formatDate(iso, options = { month: "long", day: "numeric", year: "numeric" }) {
     const date = new Date(iso);
@@ -278,8 +278,7 @@ export default function PatientRecordModal({ patient, appointment, onClose, onSe
     });
 
     const details = [patient.species, patient.breed, patient.sex, formatPetAge(patient), patient.weight != null ? `${Number(patient.weight)} kg` : null].filter(Boolean);
-    const now = Date.now();
-    const nextVisit = [...visits].reverse().find((v) => !isLocked(v.recordStatus) && new Date(v.startsAt).getTime() >= now);
+    const upcoming = nextVisit(visits);
 
     return (<div className="paw-modal-backdrop" onMouseDown={(event) => {
             if (event.target === event.currentTarget) onClose();
@@ -297,9 +296,9 @@ export default function PatientRecordModal({ patient, appointment, onClose, onSe
                   {details.map((detail) => <span key={detail} className="rounded-full border border-[#ebe8f2] bg-[#f6f4fb] px-2.5 py-1 text-xs font-semibold text-[#3f3a52]">{detail}</span>)}
                 </div>)}
               {forPetOwner
-                ? nextVisit && (<span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-50 px-3 py-1 text-[13px] font-semibold text-amber-800">
+                ? upcoming && (<span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-50 px-3 py-1 text-[13px] font-semibold text-amber-800">
                       <Svg className="h-4 w-4"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></Svg>
-                      Next visit: {formatDate(nextVisit.startsAt, { weekday: "short", month: "short", day: "numeric" })} at {formatTime(nextVisit.startsAt)}
+                      Next visit: {formatDate(upcoming.startsAt, { weekday: "short", month: "short", day: "numeric" })} at {formatTime(upcoming.startsAt)}
                     </span>)
                 : (<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-[#4b4563]">
                     <span className="inline-flex items-center gap-1.5">
