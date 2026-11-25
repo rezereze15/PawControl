@@ -60,7 +60,7 @@ class ClerkHomeTest extends TestCase
                 ->where('clerkHome.newPatientsThisMonth', 2)        // Milo, Luna
                 ->where('clerkHome.upcomingAppointments', 3)        // today x2 + tomorrow (rejected excluded)
                 ->where('clerkHome.pendingAppointments', 1)
-                ->where('clerkHome.upcomingBilling', 2)             // confirmed: Milo today, Rex tomorrow
+                ->where('clerkHome.upcomingBilling', 0)             // no visit completed by a vet yet
                 ->where('clerkHome.downPaymentsReceived', 400)
                 ->where('upcomingAppointments.0.pet', 'Milo')
                 ->where('upcomingAppointments.0.day', '2026-11-15')

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\Billing;
+use App\Models\BillingItem;
 use App\Models\MedicalRecord;
 use App\Models\MedicalRecordFile;
 use App\Models\MedicalSupply;
@@ -207,7 +209,62 @@ class DashboardController extends Controller
             'clerkHome' => $this->clerkHomeStats($appointments),
             // The records the clerk's accepted appointments created (same list the vets see).
             'patientRecords' => $this->medicalRecordsByPet(MedicalRecord::query()),
+            'billings' => $this->upcomingBillings(),
         ];
+    }
+
+    /**
+     * Every bill, newest first: one per completed medical record, created when the vet
+     * marked it completed. Paid ones stay listed with their Paid status (the list's
+     * Status filter separates them). Shaped for the clerk's Billings list and receipt.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function upcomingBillings(): Collection
+    {
+        return Billing::query()
+            ->with(['items', 'veterinarian:id,name', 'payer:id,name', 'medicalRecord.pet', 'medicalRecord.appointment.user', 'medicalRecord.appointment.pet'])
+            ->latest('issued_at')
+            ->latest('id')
+            ->get()
+            ->map(function (Billing $billing) {
+                $record = $billing->medicalRecord;
+                $appointment = $record->appointment;
+
+                return [
+                    'id' => $billing->id,
+                    'receiptNo' => $billing->receiptNumber(),
+                    'dateIssued' => $billing->issued_at->toDateString(),
+                    'medicalRecordId' => $record->id,
+                    'petId' => $record->pet_id,
+                    'pet' => $record->pet?->petName ?? 'Unknown pet',
+                    'photo' => $this->petPhotoUrl($record->pet),
+                    'owner' => $appointment?->ownerName() ?? 'Unknown owner',
+                    'email' => $appointment?->ownerEmail() ?? '',
+                    'phone' => $appointment?->ownerPhone() ?? '',
+                    'species' => $record->pet?->species,
+                    'breed' => $record->pet?->breed,
+                    'type' => $record->service_type ?? 'Appointment',
+                    // The attending vet: the one who completed the diagnosis.
+                    'veterinarian' => $billing->veterinarian?->name,
+                    'status' => $billing->status,
+                    'lastVisit' => $record->visit_date->toDateString(),
+                    'items' => $billing->items->map(fn (BillingItem $item) => [
+                        'id' => $item->id,
+                        'description' => $item->description,
+                        'qty' => $item->quantity,
+                        'unitPrice' => (float) $item->unit_price,
+                    ])->values(),
+                    'other' => ['description' => '', 'qty' => 0, 'unitPrice' => 0],
+                    'discount' => (float) $billing->discount,
+                    'notes' => $billing->notes ?? '',
+                    'referenceNumber' => $billing->reference_number ?? '',
+                    'paidAt' => $billing->paid_at?->toDateString(),
+                    'paidBy' => $billing->payer?->name,
+                    'amountPaid' => $billing->amount_paid === null ? null : (float) $billing->amount_paid,
+                ];
+            })
+            ->values();
     }
 
     /**
@@ -238,8 +295,8 @@ class DashboardController extends Controller
             // Upcoming (today onward), excluding rejected ones.
             'upcomingAppointments' => $active->count(),
             'pendingAppointments' => $active->where('status', Appointment::STATUS_PENDING)->count(),
-            // No billing table yet: every upcoming *confirmed* visit is a bill to settle at the clinic.
-            'upcomingBilling' => $confirmed->count(),
+            // Bills waiting to be settled: created when a vet completes a visit (same as the Billings list).
+            'upcomingBilling' => Billing::query()->where('status', '!=', Billing::STATUS_PAID)->count(),
             // Emergency walk-ins skip the online down payment.
             'downPaymentsReceived' => $confirmed->where('isEmergency', false)->count() * Appointment::DOWN_PAYMENT,
         ];

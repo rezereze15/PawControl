@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -141,6 +142,12 @@ class MedicalRecord extends Model
         return $this->belongsToMany(MedicalSupply::class, 'medical_record_supplies')
             ->withPivot(['quantity', 'unit_price'])
             ->withTimestamps();
+    }
+
+    /** Created automatically when the vet marks the record as Completed. */
+    public function billing(): HasOne
+    {
+        return $this->hasOne(Billing::class);
     }
 
     public function files(): HasMany

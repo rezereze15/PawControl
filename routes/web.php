@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminSupplyController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ClerkEmergencyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoogleAuthController;
@@ -93,6 +94,11 @@ Route::middleware(['auth', 'auth.session', EnsureProfileIsComplete::class])->gro
             ->name('owners');
         Route::post('/', [ClerkEmergencyController::class, 'store'])->name('store');
     });
+
+    // Clerk: settle a bill from the receipt popup.
+    Route::post('/billings/{billing}/pay', [BillingController::class, 'markPaid'])
+        ->middleware('role:clerk')
+        ->name('billings.pay');
 
     // Medical records: veterinarians encode findings, services, supplies and files.
     Route::prefix('medical-records/{medicalRecord}')->name('medical-records.')->scopeBindings()->group(function (): void {

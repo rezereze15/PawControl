@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
 import clinicLogo from '../../../imports/BIGPAW_LOGO-removebg-preview.png';
 import { CLINIC_INFO } from '../../shared/dashboard/data';
+import ConfirmDialog from '../../Veterinarian/components/ConfirmDialog';
 
 const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
 
@@ -11,6 +13,13 @@ export function billingTotals(bill) {
     const subtotal = [...(bill.items ?? []), bill.other ?? {}].reduce((sum, item) => sum + lineAmount(item), 0);
     const discount = Number(bill.discount) || 0;
     return { subtotal, discount, total: Math.max(0, subtotal - discount) };
+}
+
+/** "Dr. Name" for the attending vet; names already titled ("Dr. X", "Doc X") are kept as is. */
+export function vetDisplayName(name) {
+    const trimmed = String(name ?? '').trim();
+    if (!trimmed) return '—';
+    return /^(dr|doc)\.?\s/i.test(trimmed) ? trimmed : `Dr. ${trimmed}`;
 }
 
 function formatDate(day) {
@@ -27,13 +36,20 @@ function NumberCell({ value, editing, onChange, money }) {
 }
 
 /**
- * Billing receipt popup. Works on a local draft of `bill`; "Save" hands the draft to
- * `onSave` (the Billings list keeps it in memory until billing records live in the database).
+ * Billing receipt popup for a bill from the database (created when the vet completed the
+ * visit). The clerk can adjust it, then "Mark as Paid" saves the receipt as shown and
+ * settles it. Paid receipts are read-only.
  */
-export default function BillingReceiptModal({ bill, onClose, onSave }) {
+export default function BillingReceiptModal({ bill, onClose }) {
     const [draft, setDraft] = useState(bill);
     const [editing, setEditing] = useState(false);
-    const [saved, setSaved] = useState(false);
+    const [confirming, setConfirming] = useState(false);
+    const [paying, setPaying] = useState(false);
+    const [error, setError] = useState(null);
+    const paid = bill.status === 'Paid';
+    // A paid receipt shows what was saved; until then, the clerk's working copy.
+    const shown = paid ? bill : draft;
+    const isEditing = editing && !paid;
 
     useEffect(() => {
         const onKey = (event) => event.key === 'Escape' && onClose();
@@ -41,20 +57,39 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
         return () => window.removeEventListener('keydown', onKey);
     }, [onClose]);
 
-    const update = (changes) => {
-        setDraft((current) => ({ ...current, ...changes }));
-        setSaved(false);
-    };
+    const update = (changes) => setDraft((current) => ({ ...current, ...changes }));
     const updateItem = (id, changes) => update({ items: draft.items.map((item) => (item.id === id ? { ...item, ...changes } : item)) });
     const updateOther = (changes) => update({ other: { ...draft.other, ...changes } });
 
-    const { subtotal, discount, total } = billingTotals(draft);
-    const other = draft.other ?? { description: '', qty: 0, unitPrice: 0 };
+    const { subtotal, discount, total } = billingTotals(shown);
+    const other = shown.other ?? { description: '', qty: 0, unitPrice: 0 };
 
-    const save = () => {
-        onSave?.(draft);
-        setEditing(false);
-        setSaved(true);
+    const closeConfirm = useCallback(() => setConfirming(false), []);
+
+    const markPaid = () => {
+        router.post(`/billings/${bill.id}/pay`, {
+            items: draft.items.map(({ id, description, qty, unitPrice }) => ({ id, description, qty: Number(qty) || 0, unitPrice: Number(unitPrice) || 0 })),
+            other: { description: other.description ?? '', qty: Number(other.qty) || 0, unitPrice: Number(other.unitPrice) || 0 },
+            discount: Number(draft.discount) || 0,
+            notes: draft.notes ?? '',
+            referenceNumber: draft.referenceNumber ?? '',
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+            onStart: () => {
+                setPaying(true);
+                setError(null);
+            },
+            onSuccess: () => {
+                setEditing(false);
+                setConfirming(false);
+            },
+            onError: (errors) => {
+                setConfirming(false);
+                setError(Object.values(errors)[0] ?? 'The bill could not be marked as paid.');
+            },
+            onFinish: () => setPaying(false),
+        });
     };
 
     return (<div className="paw-billing-receipt-overlay paw-overlay-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
@@ -62,9 +97,9 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
         <div className="paw-receipt-noprint flex flex-wrap items-center justify-between gap-3 px-6 pb-4 pt-6">
           <h2 id="billing-receipt-title" className="text-2xl font-extrabold text-[#1a0a3c]">Billing Receipt</h2>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setEditing((on) => !on)} aria-pressed={editing} className={`${headerButton} ${editing ? 'bg-paw-blue-soft' : ''}`}>
-              {editing ? 'Done' : 'Edit'}
-            </button>
+            {!paid && (<button type="button" onClick={() => setEditing((on) => !on)} aria-pressed={isEditing} className={`${headerButton} ${isEditing ? 'bg-paw-blue-soft' : ''}`}>
+                {isEditing ? 'Done' : 'Edit'}
+              </button>)}
             <button type="button" onClick={() => window.print()} className={headerButton}>Print</button>
             {/* No PDF library yet: the browser print dialog's "Save as PDF" produces the file. */}
             <button type="button" onClick={() => window.print()} title="Choose “Save as PDF” in the print dialog" className={headerButton}>Export PDF</button>
@@ -87,9 +122,9 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-500">Receipt No.</p>
-            <p className="text-sm font-bold text-[#1a0a3c]">{draft.receiptNo}</p>
+            <p className="text-sm font-bold text-[#1a0a3c]">{shown.receiptNo}</p>
             <p className="mt-2 text-sm text-gray-500">Date Issued</p>
-            <p className="text-sm font-bold text-[#1a0a3c]">{formatDate(draft.dateIssued)}</p>
+            <p className="text-sm font-bold text-[#1a0a3c]">{formatDate(shown.dateIssued)}</p>
           </div>
         </div>
 
@@ -97,16 +132,16 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="text-sm">
               <p className="mb-2 text-xs font-medium uppercase text-gray-500">Billed To</p>
-              <p className="font-bold text-[#1a0a3c]">{draft.owner}</p>
-              <p className="mt-1 text-[#1a0a3c]">{draft.email}</p>
-              <p className="mt-1 text-[#1a0a3c]">{draft.phone}</p>
+              <p className="font-bold text-[#1a0a3c]">{shown.owner}</p>
+              <p className="mt-1 text-[#1a0a3c]">{shown.email}</p>
+              <p className="mt-1 text-[#1a0a3c]">{shown.phone}</p>
             </div>
             <div className="text-sm">
               <p className="mb-2 text-xs font-medium uppercase text-gray-500">Pet Information</p>
               <dl className="grid grid-cols-[120px_1fr] gap-y-1 text-[#1a0a3c]">
-                <dt>Pet Name</dt><dd>{draft.pet}</dd>
-                <dt>Species/Breed</dt><dd>{draft.species}{draft.breed ? ` (${draft.breed})` : ''}</dd>
-                <dt>Patient ID:</dt><dd>ID-{String(draft.petId).padStart(4, '0')}</dd>
+                <dt>Pet Name</dt><dd>{shown.pet}</dd>
+                <dt>Species/Breed</dt><dd>{shown.species}{shown.breed ? ` (${shown.breed})` : ''}</dd>
+                <dt>Patient ID:</dt><dd>ID-{String(shown.petId).padStart(4, '0')}</dd>
               </dl>
             </div>
           </div>
@@ -123,46 +158,49 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {draft.items.map((item) => (<tr key={item.id}>
+                  {shown.items.map((item) => (<tr key={item.id}>
                       <td className="px-3 py-2.5">
-                        {editing
+                        {isEditing
                     ? <input type="text" value={item.description} onChange={(event) => updateItem(item.id, { description: event.target.value })} className={cellInput}/>
                     : item.description}
                       </td>
                       <td className="px-3 py-2.5 text-center">
-                        <NumberCell value={item.qty} editing={editing} onChange={(qty) => updateItem(item.id, { qty })}/>
+                        <NumberCell value={item.qty} editing={isEditing} onChange={(qty) => updateItem(item.id, { qty })}/>
                       </td>
                       <td className="px-3 py-2.5 text-right">
-                        <NumberCell value={item.unitPrice} editing={editing} money onChange={(unitPrice) => updateItem(item.id, { unitPrice })}/>
+                        <NumberCell value={item.unitPrice} editing={isEditing} money onChange={(unitPrice) => updateItem(item.id, { unitPrice })}/>
                       </td>
                       <td className="px-3 py-2.5 text-right">{peso.format(lineAmount(item))}</td>
                     </tr>))}
+                  {/* A paid receipt's "Others" (if any) was saved as a normal line above. */}
+                  {!paid && (<>
                   <tr>
                     <td className="px-3 py-2.5">Others</td>
                     <td className="px-3 py-2.5 text-center">
-                      <NumberCell value={other.qty} editing={editing} onChange={(qty) => updateOther({ qty })}/>
+                      <NumberCell value={other.qty} editing={isEditing} onChange={(qty) => updateOther({ qty })}/>
                     </td>
                     <td className="px-3 py-2.5 text-right">
-                      <NumberCell value={other.unitPrice} editing={editing} money onChange={(unitPrice) => updateOther({ unitPrice })}/>
+                      <NumberCell value={other.unitPrice} editing={isEditing} money onChange={(unitPrice) => updateOther({ unitPrice })}/>
                     </td>
                     <td className="px-3 py-2.5 text-right">{peso.format(lineAmount(other))}</td>
                   </tr>
                   <tr>
                     <td colSpan={4} className="px-3 py-2.5">
-                      {editing
+                      {isEditing
                     ? <input type="text" value={other.description} onChange={(event) => updateOther({ description: event.target.value })} placeholder="Input Other" className={cellInput}/>
                     : (other.description || <span className="text-gray-400">Input Other</span>)}
                     </td>
                   </tr>
+                  </>)}
                 </tbody>
               </table>
             </div>
             <div className="grid border-t border-gray-200 sm:grid-cols-[1fr_minmax(240px,40%)]">
               <div className="p-3 text-sm">
                 <p className="mb-2 text-xs font-bold uppercase text-[#1a0a3c]">Notes</p>
-                {editing
-                    ? <textarea value={draft.notes} onChange={(event) => update({ notes: event.target.value })} rows={3} className={`${cellInput} resize-none`}/>
-                    : <p className="whitespace-pre-line text-gray-600">{draft.notes}</p>}
+                {isEditing
+                    ? <textarea value={shown.notes} onChange={(event) => update({ notes: event.target.value })} rows={3} className={`${cellInput} resize-none`}/>
+                    : <p className="whitespace-pre-line text-gray-600">{shown.notes}</p>}
               </div>
               <dl className="divide-y divide-gray-200 border-t border-gray-200 text-sm text-[#1a0a3c] sm:border-l sm:border-t-0">
                 <div className="flex items-center justify-between gap-3 px-3 py-3">
@@ -172,8 +210,8 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
                 <div className="flex items-center justify-between gap-3 px-3 py-3">
                   <dt className="font-bold">Discount</dt>
                   <dd>
-                    {editing
-                    ? <input type="number" min="0" step="0.01" value={draft.discount} onChange={(event) => update({ discount: event.target.value })} aria-label="Discount" className={`${cellInput} max-w-[110px] text-right`}/>
+                    {isEditing
+                    ? <input type="number" min="0" step="0.01" value={shown.discount} onChange={(event) => update({ discount: event.target.value })} aria-label="Discount" className={`${cellInput} max-w-[110px] text-right`}/>
                     : `– ${peso.format(discount)}`}
                   </dd>
                 </div>
@@ -186,22 +224,34 @@ export default function BillingReceiptModal({ bill, onClose, onSave }) {
           </div>
 
           <p className="-mt-3 text-sm text-gray-500">
-            Handled by <span className="ml-2 text-[#1a0a3c]">{draft.veterinarian ?? '—'}</span>
+            Attending Veterinarian: <span className="ml-1 font-semibold text-[#1a0a3c]">{vetDisplayName(shown.veterinarian)}</span>
           </p>
 
+          {/* Printed too: the receipt shows it was settled. */}
+          {paid && (<div className="-mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500" role="status">
+              <span className="rounded-full border border-green-600 bg-green-50 px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-green-700">Paid</span>
+              {shown.paidAt && <span>Paid on <span className="font-semibold text-[#1a0a3c]">{formatDate(shown.paidAt)}</span></span>}
+              {shown.referenceNumber && <span>Reference No. <span className="font-semibold text-[#1a0a3c]">{shown.referenceNumber}</span></span>}
+              {shown.paidBy && <span>Received by <span className="font-semibold text-[#1a0a3c]">{shown.paidBy}</span></span>}
+            </div>)}
+
           <div className="paw-receipt-noprint mt-4 flex flex-col gap-6">
-            <input type="text" value={draft.referenceNumber ?? ''} onChange={(event) => update({ referenceNumber: event.target.value })} placeholder="Enter receipt reference number" aria-label="Receipt reference number" className="w-full max-w-sm rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:border-paw-blue focus:outline-none"/>
+            {!paid && (<input type="text" value={shown.referenceNumber ?? ''} onChange={(event) => update({ referenceNumber: event.target.value })} placeholder="Enter receipt reference number" aria-label="Receipt reference number" className="w-full max-w-sm rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:border-paw-blue focus:outline-none"/>)}
+            {error && <p className="-mt-3 text-sm text-red-600" role="alert">{error}</p>}
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <button type="button" onClick={save} className="rounded-lg bg-paw-blue px-6 py-2 text-sm font-semibold text-white transition hover:bg-paw-blue-dark focus:outline-none focus:ring-2 focus:ring-violet-300">
-                  Save
-                </button>
-                {saved && <span className="text-sm text-green-600" role="status">Saved</span>}
-              </div>
-              <p className="text-sm text-gray-500">Page 1 of 1</p>
+              {!paid && (<button type="button" onClick={() => setConfirming(true)} disabled={paying} className="rounded-lg bg-paw-blue px-6 py-2 text-sm font-semibold text-white transition hover:bg-paw-blue-dark focus:outline-none focus:ring-2 focus:ring-violet-300 disabled:opacity-60">
+                  {paying ? 'Saving…' : 'Mark as Paid'}
+                </button>)}
+              <p className="ml-auto text-sm text-gray-500">Page 1 of 1</p>
             </div>
           </div>
         </div>
       </div>
+      {/* Clicks in the prompt must not reach the overlay, which closes the receipt. */}
+      {confirming && (<div onClick={(event) => event.stopPropagation()}>
+          <ConfirmDialog title="Mark this bill as paid?" tone="sky" icon="lock" confirmLabel="Yes, mark as paid" busyLabel="Saving…" busy={paying} onConfirm={markPaid} onCancel={closeConfirm}>
+            Total collected: <strong>{peso.format(total)}</strong>. Once paid, this receipt can no longer be edited.
+          </ConfirmDialog>
+        </div>)}
     </div>);
 }

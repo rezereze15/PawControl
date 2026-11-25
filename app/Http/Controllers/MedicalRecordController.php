@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\MedicalRecordLockedException;
 use App\Exceptions\MedicalRecordTakenException;
 use App\Http\Requests\UpdateMedicalRecordRequest;
+use App\Models\Billing;
 use App\Models\MedicalRecord;
 use App\Models\MedicalRecordFile;
 use App\Models\MedicalSupply;
@@ -98,6 +99,13 @@ class MedicalRecordController extends Controller
                 'started_at' => $record->started_at ?? now(),
                 'completed_at' => $completing ? ($record->completed_at ?? now()) : null,
             ])->save();
+
+            // Completing sends the visit straight to the clerk's Upcoming Billings, priced
+            // from the database and attributed to this vet. In the same transaction, so a
+            // completed record always has its bill.
+            if ($completing) {
+                Billing::forCompletedRecord($record, $vetId);
+            }
         });
 
         return back()->with('success', $validated['status'] === MedicalRecord::STATUS_COMPLETED

@@ -10,7 +10,7 @@ import FlashToast from '@/Components/FlashToast';
 import { clerkNotifications } from '../shared/dashboard/notifications';
 import UserSettings from '../Customer/modules/UserSettings';
 import EmergencyWalkInModal from './components/EmergencyWalkInModal';
-export default function ClerkDashboard({ username, onLogout, profile, upcomingAppointments = [], clerkHome = {}, patientRecords = [], flash, errors = {} }) {
+export default function ClerkDashboard({ username, onLogout, profile, upcomingAppointments = [], clerkHome = {}, patientRecords = [], billings = [], flash, errors = {} }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [emergencyOpen, setEmergencyOpen] = useState(false);
@@ -61,7 +61,7 @@ export default function ClerkDashboard({ username, onLogout, profile, upcomingAp
         {section === "home" && (<ClerkHomeSection username={username} appointments={upcomingAppointments} stats={clerkHome} onNavigate={setSection} onEmergency={openEmergency}/>)}
           {section === "records" && <PatientRecords patients={patientRecords}/>}
           {section === "appointments" && <ClerkAppointments appointments={upcomingAppointments} onEmergency={openEmergency}/>}
-          {section === "billings" && <ClerkBillings/>}
+          {section === "billings" && <ClerkBillings billings={billings}/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }

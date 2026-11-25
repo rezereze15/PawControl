@@ -4,8 +4,7 @@ import DataTable from '@/Components/DataTable';
 import StatusBadge from '@/Components/StatusBadge';
 import TablePagination, { paginate } from '@/Components/TablePagination';
 import { PetAvatar } from '../../shared/dashboard/PetAvatar';
-import { MOCK_BILLINGS } from '../../shared/dashboard/data';
-import BillingReceiptModal, { billingTotals } from '../components/BillingReceiptModal';
+import BillingReceiptModal, { billingTotals, vetDisplayName } from '../components/BillingReceiptModal';
 
 const PAGE_SIZE = 5;
 
@@ -77,12 +76,11 @@ function RowMenu({ bill, open, onToggle, onView }) {
 }
 
 /**
- * Upcoming billed items for pets. Not linked to the database yet: rows come in through
- * `billings` (sample data by default) until the step that creates billing records exists.
+ * Upcoming billed items for pets, from the database: a bill is created automatically
+ * when a vet marks a visit as completed, priced from the services and supplies used.
+ * "Mark as Paid" on the receipt settles it; the row then shows Paid.
  */
-export function ClerkBillings({ billings: initialBillings = MOCK_BILLINGS }) {
-    // Kept in memory so receipt edits show in the list; nothing is persisted yet.
-    const [billings, setBillings] = useState(initialBillings);
+export function ClerkBillings({ billings = [] }) {
     const [search, setSearch] = useState('');
     const [species, setSpecies] = useState('All');
     const [status, setStatus] = useState('All');
@@ -222,7 +220,7 @@ export function ClerkBillings({ billings: initialBillings = MOCK_BILLINGS }) {
                     {b.type}
                   </StatusBadge>
                 </td>
-                <td className="px-5 py-4 text-gray-600">{b.veterinarian ?? '—'}</td>
+                <td className="px-5 py-4 text-gray-600">{vetDisplayName(b.veterinarian)}</td>
                 <td className="px-5 py-4">
                   <RowMenu bill={b} open={menuId === b.id} onToggle={() => setMenuId((id) => (id === b.id ? null : b.id))} onView={() => {
                       setMenuId(null);
@@ -235,7 +233,7 @@ export function ClerkBillings({ billings: initialBillings = MOCK_BILLINGS }) {
         <TablePagination page={currentPage} pageCount={pageCount} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage}/>
       </div>
 
-      {selected && (<BillingReceiptModal key={selected.id} bill={selected} onClose={closeReceipt} onSave={(updated) => setBillings((list) => list.map((b) => (b.id === updated.id ? updated : b)))}/>)}
+      {selected && (<BillingReceiptModal key={selected.id} bill={selected} onClose={closeReceipt}/>)}
     </div>);
 }
 
