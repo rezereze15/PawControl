@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\Service;
 use App\Models\User;
 use App\Support\RegistrationRules;
+use App\Support\StaffActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -465,6 +466,8 @@ class DashboardController extends Controller
         $roleCounts = $roles->mapWithKeys(fn (Role $role) => [$role->roleName => (int) $role->users_count]);
 
         return [
+            // Who processed payments, handled pets and reviewed bookings (Staff Activity page).
+            'staffActivity' => StaffActivity::forAdmin(),
             'adminStats' => [
                 'totalUsers' => (int) $roleCounts->sum(),
                 'activeUsers' => User::query()->where('status', User::STATUS_ACTIVE)->count(),
