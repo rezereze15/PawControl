@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust the Cloudflare tunnel's X-Forwarded-* headers so URLs/redirects use https.
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             EnsureUserIsActive::class,
             HandleInertiaRequests::class,

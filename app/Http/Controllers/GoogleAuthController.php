@@ -30,12 +30,19 @@ class GoogleAuthController extends Controller
         // separate session there, the saved `state` is missing on return, and Socialite
         // throws InvalidStateException. Locally, hop to APP_URL first so both ends match.
         $appUrl = rtrim((string) config('app.url'), '/');
+        $tunnelCallback = $this->tunnelCallbackUrl($request);
 
-        if (app()->isLocal() && $appUrl !== '' && $request->getSchemeAndHttpHost() !== $appUrl) {
+        if (! $tunnelCallback && app()->isLocal() && $appUrl !== '' && $request->getSchemeAndHttpHost() !== $appUrl) {
             return redirect()->away($appUrl.'/auth/google/redirect');
         }
 
-        return Socialite::driver('google')
+        $driver = Socialite::driver('google');
+
+        if ($tunnelCallback) {
+            $driver->redirectUrl($tunnelCallback);
+        }
+
+        return $driver
             ->scopes(['openid', 'profile', 'email'])
             ->with(['prompt' => 'select_account'])
             ->redirect();
@@ -51,7 +58,14 @@ class GoogleAuthController extends Controller
 
         try {
             // Validates `state` (CSRF), exchanges the code server-side, then fetches the profile.
-            $google = Socialite::driver('google')->user();
+            $driver = Socialite::driver('google');
+
+            // The code exchange must send the same redirect_uri that step 1 used.
+            if ($tunnelCallback = $this->tunnelCallbackUrl($request)) {
+                $driver->redirectUrl($tunnelCallback);
+            }
+
+            $google = $driver->user();
         } catch (Throwable $exception) {
             Log::warning('Google sign-in failed.', [
                 'exception' => $exception,
@@ -127,5 +141,20 @@ class GoogleAuthController extends Controller
     private function failed(string $message): RedirectResponse
     {
         return redirect()->route('login')->withErrors(['username' => $message]);
+    }
+
+    /**
+     * Local testing on a phone goes through a Cloudflare quick tunnel (scripts/tunnel.ps1),
+     * whose random https://*.trycloudflare.com host differs from APP_URL. For those requests
+     * Google must return to the tunnel host itself. Google still only accepts callback URLs
+     * registered in Cloud Console, so a spoofed host can't receive the code.
+     */
+    private function tunnelCallbackUrl(Request $request): ?string
+    {
+        if (! app()->isLocal() || ! $request->isSecure() || ! str_ends_with($request->getHost(), '.trycloudflare.com')) {
+            return null;
+        }
+
+        return $request->getSchemeAndHttpHost().'/auth/google/callback';
     }
 }

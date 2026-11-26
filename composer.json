@@ -53,6 +53,10 @@
             "Composer\\Config::disableProcessTimeout",
             "@php artisan dev"
         ],
+        "tunnel": [
+            "Composer\\Config::disableProcessTimeout",
+            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/tunnel.ps1"
+        ],
         "lint": [
             "pint --parallel"
         ],
