@@ -6,7 +6,7 @@ import { formatPetAge } from "../../shared/dashboard/petAge";
 import PetDetailsModal from "./PetDetailsModal";
 import AppointmentDetailsModal, { formatAppointmentDate, formatAppointmentTime } from "./AppointmentDetailsModal";
 import { useAddPetModal } from "../hooks/useAddPetModal";
-function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomingAppointmentCount = 0, onBookAppointment, onViewRecords, onViewAppointments }) {
+function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomingAppointmentCount = 0, appointmentHistoryCount = 0, onBookAppointment, onViewRecords, onViewAppointments }) {
     const { showAddPet, setShowAddPet } = useAddPetModal();
     const [selectedPet, setSelectedPet] = useState(null);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -48,7 +48,7 @@ function CustomerHomeSection({ username, pets = [], incomingAppointment, upcomin
             <p className="text-sm text-gray-500 font-medium">
               Appointment History
             </p>
-            <p className="text-4xl font-extrabold text-[#1a0a3c]">1</p>
+            <p className="text-4xl font-extrabold text-[#1a0a3c]">{appointmentHistoryCount}</p>
             <button onClick={onViewAppointments} className="text-paw-blue text-xs font-medium mt-1 hover:underline">
               View Details
             </button>
