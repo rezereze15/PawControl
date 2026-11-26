@@ -9,7 +9,7 @@ import UserSettings from './Customer/modules/UserSettings';
 import VeterinarianDashboard from './Veterinarian/Dashboard';
 import { AppointmentWizard } from './Customer/modules/MakeAppointment';
 import AdminDashboard from './Admin/Dashboard';
-import LegacySalesReports from './Admin/components/LegacySalesReports';
+import SalesReports from './Owner/modules/SalesReports';
 import ClerkDashboard from './Clerk/Dashboard';
 import PetMedicalRecords from './Owner/modules/PetMedicalRecords';
 import CustomerDashboardLayout from '../Layouts/CustomerDashboardLayout';
@@ -73,7 +73,7 @@ function CustomerDashboard({ username, onLogout, owner, profile, pets, customerA
             </>)}
     </CustomerDashboardLayout>);
 }
-function OwnerDashboard({ username, onLogout, profile, petRecords = [], flash }) {
+function OwnerDashboard({ username, onLogout, profile, petRecords = [], salesReport = null, flash }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -111,7 +111,7 @@ function OwnerDashboard({ username, onLogout, profile, petRecords = [], flash })
           <FlashToast message={flash?.success}/>
     {section === "home" && <OwnerHomeSection username={username}/>}
           {section === "records" && <PetMedicalRecords records={petRecords}/>}
-          {section === "sales" && <LegacySalesReports ownerView/>}
+          {section === "sales" && <SalesReports report={salesReport}/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }
@@ -126,7 +126,7 @@ export default function Dashboard({ profileCompletion = null, ...props }) {
       <CompleteProfileModal email={profileCompletion.email} firstName={profileCompletion.first_name} middleName={profileCompletion.middle_name} lastName={profileCompletion.last_name} photoUrl={props.profile?.photoUrl}/>
     </>);
 }
-function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], todaysAppointments = [], clinicToday, patientRecords = [], recordOptions = {}, vetHome = {}, petRecords = [], customerAppointments = [], medicalRecords = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], staffActivity = {}, clerkHome = {}, billings = [], flash }) {
+function RoleDashboard({ role = 'customer', username: authenticatedUsername, owner, profile, pets = [], upcomingAppointments = [], confirmedAppointments = [], todaysAppointments = [], clinicToday, patientRecords = [], recordOptions = {}, vetHome = {}, petRecords = [], customerAppointments = [], medicalRecords = [], incomingAppointment = null, upcomingAppointmentCount = 0, adminStats = {}, usersByRole = [], recentUsers = [], lowStockSupplies = [], services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], staffActivity = {}, clerkHome = {}, billings = [], salesReport = null, flash }) {
     const { errors = {} } = usePage().props;
     const profiles = {
         customer: 'Karina',
@@ -144,7 +144,7 @@ function RoleDashboard({ role = 'customer', username: authenticatedUsername, own
     if (role === 'veterinarian')
         return <VeterinarianDashboard username={username} onLogout={logout} profile={profile} confirmedAppointments={confirmedAppointments} todaysAppointments={todaysAppointments} clinicToday={clinicToday} patientRecords={patientRecords} recordOptions={recordOptions} vetHome={vetHome} flash={flash}/>;
     if (role === 'owner')
-        return <OwnerDashboard username={username} onLogout={logout} profile={profile} petRecords={petRecords} flash={flash}/>;
+        return <OwnerDashboard username={username} onLogout={logout} profile={profile} petRecords={petRecords} salesReport={salesReport} flash={flash}/>;
     return <DashboardHome username={username} onLogout={logout} owner={owner} profile={profile} pets={pets} customerAppointments={customerAppointments} medicalRecords={medicalRecords} incomingAppointment={incomingAppointment} upcomingAppointmentCount={upcomingAppointmentCount} flash={flash}/>;
 }
 function DashboardHome({ username, onLogout, owner, profile, pets, customerAppointments, medicalRecords, incomingAppointment, upcomingAppointmentCount, flash }) {

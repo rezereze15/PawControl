@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\Service;
 use App\Models\User;
 use App\Support\RegistrationRules;
+use App\Support\SalesReport;
 use App\Support\StaffActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -79,7 +80,7 @@ class DashboardController extends Controller
             'customer' => $this->customerProps($user),
             'clerk' => $this->clerkProps(),
             'veterinarian' => $this->veterinarianProps($user),
-            'owner' => $this->ownerProps(),
+            'owner' => $this->ownerProps($request),
             'admin' => $this->adminProps(),
             default => [],
         };
@@ -444,7 +445,22 @@ class DashboardController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function ownerProps(): array
+    private function ownerProps(Request $request): array
+    {
+        $period = in_array($request->query('period'), SalesReport::PERIODS, true)
+            ? $request->query('period')
+            : SalesReport::DEFAULT_PERIOD;
+
+        // Wrapped in fn (): switching the Sales Reports period reloads only salesReport,
+        // without rebuilding every pet's records.
+        return [
+            'petRecords' => fn () => $this->ownerPetRecords(),
+            'salesReport' => fn () => SalesReport::build($period),
+        ];
+    }
+
+    /** @return Collection<int, array<string, mixed>> */
+    private function ownerPetRecords(): Collection
     {
         $pets = Pet::query()
             ->with([
@@ -456,7 +472,7 @@ class DashboardController extends Controller
             ->orderBy('petID')
             ->get();
 
-        return ['petRecords' => $pets->map(fn (Pet $pet) => $this->petRecord($pet))->values()];
+        return $pets->map(fn (Pet $pet) => $this->petRecord($pet))->values();
     }
 
     /** @return array<string, mixed> */
