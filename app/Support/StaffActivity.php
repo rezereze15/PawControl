@@ -43,12 +43,14 @@ class StaffActivity
         return User::query()
             ->whereIn('roleID', [Role::idFor(Role::CLERK), Role::idFor(Role::VETERINARIAN)])
             ->orderBy('name')
-            ->get(['id', 'name', 'roleID', 'status'])
+            ->get(['id', 'name', 'roleID', 'status', 'profile_photo_path', 'avatar'])
             ->map(fn (User $user) => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'role' => $user->role,
                 'active' => $user->isActive(),
+                // A link to the app's own photo route (or Google picture); null shows initials.
+                'photoUrl' => $user->profilePhotoUrl(),
             ])
             ->values()
             ->all();

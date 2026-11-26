@@ -3,6 +3,7 @@ import DataTable from "@/Components/DataTable";
 import SearchField from "@/Components/SearchField";
 import StatusBadge from "@/Components/StatusBadge";
 import TablePagination, { paginate } from "@/Components/TablePagination";
+import UserAvatar from "@/Components/UserAvatar";
 
 /**
  * Admin → Staff Activity: who processed each payment, which vet handled each pet, and who
@@ -35,23 +36,34 @@ function PetOwner({ row }) {
     </>);
 }
 
-function Staff({ name }) {
-    return <span className="font-semibold text-[#1a0a3c]">{name}</span>;
+/** Round staff photo, or their first initial when they have none (the app's usual UserAvatar). */
+function StaffAvatar({ name, photoUrl, size = "h-8 w-8" }) {
+    return (<span className={`${size} flex-none overflow-hidden rounded-full`}>
+      <UserAvatar photoUrl={photoUrl} name={name} textClassName="text-xs"/>
+    </span>);
+}
+
+function Staff({ name, photoUrl }) {
+    return (<span className="flex items-center gap-2.5 whitespace-nowrap">
+      <StaffAvatar name={name} photoUrl={photoUrl}/>
+      <span className="font-semibold text-[#1a0a3c]">{name}</span>
+    </span>);
 }
 
 // One definition per tab: its rows, the table headings, and how each cell is drawn.
+// `photoOf(staffId)` gives a staff member's photo link (null shows their initial).
 const TABS = [
     {
         id: "payments",
         label: "Payments",
         noun: "payments",
         headers: ["Date & Time", "Receipt", "Pet / Owner", "Amount", "Processed by"],
-        cells: (row) => [
+        cells: (row, photoOf) => [
             <span className="whitespace-nowrap text-gray-600">{row.when}</span>,
             <><p className="whitespace-nowrap font-semibold text-[#1a0a3c]">{row.receipt}</p>{row.reference && <p className="mt-0.5 text-xs text-gray-500">Ref. {row.reference}</p>}</>,
             <PetOwner row={row}/>,
             <span className="whitespace-nowrap font-semibold text-[#1a0a3c]">{peso.format(row.amount)}</span>,
-            <Staff name={row.staffName}/>,
+            <Staff name={row.staffName} photoUrl={photoOf(row.staffId)}/>,
         ],
     },
     {
@@ -59,13 +71,13 @@ const TABS = [
         label: "Pet Handling",
         noun: "pet visits",
         headers: ["Visit Date", "Record", "Pet / Owner", "Service", "Status", "Veterinarian"],
-        cells: (row) => [
+        cells: (row, photoOf) => [
             <span className="whitespace-nowrap text-gray-600">{row.when}</span>,
             <span className="whitespace-nowrap font-semibold text-[#1a0a3c]">{row.record}</span>,
             <PetOwner row={row}/>,
             <span className="text-gray-600">{row.service}</span>,
             <Badge>{row.status}</Badge>,
-            <Staff name={row.staffName}/>,
+            <Staff name={row.staffName} photoUrl={photoOf(row.staffId)}/>,
         ],
     },
     {
@@ -73,11 +85,11 @@ const TABS = [
         label: "Appointment Reviews",
         noun: "reviews",
         headers: ["Date & Time", "Pet / Owner", "Decision", "Reviewed by"],
-        cells: (row) => [
+        cells: (row, photoOf) => [
             <span className="whitespace-nowrap text-gray-600">{row.when}</span>,
             <><PetOwner row={row}/>{row.reference && <p className="mt-0.5 text-xs text-gray-400">Ref. {row.reference}</p>}</>,
             <><Badge>{row.decision}</Badge>{row.reason && <p className="mt-1.5 max-w-xs text-xs text-gray-500">Reason: {row.reason}</p>}</>,
-            <Staff name={row.staffName}/>,
+            <Staff name={row.staffName} photoUrl={photoOf(row.staffId)}/>,
         ],
     },
 ];
@@ -169,8 +181,11 @@ function SummaryCard({ title, people, selectedId, onSelect, emptyText }) {
             const selected = p.id === selectedId;
             return (<li key={p.id}>
                 <button type="button" onClick={() => onSelect(selected ? "" : p.id)} aria-pressed={selected} title={selected ? "Show all staff" : `Show only ${p.name}`} className={`flex w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-lg px-3 py-2 text-left transition-colors ${selected ? "bg-[#3b0f8c] text-white" : "hover:bg-gray-50"}`}>
-                  <span className={`font-semibold ${selected ? "" : "text-[#1a0a3c]"}`}>
-                    {p.name}{!p.active && <span className={`ml-1.5 text-xs font-normal ${selected ? "text-white/70" : "text-gray-400"}`}>(inactive)</span>}
+                  <span className="flex items-center gap-2.5">
+                    <StaffAvatar name={p.name} photoUrl={p.photoUrl}/>
+                    <span className={`font-semibold ${selected ? "" : "text-[#1a0a3c]"}`}>
+                      {p.name}{!p.active && <span className={`ml-1.5 text-xs font-normal ${selected ? "text-white/70" : "text-gray-400"}`}>(inactive)</span>}
+                    </span>
                   </span>
                   <span className={`text-xs ${selected ? "text-white/80" : "text-gray-500"}`}>{p.summary}</span>
                 </button>
@@ -193,6 +208,7 @@ function AdminStaffActivity({ activity = {} }) {
 
     const staff = activity.staff ?? [];
     const tab = TABS.find((t) => t.id === tabId);
+    const photoOf = (id) => staff.find((s) => s.id === id)?.photoUrl ?? null;
 
     // Every list limited to the chosen dates (the summary cards use these).
     const inRange = useMemo(() => {
@@ -316,7 +332,7 @@ function AdminStaffActivity({ activity = {} }) {
             <tbody className="divide-y divide-gray-100">
               {pageRows.length === 0 && (<tr><td colSpan={tab.headers.length} className="px-6 py-12 text-center text-sm text-gray-400">{filtersActive ? `No ${tab.noun} match these filters.` : `No ${tab.noun} this month.`}</td></tr>)}
               {pageRows.map((row) => (<tr key={row.id} className="transition-colors hover:bg-gray-50">
-                  {tab.cells(row).map((cell, index) => <td key={tab.headers[index]} className="px-6 py-4 align-top">{cell}</td>)}
+                  {tab.cells(row, photoOf).map((cell, index) => <td key={tab.headers[index]} className="px-6 py-4 align-top">{cell}</td>)}
                 </tr>))}
             </tbody>
           </DataTable>
