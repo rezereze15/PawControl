@@ -117,6 +117,47 @@ function rangeBounds(rangeId, today = clinicToday()) {
     return null;
 }
 
+// ─── Stat tiles (same look as the admin Home cards) ───────────────────────────
+
+function StatTile({ icon, label, value, onView }) {
+    return (<div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm">
+      <div className="bg-gray-100 rounded-xl p-3 flex-shrink-0">{icon}</div>
+      <div className="min-w-0">
+        <p className="text-sm text-gray-500 font-medium">{label}</p>
+        <p className="text-4xl font-extrabold text-[#1a0a3c] break-words">{value}</p>
+        <button type="button" onClick={onView} className="text-paw-blue text-xs font-medium mt-1 hover:underline">
+          View &rarr;
+        </button>
+      </div>
+    </div>);
+}
+
+const ICON = { className: "w-10 h-10", viewBox: "0 0 24 24", fill: "none", stroke: "#374151", strokeWidth: 1.8 };
+
+const collectedIcon = (<svg {...ICON}>
+    <rect x="2" y="6" width="20" height="12" rx="2"/>
+    <circle cx="12" cy="12" r="2.5"/>
+    <path d="M6 10v4M18 10v4" strokeLinecap="round"/>
+  </svg>);
+
+const paymentsIcon = (<svg {...ICON}>
+    <path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2Z" strokeLinejoin="round"/>
+    <path d="M9 7h6M9 11h6M9 15h3" strokeLinecap="round"/>
+  </svg>);
+
+const petsIcon = (<svg {...ICON}>
+    <circle cx="7" cy="8" r="2"/>
+    <circle cx="12" cy="5.5" r="2"/>
+    <circle cx="17" cy="8" r="2"/>
+    <path d="M12 11c-3 0-5.5 3.5-5.5 6 0 1.7 1.3 2.5 2.8 2.5 1.2 0 1.8-.6 2.7-.6s1.5.6 2.7.6c1.5 0 2.8-.8 2.8-2.5 0-2.5-2.5-6-5.5-6Z" strokeLinejoin="round"/>
+  </svg>);
+
+const reviewsIcon = (<svg {...ICON}>
+    <rect x="3" y="4" width="18" height="18" rx="2"/>
+    <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round"/>
+    <path d="m9 15 2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>);
+
 // ─── Summary cards ────────────────────────────────────────────────────────────
 
 function SummaryCard({ title, people, selectedId, onSelect, emptyText }) {
@@ -239,6 +280,14 @@ function AdminStaffActivity({ activity = {} }) {
               Clear filters
             </button>)}
         </div>
+      </div>
+
+      {/* Totals for the current filters (dates, staff member and search). */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        <StatTile icon={collectedIcon} label="Collected" value={peso.format(filtered.payments.reduce((sum, r) => sum + r.amount, 0))} onView={() => switchTab("payments")}/>
+        <StatTile icon={paymentsIcon} label="Payments Processed" value={filtered.payments.length.toLocaleString()} onView={() => switchTab("payments")}/>
+        <StatTile icon={petsIcon} label="Pets Handled" value={filtered.petHandling.length.toLocaleString()} onView={() => switchTab("petHandling")}/>
+        <StatTile icon={reviewsIcon} label="Bookings Reviewed" value={filtered.reviews.length.toLocaleString()} onView={() => switchTab("reviews")}/>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
