@@ -6,12 +6,13 @@ import AdminHomeSection from './components/AdminHomeSection';
 import AdminManageUsers from './modules/ManageUsers';
 import AdminManageServices from './modules/ManageServices';
 import AdminManageSupplies from './modules/ManageSupplies';
+import AdminStaffActivity from './modules/StaffActivity';
 import DashboardPlaceholder from '../shared/dashboard/Placeholder';
 import UserSettings from '../Customer/modules/UserSettings';
 import FlashToast from '@/Components/FlashToast';
 import { adminNotifications } from '../shared/dashboard/notifications';
 export { DashboardPlaceholder as AdminPlaceholder };
-export default function AdminDashboard({ username, onLogout, profile, stats, usersByRole, recentUsers, lowStockSupplies, services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], flash }) {
+export default function AdminDashboard({ username, onLogout, profile, stats, usersByRole, recentUsers, lowStockSupplies, services = [], supplies = [], supplyOptions = {}, managedUsers = [], roles = [], staffActivity = {}, flash }) {
     const [section, setSection] = useState("home");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navItems = [
@@ -49,6 +50,15 @@ export default function AdminDashboard({ username, onLogout, profile, stats, use
         </svg>),
         },
         {
+            id: "activity",
+            label: "Staff Activity",
+            icon: (<svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" strokeLinecap="round"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <path d="m9 14 2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>),
+        },
+        {
             id: "settings",
             label: "User Settings",
             icon: <PersonIcon className="w-5 h-5" color="currentColor"/>,
@@ -60,6 +70,7 @@ export default function AdminDashboard({ username, onLogout, profile, stats, use
           {section === "services" && <AdminManageServices services={services} supplies={supplies}/>}
           {section === "supplies" && <AdminManageSupplies supplies={supplies} options={supplyOptions}/>}
           {section === "users" && <AdminManageUsers users={managedUsers} roles={roles} currentUserId={profile?.id}/>}
+          {section === "activity" && <AdminStaffActivity activity={staffActivity}/>}
           {section === "settings" && <UserSettings profile={profile}/>}
     </StaffDashboardLayout>);
 }
