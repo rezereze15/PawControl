@@ -131,15 +131,12 @@ function rangeBounds(rangeId, today = clinicToday()) {
 
 // ─── Stat tiles (same look as the admin Home cards) ───────────────────────────
 
-function StatTile({ icon, label, value, onView }) {
+function StatTile({ icon, label, value }) {
     return (<div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm">
       <div className="bg-gray-100 rounded-xl p-3 flex-shrink-0">{icon}</div>
       <div className="min-w-0">
         <p className="text-sm text-gray-500 font-medium">{label}</p>
         <p className="text-4xl font-extrabold text-[#1a0a3c] break-words">{value}</p>
-        <button type="button" onClick={onView} className="text-paw-blue text-xs font-medium mt-1 hover:underline">
-          View &rarr;
-        </button>
       </div>
     </div>);
 }
@@ -173,17 +170,17 @@ const reviewsIcon = (<svg {...ICON}>
 // ─── Summary cards ────────────────────────────────────────────────────────────
 
 function SummaryCard({ title, people, selectedId, onSelect, emptyText }) {
-    return (<div className="rounded-xl bg-white p-5 shadow-sm">
-      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">{title}</h2>
+    return (<div className="rounded-xl bg-white p-4 shadow-sm">
+      <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">{title}</h2>
       {people.length === 0 && <p className="text-sm text-gray-400">{emptyText}</p>}
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col gap-0.5">
         {people.map((p) => {
             const selected = p.id === selectedId;
             return (<li key={p.id}>
-                <button type="button" onClick={() => onSelect(selected ? "" : p.id)} aria-pressed={selected} title={selected ? "Show all staff" : `Show only ${p.name}`} className={`flex w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-lg px-3 py-2 text-left transition-colors ${selected ? "bg-[#3b0f8c] text-white" : "hover:bg-gray-50"}`}>
-                  <span className="flex items-center gap-2.5">
-                    <StaffAvatar name={p.name} photoUrl={p.photoUrl}/>
-                    <span className={`font-semibold ${selected ? "" : "text-[#1a0a3c]"}`}>
+                <button type="button" onClick={() => onSelect(selected ? "" : p.id)} aria-pressed={selected} title={selected ? "Show all staff" : `Show only ${p.name}`} className={`flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-0.5 rounded-lg px-3 py-1.5 text-left transition-colors ${selected ? "bg-[#3b0f8c] text-white" : "hover:bg-gray-50"}`}>
+                  <span className="flex items-center gap-2">
+                    <StaffAvatar name={p.name} photoUrl={p.photoUrl} size="h-7 w-7"/>
+                    <span className={`text-sm font-semibold ${selected ? "" : "text-[#1a0a3c]"}`}>
                       {p.name}{!p.active && <span className={`ml-1.5 text-xs font-normal ${selected ? "text-white/70" : "text-gray-400"}`}>(inactive)</span>}
                     </span>
                   </span>
@@ -271,10 +268,16 @@ function AdminStaffActivity({ activity = {} }) {
       <div className="rounded-xl bg-white px-5 py-4 shadow-sm">
         <div className="flex flex-wrap items-end gap-4">
           <div>
-            <label htmlFor="activity-range" className="mb-1 block text-xs font-semibold text-gray-500">Date</label>
-            <select id="activity-range" value={range} onChange={(e) => update(setRange)(e.target.value)} className={SELECT}>
-              {RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
-            </select>
+            <p id="activity-range-label" className="mb-1 block text-xs font-semibold text-gray-500">Date</p>
+            {/* One click per range; the chosen one is filled purple, like the selected tab. */}
+            <div role="group" aria-labelledby="activity-range-label" className="flex flex-wrap gap-2">
+              {RANGES.map((r) => {
+                const selected = r.id === range;
+                return (<button key={r.id} type="button" aria-pressed={selected} onClick={() => update(setRange)(r.id)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${selected ? "border-[#3b0f8c] bg-[#3b0f8c] text-white" : "border-gray-300 bg-white text-gray-600 hover:border-[#3b0f8c] hover:text-[#1a0a3c]"}`}>
+                    {r.label}
+                  </button>);
+            })}
+            </div>
           </div>
           <div>
             <label htmlFor="activity-staff" className="mb-1 block text-xs font-semibold text-gray-500">Staff</label>
@@ -300,10 +303,10 @@ function AdminStaffActivity({ activity = {} }) {
 
       {/* Totals for the current filters (dates, staff member and search). */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        <StatTile icon={collectedIcon} label="Collected" value={peso.format(filtered.payments.reduce((sum, r) => sum + r.amount, 0))} onView={() => switchTab("payments")}/>
-        <StatTile icon={paymentsIcon} label="Payments Processed" value={filtered.payments.length.toLocaleString()} onView={() => switchTab("payments")}/>
-        <StatTile icon={petsIcon} label="Pets Handled" value={filtered.petHandling.length.toLocaleString()} onView={() => switchTab("petHandling")}/>
-        <StatTile icon={reviewsIcon} label="Bookings Reviewed" value={filtered.reviews.length.toLocaleString()} onView={() => switchTab("reviews")}/>
+        <StatTile icon={collectedIcon} label="Collected" value={peso.format(filtered.payments.reduce((sum, r) => sum + r.amount, 0))}/>
+        <StatTile icon={paymentsIcon} label="Payments Processed" value={filtered.payments.length.toLocaleString()}/>
+        <StatTile icon={petsIcon} label="Pets Handled" value={filtered.petHandling.length.toLocaleString()}/>
+        <StatTile icon={reviewsIcon} label="Bookings Reviewed" value={filtered.reviews.length.toLocaleString()}/>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
