@@ -7,7 +7,9 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { createServer } from 'node:net';
 import { networkInterfaces } from 'node:os';
+import type { Plugin } from 'vite';
 import { fileURLToPath } from 'node:url';
 
 // This PC's LAN IP, so a phone on the same network can load the dev assets.
@@ -30,9 +32,35 @@ function detectLanIp(): string {
 }
 
 const DEV_HOST = process.env.DEV_HOST || detectLanIp();
+const DEV_PORT = 5173;
+
+// `composer dev` already runs Vite. A second `npm run dev` can't get the port and exits,
+// and on exit laravel-vite-plugin deletes public/hot, so Laravel silently falls back to the
+// old build while the first Vite keeps running. Stop here, before that cleanup is registered.
+function singleDevServer(): Plugin {
+    return {
+        name: 'pawcontrol:single-dev-server',
+        apply: 'serve',
+        async config() {
+            const inUse = await new Promise<boolean>((resolve) => {
+                const probe = createServer()
+                    .once('error', () => resolve(true))
+                    .once('listening', () => probe.close(() => resolve(false)))
+                    .listen(DEV_PORT, '0.0.0.0');
+            });
+            if (inUse) {
+                console.error(
+                    `\n  Vite is already running on port ${DEV_PORT} (is \`composer dev\` open?).\n  Nothing to do: use that one.\n`,
+                );
+                process.exit(1);
+            }
+        },
+    };
+}
 
 export default defineConfig({
     plugins: lazyPlugins(() => [
+        singleDevServer(),
         laravel({
             input: ['resources/css/landingpage.css', 'resources/js/app.jsx'],
             refresh: true,
@@ -64,7 +92,7 @@ export default defineConfig({
     },
     server: {
         host: '0.0.0.0',
-        port: 5173,
+        port: DEV_PORT,
         strictPort: true,
         origin: `http://${DEV_HOST}:5173`,
         hmr: {
