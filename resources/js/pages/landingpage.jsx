@@ -30,7 +30,6 @@ const BOOK_NOW = 'ml-auto inline-flex h-9 min-w-[76px] shrink-0 cursor-pointer i
 const HERO_BTN = 'group inline-flex min-h-14 cursor-pointer items-center justify-center gap-2.5 rounded-full px-7 text-[17px] leading-none font-bold tracking-[0.01em] no-underline select-none [-webkit-tap-highlight-color:transparent] [transition:background-color_180ms_ease,border-color_180ms_ease,box-shadow_180ms_ease,scale_160ms_cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[#ffbb50] motion-reduce:active:scale-100 max-[480px]:w-full';
 const HERO_BTN_PRIMARY = 'border-0 bg-[#19043f] text-white shadow-[0_10px_24px_-10px_rgb(25_4_63/0.6)] hover:bg-[#2a0c63] hover:shadow-[0_14px_28px_-12px_rgb(25_4_63/0.65)]';
 const HERO_BTN_OUTLINE = 'border-[1.5px] border-[rgb(25_4_63/0.18)] bg-white/70 text-[#19043f] shadow-[0_1px_2px_rgb(25_4_63/0.06)] backdrop-blur-[6px] hover:border-[rgb(25_4_63/0.35)] hover:bg-white';
-const BTN_ICON = 'flex-none transition-[translate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none';
 
 const FOOTER_LINK = 'text-[0.875rem] leading-normal text-white/75 no-underline transition-colors duration-200 hover:text-[#f28b37]';
 
@@ -158,17 +157,15 @@ export default function App({ authModal = null, maskedEmail, resendAvailableIn, 
           <div className="flex flex-wrap gap-[14px] max-[900px]:justify-center max-[480px]:flex-col max-[480px]:items-stretch">
             <Link href={bookHref} className={`${HERO_BTN} ${HERO_BTN_PRIMARY}`} onClick={openAuth('register')}>
               <span>Book an Appointment</span>
-              <ArrowRightIcon />
             </Link>
             <a href="#how-it-works" className={`${HERO_BTN} ${HERO_BTN_OUTLINE}`}>
               <span>Learn More</span>
-              <ArrowDownIcon />
             </a>
           </div>
         </div>
         {/* Soft white spotlight behind the pets (::before) so the orange blob sits in light. */}
-        <div className="relative flex min-h-[600px] flex-[1_1_52%] items-center justify-center before:absolute before:inset-x-[4%] before:inset-y-[6%] before:z-0 before:rounded-full before:bg-[radial-gradient(closest-side,rgb(255_255_255/0.95),rgb(255_255_255/0.55)_55%,transparent)] max-[900px]:min-h-[350px] max-[640px]:min-h-[250px]">
-          <img src={petImage} alt="A cat and dog sitting together" className="relative z-[1] h-auto w-full max-w-[630px] object-contain max-[900px]:max-w-[480px] max-[640px]:max-w-[360px]"/>
+        <div className="relative flex min-h-[600px] flex-[1_1_52%] items-center justify-center before:absolute before:inset-x-[4%] before:inset-y-[6%] before:z-0 before:rounded-full before:bg-[radial-gradient(closest-side,rgb(255_255_255/0.95),rgb(255_255_255/0.55)_55%,transparent)] max-[900px]:min-h-[350px] max-[640px]:hidden">
+          <img src={petImage} alt="A cat and dog sitting together" className="relative z-[1] h-auto w-full max-w-[630px] object-contain max-[900px]:max-w-[480px]"/>
         </div>
       </section>
 
@@ -251,17 +248,6 @@ export default function App({ authModal = null, maskedEmail, resendAvailableIn, 
 
     {authMode && <AuthModal mode={authMode} step={{ maskedEmail, resendAvailableIn, codeLength }} showFlash={showFlash} onModeChange={switchView} onClose={closeAuth}/>}
     </>);
-}
-// Arrows hint at what happens next; they nudge on hover (mouse only), not with reduced motion.
-function ArrowRightIcon() {
-    return (<svg className={`${BTN_ICON} group-hover:translate-x-[3px] motion-reduce:group-hover:translate-x-0`} width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>);
-}
-function ArrowDownIcon() {
-    return (<svg className={`${BTN_ICON} group-hover:translate-y-0.5 motion-reduce:group-hover:translate-y-0`} width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M10 4v11m-4.5-4.5L10 15l4.5-4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>);
 }
 function Dash() {
     return (<div className="shrink-0 self-start pt-[47px] text-[21px] tracking-[-1px] text-[#111] max-[900px]:text-[13px] max-[640px]:rotate-90 max-[640px]:pt-0">

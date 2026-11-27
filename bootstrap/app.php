@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\UseCanonicalLocalHost;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Trust the Cloudflare tunnel's X-Forwarded-* headers so URLs/redirects use https.
         $middleware->trustProxies(at: '*');
+
+        $middleware->web(prepend: [
+            UseCanonicalLocalHost::class,
+        ]);
 
         $middleware->web(append: [
             EnsureUserIsActive::class,
